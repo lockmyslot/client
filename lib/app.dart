@@ -3,15 +3,15 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
-class OpenSlotApp extends ConsumerWidget {
-  const OpenSlotApp({super.key});
+class LockMySlotApp extends ConsumerWidget {
+  const LockMySlotApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
 
     return ShadcnApp.router(
-      title: 'OpenSlot',
+      title: 'Lock My Slot',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       routerConfig: router,

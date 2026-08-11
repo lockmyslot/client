@@ -1,4 +1,4 @@
-package com.openslot.openslot_app
+package com.lockmyslot.lockmyslot_app
 
 import io.flutter.embedding.android.FlutterActivity
 

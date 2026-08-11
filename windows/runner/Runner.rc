@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.openslot" "\0"
-            VALUE "FileDescription", "openslot_app" "\0"
+            VALUE "CompanyName", "com.lockmyslot" "\0"
+            VALUE "FileDescription", "lockmyslot_app" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "openslot_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.openslot. All rights reserved." "\0"
-            VALUE "OriginalFilename", "openslot_app.exe" "\0"
-            VALUE "ProductName", "openslot_app" "\0"
+            VALUE "InternalName", "lockmyslot_app" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.lockmyslot. All rights reserved." "\0"
+            VALUE "OriginalFilename", "lockmyslot_app.exe" "\0"
+            VALUE "ProductName", "lockmyslot_app" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

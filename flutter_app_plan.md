@@ -1,6 +1,6 @@
-# OpenSlot Flutter App — Implementation Plan
+# Lock My Slot Flutter App — Implementation Plan
 
-Mobile app (iOS + Android) for the OpenSlot resource booking system. Separate repo from the backend.
+Mobile app (iOS + Android) for the Lock My Slot resource booking system. Separate repo from the backend.
 
 ## Tech Stack
 
@@ -54,7 +54,7 @@ graph TB
 ## Project Structure
 
 ```
-openslot_app/
+lockmyslot_app/
 ├── lib/
 │   ├── main.dart
 │   ├── app.dart                          # ShadcnApp + GoRouter setup

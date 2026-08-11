@@ -68,7 +68,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const Icon(Icons.lock_clock, size: 48),
                       const SizedBox(height: 16),
                       const Text(
-                        'Welcome to OpenSlot',
+                        'Welcome to Lock My Slot',
                         textAlign: TextAlign.center,
                       ).h2(),
                       const SizedBox(height: 8),
