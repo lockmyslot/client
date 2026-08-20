@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
@@ -10,7 +10,7 @@ class LockMySlotApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
 
-    return ShadcnApp.router(
+    return MaterialApp.router(
       title: 'Lock My Slot',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
