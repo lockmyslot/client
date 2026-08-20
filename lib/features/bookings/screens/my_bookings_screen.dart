@@ -1,8 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../providers/my_bookings_provider.dart';
 import '../data/bookings_repository.dart';
+import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -28,18 +29,14 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
     final bookingsAsync = ref.watch(myBookingsProvider((groupId: widget.groupId, status: _selectedStatusFilter)));
 
     return Scaffold(
-      headers: [
-        AppBar(
-          title: const Text('My Bookings'),
-          leading: [
-            IconButton.ghost(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text('My Bookings'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-      ],
-      child: Column(
+      ),
+      body: Column(
         children: [
           // Filter Chips
           Padding(
@@ -71,7 +68,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                   );
                 }
 
-                return RefreshTrigger(
+                return RefreshIndicator(
                   onRefresh: () async => ref.invalidate(myBookingsProvider((groupId: widget.groupId, status: _selectedStatusFilter))),
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -169,14 +166,14 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
         decoration: BoxDecoration(
           color: isSelected
               ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.muted,
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: isSelected
-                ? Theme.of(context).colorScheme.primaryForeground
+                ? Theme.of(context).colorScheme.onPrimary
                 : null,
           ),
         ).small(),

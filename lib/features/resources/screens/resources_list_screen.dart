@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../providers/resources_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 
@@ -18,18 +19,14 @@ class ResourcesListScreen extends ConsumerWidget {
     final resourcesAsync = ref.watch(groupResourcesProvider(groupId));
 
     return Scaffold(
-      headers: [
-        AppBar(
-          title: const Text('Resources'),
-          leading: [
-            IconButton.ghost(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text('Resources'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-      ],
-      child: resourcesAsync.when(
+      ),
+      body: resourcesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => ErrorDisplay(
           error: err.toString(),

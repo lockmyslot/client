@@ -1,9 +1,9 @@
-import 'package:flutter/services.dart' show TextCapitalization;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../data/groups_repository.dart';
 import '../providers/groups_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/loading_overlay.dart';
 
 class JoinGroupScreen extends ConsumerStatefulWidget {
@@ -59,18 +59,14 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      headers: [
-        AppBar(
-          title: const Text('Join Group'),
-          leading: [
-            IconButton.ghost(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text('Join Group'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-      ],
-      child: LoadingOverlay(
+      ),
+      body: LoadingOverlay(
         isLoading: _isLoading,
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -92,7 +88,9 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                     TextField(
                       controller: _codeController,
                       textCapitalization: TextCapitalization.characters,
-                      placeholder: const Text('e.g., AB12CD'),
+                      decoration: const InputDecoration(
+                        hintText: 'e.g., AB12CD',
+                      ),
                       maxLength: 6,
                       onSubmitted: (_) => _handleJoin(),
                     ),

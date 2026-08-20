@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart' show showDialog;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../providers/groups_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 
@@ -16,74 +16,57 @@ class GroupsListScreen extends ConsumerWidget {
     final user = ref.watch(authProvider).user;
 
     return Scaffold(
-      headers: [
-        AppBar(
-          title: const Text('My Groups'),
-          trailing: [
-            IconButton.ghost(
-              icon: const Icon(Icons.person),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => Center(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(24),
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 400),
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
+      appBar: AppBar(
+        title: const Text('My Groups'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.account_circle, size: 32),
+                          const SizedBox(width: 12),
+                          Expanded(
                             child: Column(
-                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    const Icon(Icons.account_circle, size: 32),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(user?.displayName ?? 'User Profile').h3(),
-                                          const Text('Member').small().muted(),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 24),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    SecondaryButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Close'),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    PrimaryButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        ref.read(authProvider.notifier).logout();
-                                      },
-                                      child: const Text('Logout'),
-                                    ),
-                                  ],
-                                ),
+                                Text(user?.displayName ?? 'User Profile').h3(),
+                                const Text('Member').small().muted(),
                               ],
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
+                    ],
                   ),
-                );
-              },
-            ),
-          ],
-        ),
-      ],
-      child: Column(
+                  actions: [
+                    SecondaryButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                    const SizedBox(width: 12),
+                    PrimaryButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        ref.read(authProvider.notifier).logout();
+                      },
+                      child: const Text('Logout'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -139,7 +122,7 @@ class GroupsListScreen extends ConsumerWidget {
                   );
                 }
 
-                return RefreshTrigger(
+                return RefreshIndicator(
                   onRefresh: () => ref.read(myGroupsProvider.notifier).refresh(),
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -159,7 +142,7 @@ class GroupsListScreen extends ConsumerWidget {
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.muted,
+                                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: const Icon(Icons.group, size: 24),

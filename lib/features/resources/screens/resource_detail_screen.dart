@@ -1,8 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../providers/resources_provider.dart';
 import '../../bookings/providers/bookings_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -23,61 +24,56 @@ class ResourceDetailScreen extends ConsumerWidget {
     final bookingsAsync = ref.watch(resourceBookingsProvider((groupId: groupId, resourceId: resourceId, date: null)));
 
     return Scaffold(
-      headers: [
-        AppBar(
-          title: resourceAsync.when(
-            data: (res) => Text(res.name),
-            loading: () => const Text('Loading Resource...'),
-            error: (_, __) => const Text('Resource Detail'),
-          ),
-          leading: [
-            IconButton.ghost(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-          ],
-          trailing: [
-            IconButton.ghost(
-              icon: const Icon(Icons.settings),
-              onPressed: () => context.push('/groups/$groupId/resources/$resourceId/rules'),
-            ),
-          ],
+      appBar: AppBar(
+        title: resourceAsync.when(
+          data: (res) => Text(res.name),
+          loading: () => const Text('Loading Resource...'),
+          error: (_, __) => const Text('Resource Detail'),
         ),
-      ],
-      footers: [
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.push('/groups/$groupId/resources/$resourceId/rules'),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
         // Fixed Bottom Action Bar for Booking a Slot
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background,
-            border: Border(
-              top: BorderSide(
-                color: Theme.of(context).colorScheme.border,
-                width: 1,
-              ),
-            ),
-          ),
-          child: PrimaryButton(
-            onPressed: () => context.push('/groups/$groupId/resources/$resourceId/book'),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.calendar_today, size: 18),
-                SizedBox(width: 8),
-                Text('Book a Slot'),
-              ],
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 1,
             ),
           ),
         ),
-      ],
-      child: resourceAsync.when(
+        child: PrimaryButton(
+          expand: true,
+          onPressed: () => context.push('/groups/$groupId/resources/$resourceId/book'),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.calendar_today, size: 18),
+              SizedBox(width: 8),
+              Text('Book a Slot'),
+            ],
+          ),
+        ),
+      ),
+      body: resourceAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => ErrorDisplay(
           error: err.toString(),
           onRetry: () => ref.invalidate(resourceDetailProvider((groupId: groupId, resourceId: resourceId))),
         ),
         data: (resource) {
-          final content = RefreshTrigger(
+          final content = RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(resourceDetailProvider((groupId: groupId, resourceId: resourceId)));
               ref.invalidate(resourceBookingsProvider((groupId: groupId, resourceId: resourceId, date: null)));
@@ -103,7 +99,7 @@ class ResourceDetailScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.muted,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -120,7 +116,7 @@ class ResourceDetailScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.muted,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -142,7 +138,7 @@ class ResourceDetailScreen extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Schedule').h3(),
-                      IconButton.ghost(
+                      IconButton(
                         icon: const Icon(Icons.refresh, size: 16),
                         onPressed: () => ref.invalidate(resourceBookingsProvider((groupId: groupId, resourceId: resourceId, date: null))),
                       ),

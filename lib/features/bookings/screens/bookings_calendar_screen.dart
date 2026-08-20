@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../providers/bookings_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -36,27 +37,23 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
     );
 
     return Scaffold(
-      headers: [
-        AppBar(
-          title: const Text('Resource Schedule'),
-          leading: [
-            IconButton.ghost(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text('Resource Schedule'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-      ],
-      child: Column(
+      ),
+      body: Column(
         children: [
           // Date Selector Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.muted,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               border: Border(
                 bottom: BorderSide(
-                  color: Theme.of(context).colorScheme.border,
+                  color: Theme.of(context).colorScheme.outlineVariant,
                   width: 1,
                 ),
               ),
@@ -64,7 +61,7 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton.ghost(
+                IconButton(
                   icon: const Icon(Icons.chevron_left),
                   onPressed: () {
                     setState(() {
@@ -75,7 +72,7 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
                 Text(
                   AppDateUtils.formatDisplayDate(_selectedDate),
                 ).h4(),
-                IconButton.ghost(
+                IconButton(
                   icon: const Icon(Icons.chevron_right),
                   onPressed: () {
                     setState(() {

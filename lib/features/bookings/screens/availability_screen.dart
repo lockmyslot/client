@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart' show showDatePicker;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../data/models/availability.dart';
 import '../data/bookings_repository.dart';
 import '../providers/availability_provider.dart';
 import '../providers/bookings_provider.dart';
 import '../providers/my_bookings_provider.dart';
 import '../../resources/providers/resources_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/error_display.dart';
 
@@ -127,28 +127,24 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
     final availabilityAsync = ref.watch(availabilityProvider((groupId: widget.groupId, resourceId: widget.resourceId, date: _selectedDateString)));
 
     return Scaffold(
-      headers: [
-        AppBar(
-          title: resourceAsync.when(
-            data: (res) => Text('Book ${res.name}'),
-            loading: () => const Text('Book Resource'),
-            error: (_, __) => const Text('Book Resource'),
-          ),
-          leading: [
-            IconButton.ghost(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-          ],
-          trailing: [
-            IconButton.ghost(
-              icon: const Icon(Icons.calendar_month),
-              onPressed: _pickCalendarDate,
-            ),
-          ],
+      appBar: AppBar(
+        title: resourceAsync.when(
+          data: (res) => Text('Book ${res.name}'),
+          loading: () => const Text('Book Resource'),
+          error: (_, __) => const Text('Book Resource'),
         ),
-      ],
-      child: availabilityAsync.when(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month),
+            onPressed: _pickCalendarDate,
+          ),
+        ],
+      ),
+      body: availabilityAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => ErrorDisplay(
           error: err.toString(),
@@ -201,7 +197,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.muted,
+                                  : Theme.of(context).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Column(
@@ -211,7 +207,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                                   index == 0 ? 'Today' : AppDateUtils.formatDate(date).substring(5),
                                   style: TextStyle(
                                     color: isSelected
-                                        ? Theme.of(context).colorScheme.primaryForeground
+                                        ? Theme.of(context).colorScheme.onPrimary
                                         : null,
                                   ),
                                 ).small(),
@@ -219,7 +215,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                                   AppDateUtils.formatDisplayDate(date).split(',')[0],
                                   style: TextStyle(
                                     color: isSelected
-                                        ? Theme.of(context).colorScheme.primaryForeground
+                                        ? Theme.of(context).colorScheme.onPrimary
                                         : null,
                                   ),
                                 ).mono().small(),
@@ -248,7 +244,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                                 .h4(),
                           ],
                         ),
-                        Container(height: 20, width: 1, color: Theme.of(context).colorScheme.border),
+                        Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
                         Column(
                           children: [
                             const Text('Hours Used').small().muted(),
@@ -299,9 +295,9 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                       if (isSelected) {
                         chipBg = Theme.of(context).colorScheme.primary;
                       } else if (isAvail) {
-                        chipBg = Theme.of(context).colorScheme.muted;
+                        chipBg = Theme.of(context).colorScheme.surfaceContainerHighest;
                       } else {
-                        chipBg = Colors.slate.withValues(alpha: 0.1);
+                        chipBg = Colors.grey.withValues(alpha: 0.1);
                       }
 
                       return GestureDetector(
@@ -334,19 +330,19 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                                   isAvail ? Icons.access_time : Icons.block,
                                   size: 13,
                                   color: isSelected
-                                      ? Theme.of(context).colorScheme.primaryForeground
+                                      ? Theme.of(context).colorScheme.onPrimary
                                       : isAvail
                                           ? Colors.green
-                                          : Colors.slate,
+                                          : Colors.grey,
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
                                   AppDateUtils.formatTime(slot.startTime),
                                   style: TextStyle(
                                     color: isSelected
-                                        ? Theme.of(context).colorScheme.primaryForeground
+                                        ? Theme.of(context).colorScheme.onPrimary
                                         : !isAvail
-                                            ? Colors.slate
+                                            ? Colors.grey
                                             : null,
                                   ),
                                 ).mono().small(),
@@ -395,14 +391,14 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.muted,
+                                    : Theme.of(context).colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
                                 durationLabel,
                                 style: TextStyle(
                                   color: isSelected
-                                      ? Theme.of(context).colorScheme.primaryForeground
+                                      ? Theme.of(context).colorScheme.onPrimary
                                       : null,
                                 ),
                               ).small().semiBold(),

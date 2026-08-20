@@ -1,7 +1,7 @@
-import 'package:flutter/services.dart' show TextCapitalization;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../providers/auth_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/loading_overlay.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -51,7 +51,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      child: LoadingOverlay(
+      body: LoadingOverlay(
         isLoading: _isLoading,
         child: Center(
           child: SingleChildScrollView(
@@ -82,7 +82,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       TextField(
                         controller: _nameController,
                         textCapitalization: TextCapitalization.words,
-                        placeholder: const Text('Enter your display name'),
+                        decoration: const InputDecoration(
+                          hintText: 'Enter your display name',
+                        ),
                         onSubmitted: (_) => _handleRegister(),
                       ),
                       if (_errorMessage != null) ...[

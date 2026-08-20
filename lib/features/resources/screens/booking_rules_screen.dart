@@ -1,9 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../data/models/booking_rule.dart';
 import '../data/resources_repository.dart';
 import '../providers/booking_rules_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/error_display.dart';
 
 class BookingRulesScreen extends ConsumerStatefulWidget {
@@ -91,26 +92,26 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
     final rulesAsync = ref.watch(bookingRulesProvider((groupId: widget.groupId, resourceId: widget.resourceId)));
 
     return Scaffold(
-      headers: [
-        AppBar(
-          title: const Text('Configure Booking Rules'),
-          leading: [
-            IconButton.ghost(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-          ],
-          trailing: [
-            PrimaryButton(
-              onPressed: _isLoading ? null : _handleSaveAll,
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text('Save Rules'),
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text('Configure Booking Rules'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-      ],
-      child: rulesAsync.when(
+        actions: [
+          PrimaryButton(
+            onPressed: _isLoading ? null : _handleSaveAll,
+            child: _isLoading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Save Rules'),
+          ),
+        ],
+      ),
+      body: rulesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => ErrorDisplay(
           error: err.toString(),
@@ -150,7 +151,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.muted,
+                                  : Theme.of(context).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
@@ -159,7 +160,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
                                   scope,
                                   style: TextStyle(
                                     color: isSelected
-                                        ? Theme.of(context).colorScheme.primaryForeground
+                                        ? Theme.of(context).colorScheme.onPrimary
                                         : null,
                                   ),
                                 ).small(),
@@ -169,7 +170,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
                                     Icons.check_circle,
                                     size: 12,
                                     color: isSelected
-                                        ? Theme.of(context).colorScheme.primaryForeground
+                                        ? Theme.of(context).colorScheme.onPrimary
                                         : Colors.green,
                                   ),
                                 ],
@@ -194,10 +195,10 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
                           children: [
                             Expanded(child: Text('Rule for $_selectedScope').h3()),
                             Checkbox(
-                              state: currentForm.isEnabled ? CheckboxState.checked : CheckboxState.unchecked,
+                              value: currentForm.isEnabled,
                               onChanged: (val) {
                                 setState(() {
-                                  currentForm.isEnabled = val == CheckboxState.checked;
+                                  currentForm.isEnabled = val == true;
                                 });
                               },
                             ),
@@ -293,7 +294,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          placeholder: Text(placeholder),
+          decoration: InputDecoration(hintText: placeholder),
         ),
       ],
     );
@@ -307,7 +308,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          placeholder: Text(placeholder),
+          decoration: InputDecoration(hintText: placeholder),
         ),
       ],
     );

@@ -1,9 +1,10 @@
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../providers/groups_provider.dart';
 import '../../resources/providers/resources_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 
@@ -20,64 +21,61 @@ class GroupDetailScreen extends ConsumerWidget {
     final groupAsync = ref.watch(groupDetailProvider(groupId));
     final resourcesAsync = ref.watch(groupResourcesProvider(groupId));
 
-    return Scaffold(
-      headers: [
-        AppBar(
-          title: groupAsync.when(
-            data: (group) => Text(group.name),
-            loading: () => const Text('Loading Group...'),
-            error: (_, __) => const Text('Group Details'),
-          ),
-          leading: [
-            IconButton.ghost(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.go('/groups'),
-            ),
-          ],
-          trailing: [
-            IconButton.ghost(
-              icon: const Icon(Icons.people),
-              onPressed: () => context.push('/groups/$groupId/members'),
-            ),
-            IconButton.ghost(
-              icon: const Icon(Icons.bookmark),
-              onPressed: () => context.push('/groups/$groupId/my_bookings'),
-            ),
-          ],
-        ),
-      ],
-      footers: groupAsync.when(
-        data: (group) => group.isAdmin
-            ? [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background,
-                    border: Border(
-                      top: BorderSide(
-                        color: Theme.of(context).colorScheme.border,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: PrimaryButton(
-                    onPressed: () => context.push('/groups/$groupId/resources/create'),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add, size: 18),
-                        SizedBox(width: 8),
-                        Text('Add Resource'),
-                      ],
-                    ),
+    final bottomBar = groupAsync.when(
+      data: (group) => group.isAdmin
+          ? Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    width: 1,
                   ),
                 ),
-              ]
-            : <Widget>[],
-        loading: () => <Widget>[],
-        error: (_, __) => <Widget>[],
+              ),
+              child: PrimaryButton(
+                expand: true,
+                onPressed: () => context.push('/groups/$groupId/resources/create'),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add, size: 18),
+                    SizedBox(width: 8),
+                    Text('Add Resource'),
+                  ],
+                ),
+              ),
+            )
+          : null,
+      loading: () => null,
+      error: (_, __) => null,
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: groupAsync.when(
+          data: (group) => Text(group.name),
+          loading: () => const Text('Loading Group...'),
+          error: (_, __) => const Text('Group Details'),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/groups'),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.people),
+            onPressed: () => context.push('/groups/$groupId/members'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.bookmark),
+            onPressed: () => context.push('/groups/$groupId/my_bookings'),
+          ),
+        ],
       ),
-      child: groupAsync.when(
+      bottomNavigationBar: bottomBar,
+      body: groupAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => ErrorDisplay(
           error: err.toString(),
@@ -103,7 +101,7 @@ class GroupDetailScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.muted,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -123,7 +121,7 @@ class GroupDetailScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.muted,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
@@ -145,7 +143,7 @@ class GroupDetailScreen extends ConsumerWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.muted,
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Row(
@@ -173,7 +171,7 @@ class GroupDetailScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Resources').h3(),
-                    IconButton.ghost(
+                    IconButton(
                       icon: const Icon(Icons.refresh, size: 16),
                       onPressed: () => ref.invalidate(groupResourcesProvider(groupId)),
                     ),
@@ -207,7 +205,7 @@ class GroupDetailScreen extends ConsumerWidget {
                       );
                     }
 
-                    return RefreshTrigger(
+                    return RefreshIndicator(
                       onRefresh: () async => ref.invalidate(groupResourcesProvider(groupId)),
                       child: ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

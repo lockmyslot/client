@@ -1,9 +1,9 @@
-import 'package:flutter/services.dart' show TextCapitalization;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../data/resources_repository.dart';
 import '../providers/resources_provider.dart';
+import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/loading_overlay.dart';
 
 class CreateResourceScreen extends ConsumerStatefulWidget {
@@ -81,18 +81,14 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      headers: [
-        AppBar(
-          title: const Text('Add Resource'),
-          leading: [
-            IconButton.ghost(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text('Add Resource'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-      ],
-      child: LoadingOverlay(
+      ),
+      body: LoadingOverlay(
         isLoading: _isLoading,
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -114,7 +110,9 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
                     TextField(
                       controller: _nameController,
                       textCapitalization: TextCapitalization.words,
-                      placeholder: const Text('e.g., Washing Machine 1, Conference Room A'),
+                      decoration: const InputDecoration(
+                        hintText: 'e.g., Washing Machine 1, Conference Room A',
+                      ),
                     ),
                     const SizedBox(height: 16),
                     const Text('Description (optional)').small().semiBold(),
@@ -122,7 +120,9 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
                     TextField(
                       controller: _descController,
                       textCapitalization: TextCapitalization.sentences,
-                      placeholder: const Text('e.g., Located on 2nd floor, includes whiteboard'),
+                      decoration: const InputDecoration(
+                        hintText: 'e.g., Located on 2nd floor, includes whiteboard',
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -135,7 +135,7 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
                               const SizedBox(height: 6),
                               TextField(
                                 controller: _capacityController,
-                                placeholder: const Text('1'),
+                                decoration: const InputDecoration(hintText: '1'),
                               ),
                             ],
                           ),
@@ -149,7 +149,7 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
                               const SizedBox(height: 6),
                               TextField(
                                 controller: _slotDurationController,
-                                placeholder: const Text('60'),
+                                decoration: const InputDecoration(hintText: '60'),
                               ),
                             ],
                           ),
