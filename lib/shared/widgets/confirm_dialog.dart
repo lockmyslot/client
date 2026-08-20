@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart' show showDialog;
-import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:flutter/material.dart';
+import '../../core/ui/ui.dart';
 
 class ConfirmDialog extends StatelessWidget {
   final String title;
@@ -40,52 +40,26 @@ class ConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        isDestructive ? Icons.warning_amber : Icons.help_outline,
-                        color: isDestructive ? Colors.red : null,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text(title).h3()),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(message).p().muted(),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SecondaryButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: Text(cancelText),
-                      ),
-                      const SizedBox(width: 12),
-                      PrimaryButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: Text(confirmText),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+    return AlertDialog(
+      icon: Icon(
+        isDestructive ? Icons.warning_amber : Icons.help_outline,
+        color: isDestructive
+            ? Theme.of(context).colorScheme.error
+            : Theme.of(context).colorScheme.primary,
       ),
+      title: Text(title).h3(),
+      content: Text(message).p(),
+      actions: [
+        SecondaryButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(cancelText),
+        ),
+        const SizedBox(width: 12),
+        PrimaryButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(confirmText),
+        ),
+      ],
     );
   }
 }

@@ -1,4 +1,5 @@
-import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:flutter/material.dart';
+import '../../core/ui/ui.dart';
 
 class EmptyState extends StatelessWidget {
   final IconData icon;
@@ -16,16 +17,14 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 56,
-            ),
+            Icon(icon, size: 56, color: cs.onSurfaceVariant),
             const SizedBox(height: 16),
             Text(
               title,

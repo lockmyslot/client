@@ -1,4 +1,5 @@
-import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:flutter/material.dart';
+import '../../core/ui/ui.dart';
 
 class ErrorDisplay extends StatelessWidget {
   final String error;
@@ -18,10 +19,10 @@ class ErrorDisplay extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline,
               size: 48,
-              color: Colors.red,
+              color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: 16),
             Text(

@@ -1,4 +1,5 @@
-import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:flutter/material.dart';
+import '../../core/ui/ui.dart';
 
 class LoadingOverlay extends StatelessWidget {
   final Widget child;
@@ -19,7 +20,7 @@ class LoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Container(
-            color: Colors.black.withValues(alpha: 0.5),
+            color: Colors.black54,
             child: Center(
               child: Card(
                 child: Padding(
