@@ -300,7 +300,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                     const Text('Select Start Time').h3(),
                     if (availability.availableFrom != null || availability.availableUntil != null) ...[
                       const SizedBox(height: 2),
-                      Text('Available hours: ${availability.availableFrom ?? '00:00'} - ${availability.availableUntil ?? '24:00'}')
+                      Text('Available hours: ${AppDateUtils.formatTimeString(availability.availableFrom ?? '00:00')} - ${AppDateUtils.formatTimeString(availability.availableUntil ?? '24:00')}')
                           .small()
                           .muted(),
                     ],
