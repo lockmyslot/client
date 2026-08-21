@@ -47,7 +47,7 @@ class MembersScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   child: Card(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                      padding: kCardPadding,
                       child: Row(
                         children: [
                           const Icon(Icons.vpn_key_outlined, size: 24),
@@ -89,7 +89,7 @@ class MembersScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Card(
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                          padding: kCardPadding,
                           child: Row(
                             children: [
                               Container(

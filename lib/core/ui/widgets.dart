@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+/// Standard padding used across all content list cards.
+const EdgeInsets kCardPadding = EdgeInsets.fromLTRB(16, 14, 16, 14);
+
 /// Primary action button (maps shadcn [PrimaryButton] to Material [FilledButton]).
 class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;

@@ -136,7 +136,7 @@ class GroupsListScreen extends ConsumerWidget {
                           onTap: () => context.push('/groups/${group.id}'),
                           child: Card(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                              padding: kCardPadding,
                               child: Row(
                                 children: [
                                   Container(
