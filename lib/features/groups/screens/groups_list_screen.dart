@@ -184,6 +184,30 @@ class GroupsListScreen extends ConsumerWidget {
           ),
         ],
       ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 1,
+            ),
+          ),
+        ),
+        child: PrimaryButton(
+          expand: true,
+          onPressed: () => context.push('/quick-book'),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.bolt, size: 18),
+              SizedBox(width: 8),
+              Text('Quick Book'),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

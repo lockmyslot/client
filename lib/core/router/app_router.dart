@@ -13,6 +13,7 @@ import '../../features/resources/screens/create_resource_screen.dart';
 import '../../features/resources/screens/resource_detail_screen.dart';
 import '../../features/resources/screens/booking_rules_screen.dart';
 import '../../features/bookings/screens/availability_screen.dart';
+import '../../features/bookings/screens/quick_booking_screen.dart';
 import '../../features/bookings/screens/bookings_calendar_screen.dart';
 import '../../features/bookings/screens/my_bookings_screen.dart';
 
@@ -81,6 +82,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _buildSmoothTransition(
           state: state,
           child: const RegisterScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/quick-book',
+        pageBuilder: (context, state) => _buildSmoothTransition(
+          state: state,
+          child: const QuickBookingScreen(),
         ),
       ),
       GoRoute(
