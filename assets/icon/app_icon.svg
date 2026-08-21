@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5C6BC0"/>
+      <stop offset="1" stop-color="#3F51B5"/>
+    </linearGradient>
+    <linearGradient id="shackle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3949AB"/>
+      <stop offset="1" stop-color="#303F9F"/>
+    </linearGradient>
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="28" result="blur"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" fill="#FFFFFF"/>
+
+  <ellipse cx="512" cy="830" rx="200" ry="30" fill="#3949AB" opacity="0.30" filter="url(#softShadow)"/>
+
+  <path d="M 398 470 v -98 a 114 114 0 0 1 228 0 v 98"
+        fill="none" stroke="url(#shackle)" stroke-width="84" stroke-linecap="round"/>
+
+  <path d="M 415 470 v -98 a 95 95 0 0 1 190 0 v 98"
+        fill="none" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="84" stroke-linecap="round"
+        transform="translate(2 -3)"/>
+
+  <rect x="322" y="460" width="380" height="352" rx="92" fill="url(#body)"/>
+
+  <rect x="338" y="476" width="348" height="140" rx="70" fill="#FFFFFF" opacity="0.16"/>
+
+  <circle cx="512" cy="590" r="60" fill="#FFFFFF"/>
+  <rect x="485" y="578" width="54" height="150" rx="27" fill="#FFFFFF"/>
+</svg>
