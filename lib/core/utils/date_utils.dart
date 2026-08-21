@@ -4,6 +4,8 @@ class AppDateUtils {
   static final DateFormat _dateFormat = DateFormat('yyyy-MM-dd');
   static final DateFormat _timeFormat = DateFormat('h:mm a');
   static final DateFormat _displayDateFormat = DateFormat('EEE, MMM d, yyyy');
+  static final DateFormat _shortDateFormat = DateFormat('MMM d');
+  static final DateFormat _weekdayFormat = DateFormat('EEE');
   static final DateFormat _displayTimeFormat = DateFormat('h:mm a');
   static final DateFormat _displayDateTimeFormat = DateFormat('MMM d, h:mm a');
 
@@ -30,6 +32,14 @@ class AppDateUtils {
 
   static String formatDisplayDate(DateTime date) {
     return _displayDateFormat.format(date);
+  }
+
+  static String formatShortDate(DateTime date) {
+    return _shortDateFormat.format(date);
+  }
+
+  static String formatWeekday(DateTime date) {
+    return _weekdayFormat.format(date);
   }
 
   static String formatDisplayTime(DateTime date) {

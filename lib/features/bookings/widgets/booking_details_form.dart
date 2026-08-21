@@ -241,7 +241,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      index == 0 ? 'Today' : AppDateUtils.formatDate(date).substring(5),
+                                      index == 0 ? 'Today' : AppDateUtils.formatShortDate(date),
                                       style: TextStyle(
                                         color: isSelected
                                             ? Theme.of(context).colorScheme.onPrimary
@@ -249,7 +249,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                                       ),
                                     ).small(),
                                     Text(
-                                      AppDateUtils.formatDisplayDate(date).split(',')[0],
+                                      AppDateUtils.formatWeekday(date),
                                       style: TextStyle(
                                         color: isSelected
                                             ? Theme.of(context).colorScheme.onPrimary
