@@ -91,45 +91,34 @@ class ResourceDetailScreen extends ConsumerWidget {
                     const SizedBox(height: 10),
                   ],
 
-                  // Icon-based Metadata Row (No Card, No explicit Active pill)
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 6,
-                    children: [
-                      // Capacity
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.people_outline, size: 14),
-                            const SizedBox(width: 5),
-                            Text('${resource.capacity}').small().semiBold(),
-                          ],
-                        ),
+                  // Metadata Stats Card
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text('Capacity').small().muted(),
+                                Text('${resource.capacity}'),
+                              ],
+                            ),
+                          ),
+                          Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text('Slot Duration').small().muted(),
+                                Text('${resource.slotDurationMinutes} min'),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-
-                      // Slot Duration
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.timer_outlined, size: 14),
-                            const SizedBox(width: 5),
-                            Text('${resource.slotDurationMinutes} min').small().semiBold(),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
 
                   const SizedBox(height: 20),
@@ -197,7 +186,7 @@ class ResourceDetailScreen extends ConsumerWidget {
                                   padding: const EdgeInsets.only(bottom: 8),
                                   child: Card(
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [

@@ -50,7 +50,7 @@ class ResourcesListScreen extends ConsumerWidget {
                 child: GestureDetector(
                   onTap: () => context.push('/groups/$groupId/resources/${resource.id}'),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

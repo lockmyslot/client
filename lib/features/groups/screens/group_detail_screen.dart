@@ -88,77 +88,72 @@ class GroupDetailScreen extends ConsumerWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Group Details Header Metadata (No Card Layout)
+              // Group Details Header Metadata Card
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
-                child: Wrap(
-                  spacing: 10,
-                  runSpacing: 6,
-                  children: [
-                    // Member Count
-                    GestureDetector(
-                      onTap: () => context.push('/groups/$groupId/members'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.people_outline, size: 14),
-                            const SizedBox(width: 5),
-                            Text('${group.memberCount} member${group.memberCount == 1 ? '' : 's'}')
-                                .small()
-                                .semiBold(),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Role Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.verified_user_outlined, size: 14),
-                          const SizedBox(width: 5),
-                          Text(group.role).small().semiBold(),
-                        ],
-                      ),
-                    ),
-
-                    // Invite Code (Tap to Copy)
-                    if (group.inviteCode != null && group.inviteCode!.isNotEmpty)
-                      GestureDetector(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: group.inviteCode!));
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(16),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: Row(
+                      children: [
+                        // Member Count (Tap to View Members)
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => context.push('/groups/$groupId/members'),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text('Members').small().muted(),
+                                  Text('${group.memberCount}'),
+                                ],
+                              ),
+                            ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                        ),
+                        Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Icon(Icons.vpn_key_outlined, size: 14),
-                              const SizedBox(width: 5),
-                              Text('Code: ${group.inviteCode}').mono().small(),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.copy_outlined, size: 12),
+                              const Text('Role').small().muted(),
+                              Text(group.role),
                             ],
                           ),
                         ),
-                      ),
-                  ],
+                        if (group.inviteCode != null && group.inviteCode!.isNotEmpty) ...[
+                          Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(text: group.inviteCode!));
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text('Code').small().muted(),
+                                        const SizedBox(width: 3),
+                                        const Icon(Icons.copy_outlined, size: 12),
+                                      ],
+                                    ),
+                                    Text(group.inviteCode!).mono(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
               ),
 
@@ -217,14 +212,14 @@ class GroupDetailScreen extends ConsumerWidget {
                             onTap: () => context.push('/groups/$groupId/resources/${resource.id}'),
                             child: Card(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       children: [
                                         Expanded(
-                                          child: Text(resource.name).small().semiBold(),
+                                          child: Text(resource.name).h4(),
                                         ),
                                       ],
                                     ),
@@ -245,6 +240,11 @@ class GroupDetailScreen extends ConsumerWidget {
                                         const Spacer(),
                                         OutlineButton(
                                           onPressed: () => context.push('/groups/$groupId/resources/${resource.id}/book'),
+                                          style: TextButton.styleFrom(
+                                            minimumSize: const Size(0, 32),
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            visualDensity: VisualDensity.compact,
+                                          ),
                                           child: const Text('Book'),
                                         ),
                                       ],

@@ -79,11 +79,11 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [

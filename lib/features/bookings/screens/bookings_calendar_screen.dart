@@ -116,7 +116,7 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Card(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

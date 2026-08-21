@@ -57,19 +57,21 @@ class OutlineButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Widget child;
   final EdgeInsetsGeometry padding;
+  final ButtonStyle? style;
 
   const OutlineButton({
     super.key,
     required this.onPressed,
     required this.child,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    this.style,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: onPressed,
-      style: TextButton.styleFrom(padding: padding),
+      style: TextButton.styleFrom(padding: padding).merge(style),
       child: child,
     );
   }
