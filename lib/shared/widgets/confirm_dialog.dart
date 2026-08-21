@@ -42,7 +42,7 @@ class ConfirmDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       icon: Icon(
-        isDestructive ? Icons.warning_amber : Icons.help_outline,
+        isDestructive ? Icons.warning_amber_outlined : Icons.help_outline,
         color: isDestructive
             ? Theme.of(context).colorScheme.error
             : Theme.of(context).colorScheme.primary,

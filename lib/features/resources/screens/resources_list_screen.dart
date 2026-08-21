@@ -22,7 +22,7 @@ class ResourcesListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Resources'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
       ),
@@ -35,7 +35,7 @@ class ResourcesListScreen extends ConsumerWidget {
         data: (resources) {
           if (resources.isEmpty) {
             return const EmptyState(
-              icon: Icons.inventory_2,
+              icon: Icons.inventory_2_outlined,
               title: 'No Resources Available',
               description: 'There are no active resources set up in this group yet.',
             );

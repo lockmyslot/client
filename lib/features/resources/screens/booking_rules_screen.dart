@@ -95,7 +95,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
       appBar: AppBar(
         title: const Text('Configure Booking Rules'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -167,7 +167,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
                                 if (form.isEnabled) ...[
                                   const SizedBox(width: 4),
                                   Icon(
-                                    Icons.check_circle,
+                                    Icons.check_circle_outline,
                                     size: 12,
                                     color: isSelected
                                         ? Theme.of(context).colorScheme.onPrimary

@@ -26,7 +26,7 @@ class MembersScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Group Members'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
       ),
@@ -50,7 +50,7 @@ class MembersScreen extends ConsumerWidget {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          const Icon(Icons.vpn_key, size: 24),
+                          const Icon(Icons.vpn_key_outlined, size: 24),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -67,7 +67,7 @@ class MembersScreen extends ConsumerWidget {
                             },
                             child: const Row(
                               children: [
-                                Icon(Icons.copy, size: 14),
+                                Icon(Icons.copy_outlined, size: 14),
                                 SizedBox(width: 4),
                                 Text('Copy'),
                               ],

@@ -31,7 +31,7 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
           error: (_, __) => const Text('Book Resource'),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
       ),

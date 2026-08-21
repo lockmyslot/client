@@ -40,7 +40,7 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
       appBar: AppBar(
         title: const Text('Resource Schedule'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
       ),
@@ -62,7 +62,7 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.chevron_left),
+                  icon: const Icon(Icons.chevron_left_outlined),
                   onPressed: () {
                     setState(() {
                       _selectedDate = _selectedDate.subtract(const Duration(days: 1));
@@ -73,7 +73,7 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
                   AppDateUtils.formatDisplayDate(_selectedDate),
                 ).h4(),
                 IconButton(
-                  icon: const Icon(Icons.chevron_right),
+                  icon: const Icon(Icons.chevron_right_outlined),
                   onPressed: () {
                     setState(() {
                       _selectedDate = _selectedDate.add(const Duration(days: 1));
@@ -101,7 +101,7 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
               data: (bookings) {
                 if (bookings.isEmpty) {
                   return EmptyState(
-                    icon: Icons.event_available,
+                    icon: Icons.event_available_outlined,
                     title: 'No Bookings',
                     description: 'No bookings scheduled for ${AppDateUtils.formatDisplayDate(_selectedDate)}.',
                   );
@@ -122,7 +122,7 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.calendar_today, size: 14),
+                                  const Icon(Icons.calendar_today_outlined, size: 14),
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
@@ -135,7 +135,7 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.access_time, size: 14),
+                                  const Icon(Icons.access_time_outlined, size: 14),
                                   const SizedBox(width: 6),
                                   Text(
                                     '${AppDateUtils.formatTime(booking.startTime)} - ${AppDateUtils.formatTime(booking.endTime)}',

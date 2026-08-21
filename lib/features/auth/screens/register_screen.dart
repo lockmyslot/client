@@ -65,7 +65,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Icon(Icons.lock_clock, size: 48),
+                      const Icon(Icons.lock_clock_outlined, size: 48),
                       const SizedBox(height: 16),
                       const Text(
                         'Welcome to Lock My Slot',

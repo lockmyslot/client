@@ -40,7 +40,7 @@ class GroupDetailScreen extends ConsumerWidget {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add, size: 18),
+                    Icon(Icons.add_outlined, size: 18),
                     SizedBox(width: 8),
                     Text('Add Resource'),
                   ],
@@ -60,16 +60,16 @@ class GroupDetailScreen extends ConsumerWidget {
           error: (_, __) => const Text('Group Details'),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.go('/groups'),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.people),
+            icon: const Icon(Icons.people_outlined),
             onPressed: () => context.push('/groups/$groupId/members'),
           ),
           IconButton(
-            icon: const Icon(Icons.bookmark),
+            icon: const Icon(Icons.bookmark_outline),
             onPressed: () => context.push('/groups/$groupId/my_bookings'),
           ),
         ],
@@ -153,7 +153,7 @@ class GroupDetailScreen extends ConsumerWidget {
                               const SizedBox(width: 5),
                               Text('Code: ${group.inviteCode}').mono().small(),
                               const SizedBox(width: 4),
-                              const Icon(Icons.copy, size: 12),
+                              const Icon(Icons.copy_outlined, size: 12),
                             ],
                           ),
                         ),
@@ -172,7 +172,7 @@ class GroupDetailScreen extends ConsumerWidget {
                   children: [
                     const Text('Resources').h3(),
                     IconButton(
-                      icon: const Icon(Icons.refresh, size: 16),
+                      icon: const Icon(Icons.refresh_outlined, size: 16),
                       onPressed: () => ref.invalidate(groupResourcesProvider(groupId)),
                     ),
                   ],
@@ -191,7 +191,7 @@ class GroupDetailScreen extends ConsumerWidget {
                   data: (resources) {
                     if (resources.isEmpty) {
                       return EmptyState(
-                        icon: Icons.inventory_2,
+                        icon: Icons.inventory_2_outlined,
                         title: 'No Resources Added',
                         description: group.isAdmin
                             ? 'Create resources (e.g. Washing Machine, Court 1, Meeting Room) to allow member booking.'

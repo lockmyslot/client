@@ -84,7 +84,7 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
       appBar: AppBar(
         title: const Text('Add Resource'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
       ),

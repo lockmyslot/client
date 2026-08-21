@@ -52,7 +52,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                   final isSelected = id(item) == selectedId;
                   return ListTile(
                     leading: const Icon(Icons.radio_button_unchecked),
-                    trailing: isSelected ? const Icon(Icons.check) : null,
+                    trailing: isSelected ? const Icon(Icons.check_outlined) : null,
                     title: Text(label(item)),
                     subtitle: subtitle != null ? Text(subtitle(item) ?? '') : null,
                     onTap: () => Navigator.pop(context, item),
@@ -142,7 +142,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.chevron_right, size: 20, color: textColor),
+              Icon(Icons.chevron_right_outlined, size: 20, color: textColor),
             ],
           ),
         ),
@@ -157,7 +157,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.bolt, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            Icon(Icons.bolt_outlined, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(height: 12),
             const Text('Select a group and resource to start booking.').muted().p(),
           ],
@@ -178,7 +178,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       appBar: AppBar(
         title: const Text('Quick Book'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
       ),
@@ -198,7 +198,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
 
           if (groups.isEmpty) {
             return EmptyState(
-              icon: Icons.bolt,
+              icon: Icons.bolt_outlined,
               title: 'No Groups Yet',
               description: 'Create or join a group before you can book resources.',
               action: PrimaryButton(
@@ -220,7 +220,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
             resourcePicker = _buildPickerCard(
               label: 'Resource',
               value: 'Select a group first',
-              icon: Icons.perm_media,
+              icon: Icons.perm_media_outlined,
               onTap: null,
               enabled: false,
             );
@@ -229,14 +229,14 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
               loading: () => _buildPickerCard(
                 label: 'Resource',
                 value: 'Loading…',
-                icon: Icons.perm_media,
+                icon: Icons.perm_media_outlined,
                 onTap: null,
                 enabled: false,
               ),
               error: (err, _) => _buildPickerCard(
                 label: 'Resource',
                 value: 'Failed to load',
-                icon: Icons.perm_media,
+                icon: Icons.perm_media_outlined,
                 onTap: null,
                 enabled: false,
               ),
@@ -245,7 +245,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                   return _buildPickerCard(
                     label: 'Resource',
                     value: 'No active resources',
-                    icon: Icons.perm_media,
+                    icon: Icons.perm_media_outlined,
                     onTap: null,
                     enabled: false,
                   );
@@ -264,7 +264,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                 return _buildPickerCard(
                   label: 'Resource',
                   value: selectedResource?.name ?? 'Select Resource',
-                  icon: Icons.perm_media,
+                  icon: Icons.perm_media_outlined,
                   onTap: () => _pickResource(activeResources),
                 );
               },
@@ -282,7 +282,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                       child: _buildPickerCard(
                         label: 'Group',
                         value: selectedGroup?.name ?? 'Select Group',
-                        icon: Icons.group,
+                        icon: Icons.group_outlined,
                         onTap: () => _pickGroup(groups),
                       ),
                     ),

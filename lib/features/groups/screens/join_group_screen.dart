@@ -62,7 +62,7 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
       appBar: AppBar(
         title: const Text('Join Group'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
       ),

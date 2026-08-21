@@ -20,7 +20,7 @@ class GroupsListScreen extends ConsumerWidget {
         title: const Text('My Groups'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.person),
+            icon: const Icon(Icons.person_outline),
             onPressed: () {
               showDialog(
                 context: context,
@@ -31,7 +31,7 @@ class GroupsListScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.account_circle, size: 32),
+                          const Icon(Icons.account_circle_outlined, size: 32),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -78,7 +78,7 @@ class GroupsListScreen extends ConsumerWidget {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.vpn_key, size: 16),
+                        Icon(Icons.vpn_key_outlined, size: 16),
                         SizedBox(width: 8),
                         Text('Join Group'),
                       ],
@@ -92,7 +92,7 @@ class GroupsListScreen extends ConsumerWidget {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add, size: 16),
+                        Icon(Icons.add_outlined, size: 16),
                         SizedBox(width: 8),
                         Text('Create Group'),
                       ],
@@ -112,7 +112,7 @@ class GroupsListScreen extends ConsumerWidget {
               data: (groups) {
                 if (groups.isEmpty) {
                   return EmptyState(
-                    icon: Icons.group_work,
+                    icon: Icons.group_work_outlined,
                     title: 'No Groups Yet',
                     description: 'Create or join a group to start booking shared resources.',
                     action: PrimaryButton(
@@ -145,7 +145,7 @@ class GroupsListScreen extends ConsumerWidget {
                                       color: Theme.of(context).colorScheme.surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: const Icon(Icons.group, size: 24),
+                                    child: const Icon(Icons.group_outlined, size: 24),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
@@ -201,7 +201,7 @@ class GroupsListScreen extends ConsumerWidget {
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.bolt, size: 18),
+              Icon(Icons.bolt_outlined, size: 18),
               SizedBox(width: 8),
               Text('Quick Book'),
             ],

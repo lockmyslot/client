@@ -32,7 +32,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
       appBar: AppBar(
         title: const Text('My Bookings'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
       ),
@@ -101,7 +101,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                                 Row(
                                   children: [
                                     Icon(
-                                      Icons.schedule,
+                                      Icons.schedule_outlined,
                                       size: 18,
                                       color: Theme.of(context).colorScheme.primary,
                                     ),
@@ -137,7 +137,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                                         foregroundColor: Theme.of(context).colorScheme.error,
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                       ),
-                                      icon: const Icon(Icons.close, size: 18),
+                                      icon: const Icon(Icons.close_outlined, size: 18),
                                       label: const Text('Cancel'),
                                     ),
                                   ),

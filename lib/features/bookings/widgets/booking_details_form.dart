@@ -138,7 +138,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
         children: [
           Row(
             children: [
-              const Icon(Icons.bookmark_added, size: 20),
+              const Icon(Icons.bookmark_added_outlined, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -208,7 +208,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                           onPressed: _pickCalendarDate,
                           child: const Row(
                             children: [
-                              Icon(Icons.event, size: 16),
+                              Icon(Icons.event_outlined, size: 16),
                               SizedBox(width: 6),
                               Text('Change Date'),
                             ],
@@ -364,7 +364,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      isAvail ? Icons.access_time : Icons.block,
+                                      isAvail ? Icons.access_time_outlined : Icons.block_outlined,
                                       size: 13,
                                       color: isSelected
                                           ? Theme.of(context).colorScheme.onPrimary

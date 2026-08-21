@@ -62,7 +62,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
       appBar: AppBar(
         title: const Text('Create Group'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
       ),

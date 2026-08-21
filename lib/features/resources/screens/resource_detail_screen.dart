@@ -32,12 +32,12 @@ class ResourceDetailScreen extends ConsumerWidget {
           error: (_, __) => const Text('Resource Detail'),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/groups/$groupId/resources/$resourceId/rules'),
           ),
         ],
@@ -60,7 +60,7 @@ class ResourceDetailScreen extends ConsumerWidget {
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.calendar_today, size: 18),
+              Icon(Icons.calendar_today_outlined, size: 18),
               SizedBox(width: 8),
               Text('Book a Slot'),
             ],
@@ -140,7 +140,7 @@ class ResourceDetailScreen extends ConsumerWidget {
                     children: [
                       const Text('Schedule').h3(),
                       IconButton(
-                        icon: const Icon(Icons.refresh, size: 16),
+                        icon: const Icon(Icons.refresh_outlined, size: 16),
                         onPressed: () => ref.invalidate(resourceBookingsProvider((groupId: groupId, resourceId: resourceId, date: null))),
                       ),
                     ],
@@ -156,7 +156,7 @@ class ResourceDetailScreen extends ConsumerWidget {
                     data: (bookings) {
                       if (bookings.isEmpty) {
                         return const EmptyState(
-                          icon: Icons.calendar_today,
+                          icon: Icons.calendar_today_outlined,
                           title: 'No Upcoming Bookings',
                           description: 'There are no bookings scheduled for this resource yet.',
                         );
@@ -205,7 +205,7 @@ class ResourceDetailScreen extends ConsumerWidget {
                                           Row(
                                             children: [
                                               Icon(
-                                                Icons.schedule,
+                                                Icons.schedule_outlined,
                                                 size: 16,
                                                 color: Theme.of(context).colorScheme.primary,
                                               ),
