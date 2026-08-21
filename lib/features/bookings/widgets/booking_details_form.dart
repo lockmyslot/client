@@ -445,29 +445,32 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
 
                               final cs = Theme.of(context).colorScheme;
                               Color chipBg;
+                              Color chipBorder;
+                              double borderWidth;
                               IconData icon;
                               Color? iconColor;
                               Color? textColor;
                               if (isSelected) {
-                                chipBg = cs.primary;
-                                icon = Icons.access_time_outlined;
-                                iconColor = cs.onPrimary;
-                                textColor = cs.onPrimary;
+                                chipBg = cs.primaryContainer;
+                                chipBorder = cs.primary;
+                                borderWidth = 1.5;
+                                icon = Icons.check_outlined;
+                                iconColor = cs.onPrimaryContainer;
+                                textColor = cs.onPrimaryContainer;
                               } else if (isAvail) {
-                                chipBg = cs.surfaceContainerHighest;
+                                chipBg = cs.surface;
+                                chipBorder = cs.outline;
+                                borderWidth = 1;
                                 icon = Icons.access_time_outlined;
                                 iconColor = cs.onSurfaceVariant;
+                                textColor = cs.onSurface;
                               } else {
-                                chipBg = cs.surfaceContainerHighest.withValues(
-                                  alpha: 0.5,
-                                );
+                                chipBg = cs.surface;
+                                chipBorder = cs.outlineVariant;
+                                borderWidth = 1;
                                 icon = Icons.block_outlined;
-                                iconColor = cs.onSurfaceVariant.withValues(
-                                  alpha: 0.7,
-                                );
-                                textColor = cs.onSurfaceVariant.withValues(
-                                  alpha: 0.7,
-                                );
+                                iconColor = cs.outline.withValues(alpha: 0.8);
+                                textColor = cs.outline;
                               }
 
                               return GestureDetector(
@@ -489,6 +492,10 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                                     decoration: BoxDecoration(
                                       color: chipBg,
                                       borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: chipBorder,
+                                        width: borderWidth,
+                                      ),
                                     ),
                                     child: Center(
                                       child: Row(
