@@ -104,14 +104,45 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
     required VoidCallback? onTap,
     bool enabled = true,
   }) {
+    final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
+    final textColor = enabled ? null : mutedColor;
     return Card(
-      child: ListTile(
+      margin: EdgeInsets.zero,
+      child: InkWell(
         onTap: onTap,
-        enabled: enabled,
-        leading: Icon(icon),
-        title: Text(label).small().muted(),
-        subtitle: Text(value),
-        trailing: const Icon(Icons.chevron_right),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(icon, size: 14, color: textColor),
+                        const SizedBox(width: 4),
+                        Text(label).small().muted(),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textColor != null ? TextStyle(color: textColor) : null,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.chevron_right, size: 20, color: textColor),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -174,65 +205,71 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
               .where((r) => r.isActive)
               .toList();
 
+          final Widget resourcePicker;
+          if (selectedGroupId == null) {
+            resourcePicker = _buildPickerCard(
+              label: 'Resource',
+              value: 'Select a group first',
+              icon: Icons.perm_media,
+              onTap: null,
+              enabled: false,
+            );
+          } else {
+            resourcePicker = resourcesAsync!.when(
+              loading: () => _buildPickerCard(
+                label: 'Resource',
+                value: 'Loading…',
+                icon: Icons.perm_media,
+                onTap: null,
+                enabled: false,
+              ),
+              error: (err, _) => _buildPickerCard(
+                label: 'Resource',
+                value: 'Failed to load',
+                icon: Icons.perm_media,
+                onTap: null,
+                enabled: false,
+              ),
+              data: (resources) {
+                if (activeResources.isEmpty) {
+                  return _buildPickerCard(
+                    label: 'Resource',
+                    value: 'No active resources',
+                    icon: Icons.perm_media,
+                    onTap: null,
+                    enabled: false,
+                  );
+                }
+                final selectedResource = activeResources
+                    .where((r) => r.id == _selectedResourceId)
+                    .firstOrNull;
+                return _buildPickerCard(
+                  label: 'Resource',
+                  value: selectedResource?.name ?? 'Select Resource',
+                  icon: Icons.perm_media,
+                  onTap: () => _pickResource(activeResources),
+                );
+              },
+            );
+          }
+
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildPickerCard(
-                      label: 'Group',
-                      value: selectedGroup?.name ?? 'Select Group',
-                      icon: Icons.group,
-                      onTap: () => _pickGroup(groups),
-                    ),
-                    const SizedBox(height: 8),
-                    if (selectedGroupId == null)
-                      _buildPickerCard(
-                        label: 'Resource',
-                        value: 'Select a group first',
-                        icon: Icons.perm_media,
-                        onTap: null,
-                        enabled: false,
-                      )
-                    else
-                      resourcesAsync!.when(
-                        loading: () => _buildPickerCard(
-                          label: 'Resource',
-                          value: 'Loading resources…',
-                          icon: Icons.perm_media,
-                          onTap: null,
-                          enabled: false,
-                        ),
-                        error: (err, _) => _buildPickerCard(
-                          label: 'Resource',
-                          value: 'Failed to load resources',
-                          icon: Icons.perm_media,
-                          onTap: null,
-                          enabled: false,
-                        ),
-                        data: (resources) {
-                          if (activeResources.isEmpty) {
-                            return _buildPickerCard(
-                              label: 'Resource',
-                              value: 'No active resources in this group',
-                              icon: Icons.perm_media,
-                              onTap: null,
-                              enabled: false,
-                            );
-                          }
-                          final selectedResource = activeResources
-                              .where((r) => r.id == _selectedResourceId)
-                              .firstOrNull;
-                          return _buildPickerCard(
-                            label: 'Resource',
-                            value: selectedResource?.name ?? 'Select Resource',
-                            icon: Icons.perm_media,
-                            onTap: () => _pickResource(activeResources),
-                          );
-                        },
+                    Expanded(
+                      child: _buildPickerCard(
+                        label: 'Group',
+                        value: selectedGroup?.name ?? 'Select Group',
+                        icon: Icons.group,
+                        onTap: () => _pickGroup(groups),
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(child: resourcePicker),
                   ],
                 ),
               ),
