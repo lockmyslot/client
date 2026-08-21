@@ -94,64 +94,70 @@ class GroupDetailScreen extends ConsumerWidget {
                 child: Card(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: Row(
-                      children: [
-                        // Member Count (Tap to View Members)
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => context.push('/groups/$groupId/members'),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const Text('Members').small().muted(),
-                                  Text('${group.memberCount}'),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const Text('Role').small().muted(),
-                              Text(group.role),
-                            ],
-                          ),
-                        ),
-                        if (group.inviteCode != null && group.inviteCode!.isNotEmpty) ...[
-                          Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                    child: SizedBox(
+                      height: 40,
+                      child: Row(
+                        children: [
+                          // Member Count (Tap to View Members)
                           Expanded(
                             child: InkWell(
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(text: group.inviteCode!));
-                              },
+                              onTap: () => context.push('/groups/$groupId/members'),
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Text('Code').small().muted(),
-                                        const SizedBox(width: 3),
-                                        const Icon(Icons.copy_outlined, size: 12),
-                                      ],
-                                    ),
-                                    Text(group.inviteCode!).mono(),
+                                    const Text('Members').small().muted(),
+                                    Text('${group.memberCount}'),
                                   ],
                                 ),
                               ),
                             ),
                           ),
+                          Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text('Role').small().muted(),
+                                Text(group.role),
+                              ],
+                            ),
+                          ),
+                          if (group.inviteCode != null && group.inviteCode!.isNotEmpty) ...[
+                            Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(text: group.inviteCode!));
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text('Code').small().muted(),
+                                          const SizedBox(width: 3),
+                                          const Icon(Icons.copy_outlined, size: 12),
+                                        ],
+                                      ),
+                                      Text(group.inviteCode!).mono(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -212,7 +218,7 @@ class GroupDetailScreen extends ConsumerWidget {
                             onTap: () => context.push('/groups/$groupId/resources/${resource.id}'),
                             child: Card(
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                                padding: kCardPadding,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [

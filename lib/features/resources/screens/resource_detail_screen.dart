@@ -95,28 +95,33 @@ class ResourceDetailScreen extends ConsumerWidget {
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Text('Capacity').small().muted(),
-                                Text('${resource.capacity}'),
-                              ],
+                      child: SizedBox(
+                        height: 40,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text('Capacity').small().muted(),
+                                  Text('${resource.capacity}'),
+                                ],
+                              ),
                             ),
-                          ),
-                          Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Text('Slot Duration').small().muted(),
-                                Text('${resource.slotDurationMinutes} min'),
-                              ],
+                            Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text('Slot Duration').small().muted(),
+                                  Text('${resource.slotDurationMinutes} min'),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -186,7 +191,7 @@ class ResourceDetailScreen extends ConsumerWidget {
                                   padding: const EdgeInsets.only(bottom: 8),
                                   child: Card(
                                     child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                                      padding: kCardPadding,
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
