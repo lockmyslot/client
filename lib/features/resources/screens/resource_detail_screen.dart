@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/resources_provider.dart';
+import '../../bookings/data/models/booking.dart';
 import '../../bookings/providers/bookings_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
@@ -161,53 +162,86 @@ class ResourceDetailScreen extends ConsumerWidget {
                         );
                       }
 
+                      final sorted = [...bookings]
+                        ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
+                      final grouped = <String, List<Booking>>{};
+                      for (final booking in sorted) {
+                        grouped.putIfAbsent(AppDateUtils.formatDate(booking.startTime), () => []).add(booking);
+                      }
+
                       return Column(
-                        children: bookings.map((booking) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: grouped.entries.map((entry) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8, bottom: 6),
+                                child: Row(
                                   children: [
-                                    // Top Line: Date & Status Badge
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.calendar_today, size: 14),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            AppDateUtils.formatDisplayDate(booking.startTime),
-                                          ).small().semiBold(),
-                                        ),
-                                        PrimaryBadge(child: Text(booking.status)),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    // Middle Line: Time Range
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.access_time, size: 14),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          '${AppDateUtils.formatTime(booking.startTime)} - ${AppDateUtils.formatTime(booking.endTime)}',
-                                        ).mono().small(),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    // Bottom Line: Booked By
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.person_outline, size: 14),
-                                        const SizedBox(width: 6),
-                                        Text('Booked by: ${booking.userDisplayName ?? 'User'}').small().muted(),
-                                      ],
+                                    Text(
+                                      AppDateUtils.formatDisplayDate(entry.value.first.startTime),
+                                    ).textLarge().semiBold(),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Divider(
+                                        color: Theme.of(context).colorScheme.outlineVariant,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
+                              ...entry.value.map((booking) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // Time Range
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.schedule,
+                                                size: 16,
+                                                color: Theme.of(context).colorScheme.primary,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                '${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}',
+                                              ).mono().semiBold(),
+                                              const Spacer(),
+                                              PrimaryBadge(child: Text(booking.status)),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 6),
+                                          // Booked By
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.person_outline,
+                                                size: 16,
+                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  booking.userDisplayName ?? 'User',
+                                                  overflow: TextOverflow.ellipsis,
+                                                ).small().muted(),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ],
                           );
                         }).toList(),
                       );

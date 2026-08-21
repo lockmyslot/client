@@ -97,48 +97,49 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 10),
                                 Row(
                                   children: [
-                                    const Icon(Icons.calendar_today, size: 16),
-                                    const SizedBox(width: 6),
-                                    Text(AppDateUtils.formatDisplayDate(booking.startTime)).small(),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.access_time, size: 16),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      '${AppDateUtils.formatTime(booking.startTime)} - ${AppDateUtils.formatTime(booking.endTime)}',
-                                    ).mono().small(),
+                                    Icon(
+                                      Icons.schedule,
+                                      size: 18,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '${AppDateUtils.formatDisplayDate(booking.startTime)} · ${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}',
+                                      ).small(),
+                                    ),
                                   ],
                                 ),
                                 if (booking.isConfirmed && isUpcoming) ...[
                                   const SizedBox(height: 12),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      OutlineButton(
-                                        onPressed: () async {
-                                          final confirmed = await ConfirmDialog.show(
-                                            context,
-                                            title: 'Cancel Booking',
-                                            message: 'Are you sure you want to cancel this booking?',
-                                            confirmText: 'Cancel Booking',
-                                            isDestructive: true,
-                                          );
-                                          if (confirmed == true) {
-                                            await ref
-                                                .read(bookingsRepositoryProvider)
-                                                .cancelBooking(widget.groupId, booking.id);
-                                            ref.invalidate(myBookingsProvider((groupId: widget.groupId, status: _selectedStatusFilter)));
-                                          }
-                                        },
-                                        child: const Text('Cancel Booking'),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: TextButton.icon(
+                                      onPressed: () async {
+                                        final confirmed = await ConfirmDialog.show(
+                                          context,
+                                          title: 'Cancel Booking',
+                                          message: 'Are you sure you want to cancel this booking?',
+                                          confirmText: 'Cancel Booking',
+                                          isDestructive: true,
+                                        );
+                                        if (confirmed == true) {
+                                          await ref
+                                              .read(bookingsRepositoryProvider)
+                                              .cancelBooking(widget.groupId, booking.id);
+                                          ref.invalidate(myBookingsProvider((groupId: widget.groupId, status: _selectedStatusFilter)));
+                                        }
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Theme.of(context).colorScheme.error,
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                       ),
-                                    ],
+                                      icon: const Icon(Icons.close, size: 18),
+                                      label: const Text('Cancel'),
+                                    ),
                                   ),
                                 ],
                               ],
