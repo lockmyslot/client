@@ -109,8 +109,8 @@ extension LockMySlotText on Widget {
   /// Monospace font family.
   Widget mono() => _styled(
         style: (_, __) => TextStyle(
-          fontFamily: 'monospace',
-          fontFamilyFallback: const ['Roboto Mono', 'Courier New'],
+          fontFamily: 'GoogleSansCode',
+          fontFamilyFallback: const ['monospace', 'Roboto Mono', 'Courier New'],
         ),
       );
 
