@@ -103,22 +103,22 @@ class ResourceDetailScreen extends ConsumerWidget {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Column(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Text('Capacity').small().muted(),
+                                  const Icon(Icons.people_outline, size: 18),
+                                  const SizedBox(width: 6),
                                   Text('${resource.capacity}'),
                                 ],
                               ),
                             ),
                             Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
                             Expanded(
-                              child: Column(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const Text('Slot Duration').small().muted(),
+                                  const Icon(Icons.timer_outlined, size: 18),
+                                  const SizedBox(width: 6),
                                   Text('${resource.slotDurationMinutes} min'),
                                 ],
                               ),

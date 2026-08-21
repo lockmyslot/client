@@ -108,11 +108,11 @@ class GroupDetailScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                child: Column(
+                                child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    const Text('Members').small().muted(),
+                                    const Icon(Icons.people_outline, size: 18),
+                                    const SizedBox(width: 6),
                                     Text('${group.memberCount}'),
                                   ],
                                 ),
@@ -121,11 +121,11 @@ class GroupDetailScreen extends ConsumerWidget {
                           ),
                           Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
                           Expanded(
-                            child: Column(
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                const Text('Role').small().muted(),
+                                const Icon(Icons.verified_user_outlined, size: 18),
+                                const SizedBox(width: 6),
                                 Text(group.role),
                               ],
                             ),
@@ -140,18 +140,11 @@ class GroupDetailScreen extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  child: Column(
+                                  child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Text('Code').small().muted(),
-                                          const SizedBox(width: 3),
-                                          const Icon(Icons.copy_outlined, size: 12),
-                                        ],
-                                      ),
+                                      const Icon(Icons.vpn_key_outlined, size: 18),
+                                      const SizedBox(width: 6),
                                       Text(group.inviteCode!).mono(),
                                     ],
                                   ),
