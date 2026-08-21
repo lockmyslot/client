@@ -20,6 +20,8 @@ class QuickBookingScreen extends ConsumerStatefulWidget {
 class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
   String? _selectedGroupId;
   String? _selectedResourceId;
+  bool _autoOpenedGroupPicker = false;
+  bool _autoOpenResourcePicker = false;
 
   Future<T?> _showPickerSheet<T>({
     required String title,
@@ -77,6 +79,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       setState(() {
         _selectedGroupId = group.id;
         _selectedResourceId = null;
+        _autoOpenResourcePicker = true;
       });
     }
   }
@@ -186,6 +189,13 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
           onRetry: () => ref.read(myGroupsProvider.notifier).refresh(),
         ),
         data: (groups) {
+          if (!_autoOpenedGroupPicker && _selectedGroupId == null) {
+            _autoOpenedGroupPicker = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && _selectedGroupId == null) _pickGroup(groups);
+            });
+          }
+
           if (groups.isEmpty) {
             return EmptyState(
               icon: Icons.bolt,
@@ -239,6 +249,14 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                     onTap: null,
                     enabled: false,
                   );
+                }
+                if (_autoOpenResourcePicker && _selectedResourceId == null) {
+                  _autoOpenResourcePicker = false;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && _selectedResourceId == null) {
+                      _pickResource(activeResources);
+                    }
+                  });
                 }
                 final selectedResource = activeResources
                     .where((r) => r.id == _selectedResourceId)
