@@ -328,13 +328,25 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                           final isSelected = _selectedStartTimeSlot?.startTime.isAtSameMomentAs(slot.startTime) ?? false;
                           final isAvail = slot.isAvailable;
 
+                          final cs = Theme.of(context).colorScheme;
                           Color chipBg;
+                          IconData icon;
+                          Color? iconColor;
+                          Color? textColor;
                           if (isSelected) {
-                            chipBg = Theme.of(context).colorScheme.primary;
+                            chipBg = cs.primary;
+                            icon = Icons.access_time_outlined;
+                            iconColor = cs.onPrimary;
+                            textColor = cs.onPrimary;
                           } else if (isAvail) {
-                            chipBg = Theme.of(context).colorScheme.surfaceContainerHighest;
+                            chipBg = cs.surfaceContainerHighest;
+                            icon = Icons.access_time_outlined;
+                            iconColor = cs.onSurfaceVariant;
                           } else {
-                            chipBg = Colors.grey.withValues(alpha: 0.1);
+                            chipBg = cs.surfaceContainerHighest.withValues(alpha: 0.5);
+                            icon = Icons.block_outlined;
+                            iconColor = cs.onSurfaceVariant.withValues(alpha: 0.7);
+                            textColor = cs.onSurfaceVariant.withValues(alpha: 0.7);
                           }
 
                           return GestureDetector(
@@ -350,38 +362,17 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                               decoration: BoxDecoration(
                                 color: chipBg,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? Theme.of(context).colorScheme.primary
-                                      : isAvail
-                                          ? Colors.green.withValues(alpha: 0.4)
-                                          : Colors.transparent,
-                                ),
                               ),
                               child: Center(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
-                                      isAvail ? Icons.access_time_outlined : Icons.block_outlined,
-                                      size: 13,
-                                      color: isSelected
-                                          ? Theme.of(context).colorScheme.onPrimary
-                                          : isAvail
-                                              ? Colors.green
-                                              : Colors.grey,
-                                    ),
+                                    Icon(icon, size: 13, color: iconColor),
                                     const SizedBox(width: 5),
                                     Text(
                                       AppDateUtils.formatTime(slot.startTime),
-                                      style: TextStyle(
-                                        color: isSelected
-                                            ? Theme.of(context).colorScheme.onPrimary
-                                            : !isAvail
-                                                ? Colors.grey
-                                                : null,
-                                      ),
+                                      style: TextStyle(color: textColor),
                                     ).mono().small(),
                                   ],
                                 ),
