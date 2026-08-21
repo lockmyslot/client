@@ -72,40 +72,42 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Center(
             child: SingleChildScrollView(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text('New Group').h3(),
-                    const SizedBox(height: 8),
-                    const Text('Create a group for your team, apartment, studio, or club.')
-                        .muted()
-                        .small(),
-                    const SizedBox(height: 24),
-                    const Text('Group Name').small().semiBold(),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _nameController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        hintText: 'e.g., Design Studio, Tennis Club',
+              child: Entrance(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text('New Group').h3(),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Create a group for your team, apartment, studio, or club.',
+                      ).muted().small(),
+                      const SizedBox(height: 24),
+                      const Text('Group Name').small().semiBold(),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _nameController,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: const InputDecoration(
+                          hintText: 'e.g., Design Studio, Tennis Club',
+                        ),
+                        onSubmitted: (_) => _handleCreate(),
                       ),
-                      onSubmitted: (_) => _handleCreate(),
-                    ),
-                    if (_errorMessage != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: Colors.red),
-                      ).small(),
+                      if (_errorMessage != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                        ).small(),
+                      ],
+                      const SizedBox(height: 24),
+                      PrimaryButton(
+                        onPressed: _handleCreate,
+                        child: const Text('Create Group'),
+                      ),
                     ],
-                    const SizedBox(height: 24),
-                    PrimaryButton(
-                      onPressed: _handleCreate,
-                      child: const Text('Create Group'),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

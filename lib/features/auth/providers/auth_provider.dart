@@ -35,7 +35,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
   final SecureStorageService _storage;
 
-  AuthNotifier(this._repository, this._storage) : super(const AuthState(isLoading: true)) {
+  AuthNotifier(this._repository, this._storage)
+    : super(const AuthState(isLoading: true)) {
     checkAuthStatus();
   }
 
@@ -49,11 +50,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
 
       final user = await _repository.getMe();
-      state = AuthState(
-        user: user,
-        isAuthenticated: true,
-        isLoading: false,
-      );
+      state = AuthState(user: user, isAuthenticated: true, isLoading: false);
     } catch (e) {
       // If fetching fails, we clear token so user can register/login again
       await _storage.deleteAuthToken();
@@ -65,17 +62,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final user = await _repository.register(displayName);
-      state = AuthState(
-        user: user,
-        isAuthenticated: true,
-        isLoading: false,
-      );
+      state = AuthState(user: user, isAuthenticated: true, isLoading: false);
       return true;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     }
   }

@@ -9,7 +9,8 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       fontFamily: _fontFamily,
-      colorScheme: colorScheme ??
+      colorScheme:
+          colorScheme ??
           ColorScheme.fromSeed(
             seedColor: _seedColor,
             brightness: Brightness.dark,
@@ -22,7 +23,8 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       fontFamily: _fontFamily,
-      colorScheme: colorScheme ??
+      colorScheme:
+          colorScheme ??
           ColorScheme.fromSeed(
             seedColor: _seedColor,
             brightness: Brightness.light,

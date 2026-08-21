@@ -30,14 +30,20 @@ class Resource {
       name: json['name'] as String? ?? '',
       description: json['description'] as String?,
       capacity: json['capacity'] as int? ?? 1,
-      slotDurationMinutes: json['slot_duration_minutes'] as int? ?? json['slotDurationMinutes'] as int? ?? 60,
+      slotDurationMinutes:
+          json['slot_duration_minutes'] as int? ??
+          json['slotDurationMinutes'] as int? ??
+          60,
       isActive: json['is_active'] as bool? ?? json['isActive'] as bool? ?? true,
-      rulesConfigured: json['rules_configured'] as bool? ?? json['rulesConfigured'] as bool? ?? false,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String) 
+      rulesConfigured:
+          json['rules_configured'] as bool? ??
+          json['rulesConfigured'] as bool? ??
+          false,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
-      updatedAt: json['updated_at'] != null 
-          ? DateTime.parse(json['updated_at'] as String) 
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
           : DateTime.now(),
     );
   }

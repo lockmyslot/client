@@ -25,10 +25,27 @@ class ConfirmDialog extends StatelessWidget {
     String cancelText = 'Cancel',
     bool isDestructive = false,
   }) {
-    return showDialog<bool>(
+    return showGeneralDialog<bool>(
       context: context,
       barrierDismissible: true,
-      builder: (context) => ConfirmDialog(
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 320),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+          reverseCurve: Curves.easeInCubic,
+        );
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.85, end: 1.0).animate(curved),
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) => ConfirmDialog(
         title: title,
         message: message,
         confirmText: confirmText,

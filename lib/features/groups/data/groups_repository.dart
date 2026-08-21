@@ -14,7 +14,9 @@ class GroupsRepository {
       ApiConstants.groups,
       fromJson: (json) {
         if (json is List) {
-          return json.map((e) => Group.fromJson(e as Map<String, dynamic>)).toList();
+          return json
+              .map((e) => Group.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
         return [];
       },
@@ -53,7 +55,9 @@ class GroupsRepository {
       ApiConstants.groupMembers(groupId),
       fromJson: (json) {
         if (json is List) {
-          return json.map((e) => GroupMember.fromJson(e as Map<String, dynamic>)).toList();
+          return json
+              .map((e) => GroupMember.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
         return [];
       },

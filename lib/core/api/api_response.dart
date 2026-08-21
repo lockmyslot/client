@@ -2,10 +2,7 @@ class ApiResponse<T> {
   final T data;
   final Map<String, dynamic>? meta;
 
-  const ApiResponse({
-    required this.data,
-    this.meta,
-  });
+  const ApiResponse({required this.data, this.meta});
 
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,
@@ -14,10 +11,7 @@ class ApiResponse<T> {
     final rawData = json['data'] ?? json;
     final metaData = json['meta'] as Map<String, dynamic>?;
 
-    return ApiResponse<T>(
-      data: fromJsonT(rawData),
-      meta: metaData,
-    );
+    return ApiResponse<T>(data: fromJsonT(rawData), meta: metaData);
   }
 
   factory ApiResponse.fromListJson(

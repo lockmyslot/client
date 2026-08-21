@@ -11,14 +11,13 @@ class ApiClient {
   final SecureStorageService storage;
   final http.Client _client;
 
-  ApiClient({
-    String? baseUrl,
-    required this.storage,
-    http.Client? client,
-  })  : baseUrl = baseUrl ?? ApiConstants.baseUrl,
-        _client = client ?? http.Client();
+  ApiClient({String? baseUrl, required this.storage, http.Client? client})
+    : baseUrl = baseUrl ?? ApiConstants.baseUrl,
+      _client = client ?? http.Client();
 
-  Future<Map<String, String>> _getHeaders([Map<String, String>? extraHeaders]) async {
+  Future<Map<String, String>> _getHeaders([
+    Map<String, String>? extraHeaders,
+  ]) async {
     final token = await storage.getAuthToken();
     final headers = <String, String>{
       'Content-Type': 'application/json',
@@ -41,7 +40,7 @@ class ApiClient {
     if (query == null || query.isEmpty) {
       return baseUri;
     }
-    
+
     final queryParams = <String, String>{};
     query.forEach((key, value) {
       if (value != null) {
@@ -57,7 +56,8 @@ class ApiClient {
     try {
       return await requestFn(_client);
     } catch (e) {
-      if (e is http.ClientException || e.toString().contains('Connection closed')) {
+      if (e is http.ClientException ||
+          e.toString().contains('Connection closed')) {
         final freshClient = http.Client();
         try {
           return await requestFn(freshClient);
@@ -77,7 +77,9 @@ class ApiClient {
     try {
       final uri = _buildUri(path, query);
       final headers = await _getHeaders();
-      final response = await _sendWithRetry((client) => client.get(uri, headers: headers));
+      final response = await _sendWithRetry(
+        (client) => client.get(uri, headers: headers),
+      );
       return _processResponse<T>(response, fromJson);
     } catch (e) {
       if (e is ApiException) rethrow;
@@ -94,7 +96,9 @@ class ApiClient {
       final uri = _buildUri(path);
       final headers = await _getHeaders();
       final encodedBody = body != null ? jsonEncode(body) : null;
-      final response = await _sendWithRetry((client) => client.post(uri, headers: headers, body: encodedBody));
+      final response = await _sendWithRetry(
+        (client) => client.post(uri, headers: headers, body: encodedBody),
+      );
       return _processResponse<T>(response, fromJson);
     } catch (e) {
       if (e is ApiException) rethrow;
@@ -111,7 +115,9 @@ class ApiClient {
       final uri = _buildUri(path);
       final headers = await _getHeaders();
       final encodedBody = body != null ? jsonEncode(body) : null;
-      final response = await _sendWithRetry((client) => client.patch(uri, headers: headers, body: encodedBody));
+      final response = await _sendWithRetry(
+        (client) => client.patch(uri, headers: headers, body: encodedBody),
+      );
       return _processResponse<T>(response, fromJson);
     } catch (e) {
       if (e is ApiException) rethrow;
@@ -128,7 +134,9 @@ class ApiClient {
       final uri = _buildUri(path);
       final headers = await _getHeaders();
       final encodedBody = body != null ? jsonEncode(body) : null;
-      final response = await _sendWithRetry((client) => client.put(uri, headers: headers, body: encodedBody));
+      final response = await _sendWithRetry(
+        (client) => client.put(uri, headers: headers, body: encodedBody),
+      );
       return _processResponse<T>(response, fromJson);
     } catch (e) {
       if (e is ApiException) rethrow;
@@ -140,7 +148,9 @@ class ApiClient {
     try {
       final uri = _buildUri(path);
       final headers = await _getHeaders();
-      final response = await _sendWithRetry((client) => client.delete(uri, headers: headers));
+      final response = await _sendWithRetry(
+        (client) => client.delete(uri, headers: headers),
+      );
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return;
       }
@@ -167,10 +177,14 @@ class ApiClient {
           return ApiResponse<T>(data: fromJson(decoded));
         }
       } else {
-        final data = decoded is Map && decoded.containsKey('data') ? decoded['data'] : decoded;
+        final data = decoded is Map && decoded.containsKey('data')
+            ? decoded['data']
+            : decoded;
         return ApiResponse<T>(
           data: data as T,
-          meta: decoded is Map && decoded.containsKey('meta') ? decoded['meta'] : null,
+          meta: decoded is Map && decoded.containsKey('meta')
+              ? decoded['meta']
+              : null,
         );
       }
     }
@@ -187,9 +201,13 @@ class ApiClient {
         if (json is Map) {
           message = json['message']?.toString() ?? message;
           if (json['violations'] is List) {
-            violations = (json['violations'] as List).map((e) => e.toString()).toList();
+            violations = (json['violations'] as List)
+                .map((e) => e.toString())
+                .toList();
           } else if (json['errors'] is List) {
-            violations = (json['errors'] as List).map((e) => e.toString()).toList();
+            violations = (json['errors'] as List)
+                .map((e) => e.toString())
+                .toList();
           }
         }
       }

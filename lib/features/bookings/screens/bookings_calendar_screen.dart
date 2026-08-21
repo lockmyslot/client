@@ -18,10 +18,12 @@ class BookingsCalendarScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<BookingsCalendarScreen> createState() => _BookingsCalendarScreenState();
+  ConsumerState<BookingsCalendarScreen> createState() =>
+      _BookingsCalendarScreenState();
 }
 
-class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen> {
+class _BookingsCalendarScreenState
+    extends ConsumerState<BookingsCalendarScreen> {
   DateTime _selectedDate = DateTime.now();
 
   String get _selectedDateString => AppDateUtils.formatDate(_selectedDate);
@@ -65,18 +67,26 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
                   icon: const Icon(Icons.chevron_left_outlined),
                   onPressed: () {
                     setState(() {
-                      _selectedDate = _selectedDate.subtract(const Duration(days: 1));
+                      _selectedDate = _selectedDate.subtract(
+                        const Duration(days: 1),
+                      );
                     });
                   },
                 ),
-                Text(
-                  AppDateUtils.formatDisplayDate(_selectedDate),
-                ).h4(),
+                SlideFadeSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: Text(
+                    AppDateUtils.formatDisplayDate(_selectedDate),
+                    key: ValueKey('date-$_selectedDateString'),
+                  ).h4(),
+                ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right_outlined),
                   onPressed: () {
                     setState(() {
-                      _selectedDate = _selectedDate.add(const Duration(days: 1));
+                      _selectedDate = _selectedDate.add(
+                        const Duration(days: 1),
+                      );
                     });
                   },
                 ),
@@ -86,78 +96,111 @@ class _BookingsCalendarScreenState extends ConsumerState<BookingsCalendarScreen>
 
           // Bookings List for selected date
           Expanded(
-            child: bookingsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => ErrorDisplay(
-                error: err.toString(),
-                onRetry: () => ref.invalidate(
-                  resourceBookingsProvider((
-                    groupId: widget.groupId,
-                    resourceId: widget.resourceId,
-                    date: _selectedDateString,
-                  )),
+            child: SlideFadeSwitcher(
+              child: bookingsAsync.when(
+                loading: () => const KeyedSubtree(
+                  key: ValueKey('loading'),
+                  child: Center(child: CircularProgressIndicator()),
                 ),
-              ),
-              data: (bookings) {
-                if (bookings.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.event_available_outlined,
-                    title: 'No Bookings',
-                    description: 'No bookings scheduled for ${AppDateUtils.formatDisplayDate(_selectedDate)}.',
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: bookings.length,
-                  itemBuilder: (context, index) {
-                    final booking = bookings[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Card(
-                        child: Padding(
-                          padding: kCardPadding,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.calendar_today_outlined, size: 14),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      AppDateUtils.formatDisplayDate(booking.startTime),
-                                    ).small().semiBold(),
-                                  ),
-                                  PrimaryBadge(child: Text(booking.status)),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(Icons.access_time_outlined, size: 14),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '${AppDateUtils.formatTime(booking.startTime)} - ${AppDateUtils.formatTime(booking.endTime)}',
-                                  ).mono().small(),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(Icons.person_outline, size: 14),
-                                  const SizedBox(width: 6),
-                                  Text('Booked by: ${booking.userDisplayName ?? 'User'}').small().muted(),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
+                error: (err, _) => KeyedSubtree(
+                  key: const ValueKey('error'),
+                  child: ErrorDisplay(
+                    error: err.toString(),
+                    onRetry: () => ref.invalidate(
+                      resourceBookingsProvider((
+                        groupId: widget.groupId,
+                        resourceId: widget.resourceId,
+                        date: _selectedDateString,
+                      )),
+                    ),
+                  ),
+                ),
+                data: (bookings) {
+                  if (bookings.isEmpty) {
+                    return KeyedSubtree(
+                      key: ValueKey('empty-$_selectedDateString'),
+                      child: EmptyState(
+                        icon: Icons.event_available_outlined,
+                        title: 'No Bookings',
+                        description:
+                            'No bookings scheduled for ${AppDateUtils.formatDisplayDate(_selectedDate)}.',
                       ),
                     );
-                  },
-                );
-              },
+                  }
+
+                  return KeyedSubtree(
+                    key: ValueKey('data-$_selectedDateString'),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: bookings.length,
+                      itemBuilder: (context, index) {
+                        final booking = bookings[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Entrance(
+                            delay: Duration(milliseconds: index * 60),
+                            child: Card(
+                              child: Padding(
+                                padding: kCardPadding,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.calendar_today_outlined,
+                                          size: 14,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            AppDateUtils.formatDisplayDate(
+                                              booking.startTime,
+                                            ),
+                                          ).small().semiBold(),
+                                        ),
+                                        PrimaryBadge(
+                                          child: Text(booking.status),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time_outlined,
+                                          size: 14,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          '${AppDateUtils.formatTime(booking.startTime)} - ${AppDateUtils.formatTime(booking.endTime)}',
+                                        ).mono().small(),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.person_outline,
+                                          size: 14,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Booked by: ${booking.userDisplayName ?? 'User'}',
+                                        ).small().muted(),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],

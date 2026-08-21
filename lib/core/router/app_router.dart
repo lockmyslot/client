@@ -24,8 +24,8 @@ CustomTransitionPage<void> _buildSmoothTransition({
   return CustomTransitionPage<void>(
     key: state.pageKey,
     child: child,
-    transitionDuration: const Duration(milliseconds: 280),
-    reverseTransitionDuration: const Duration(milliseconds: 240),
+    transitionDuration: const Duration(milliseconds: 420),
+    reverseTransitionDuration: const Duration(milliseconds: 320),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       final curvedAnimation = CurvedAnimation(
         parent: animation,
@@ -34,7 +34,7 @@ CustomTransitionPage<void> _buildSmoothTransition({
       );
 
       final slideAnimation = Tween<Offset>(
-        begin: const Offset(0.05, 0.0),
+        begin: const Offset(0.06, 0.0),
         end: Offset.zero,
       ).animate(curvedAnimation);
 
@@ -43,11 +43,24 @@ CustomTransitionPage<void> _buildSmoothTransition({
         end: 1.0,
       ).animate(curvedAnimation);
 
+      final secondaryAnimationCurved = CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+
+      // The outgoing page is pushed slightly to the left while the incoming
+      // one slides in, producing a subtle parallax effect.
+      final secondarySlide = Tween<Offset>(
+        begin: Offset.zero,
+        end: const Offset(-0.04, 0.0),
+      ).animate(secondaryAnimationCurved);
+
       return SlideTransition(
-        position: slideAnimation,
-        child: FadeTransition(
-          opacity: fadeAnimation,
-          child: child,
+        position: secondarySlide,
+        child: SlideTransition(
+          position: slideAnimation,
+          child: FadeTransition(opacity: fadeAnimation, child: child),
         ),
       );
     },
@@ -79,10 +92,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/register',
-        pageBuilder: (context, state) => _buildSmoothTransition(
-          state: state,
-          child: const RegisterScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            _buildSmoothTransition(state: state, child: const RegisterScreen()),
       ),
       GoRoute(
         path: '/quick-book',
@@ -161,7 +172,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   final resourceId = state.pathParameters['resource_id']!;
                   return _buildSmoothTransition(
                     state: state,
-                    child: ResourceDetailScreen(groupId: groupId, resourceId: resourceId),
+                    child: ResourceDetailScreen(
+                      groupId: groupId,
+                      resourceId: resourceId,
+                    ),
                   );
                 },
                 routes: [
@@ -172,7 +186,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                       final resourceId = state.pathParameters['resource_id']!;
                       return _buildSmoothTransition(
                         state: state,
-                        child: BookingRulesScreen(groupId: groupId, resourceId: resourceId),
+                        child: BookingRulesScreen(
+                          groupId: groupId,
+                          resourceId: resourceId,
+                        ),
                       );
                     },
                   ),
@@ -183,7 +200,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                       final resourceId = state.pathParameters['resource_id']!;
                       return _buildSmoothTransition(
                         state: state,
-                        child: AvailabilityScreen(groupId: groupId, resourceId: resourceId),
+                        child: AvailabilityScreen(
+                          groupId: groupId,
+                          resourceId: resourceId,
+                        ),
                       );
                     },
                   ),
@@ -194,7 +214,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                       final resourceId = state.pathParameters['resource_id']!;
                       return _buildSmoothTransition(
                         state: state,
-                        child: BookingsCalendarScreen(groupId: groupId, resourceId: resourceId),
+                        child: BookingsCalendarScreen(
+                          groupId: groupId,
+                          resourceId: resourceId,
+                        ),
                       );
                     },
                   ),

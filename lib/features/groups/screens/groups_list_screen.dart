@@ -103,83 +103,113 @@ class GroupsListScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: groupsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => ErrorDisplay(
-                error: err.toString(),
-                onRetry: () => ref.read(myGroupsProvider.notifier).refresh(),
-              ),
-              data: (groups) {
-                if (groups.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.group_work_outlined,
-                    title: 'No Groups Yet',
-                    description: 'Create or join a group to start booking shared resources.',
-                    action: PrimaryButton(
-                      onPressed: () => context.push('/groups/create'),
-                      child: const Text('Create Your First Group'),
-                    ),
-                  );
-                }
+            child: SlideFadeSwitcher(
+              child: groupsAsync.when(
+                loading: () => const KeyedSubtree(
+                  key: ValueKey('loading'),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (err, stack) => KeyedSubtree(
+                  key: const ValueKey('error'),
+                  child: ErrorDisplay(
+                    error: err.toString(),
+                    onRetry: () =>
+                        ref.read(myGroupsProvider.notifier).refresh(),
+                  ),
+                ),
+                data: (groups) {
+                  if (groups.isEmpty) {
+                    return KeyedSubtree(
+                      key: const ValueKey('empty'),
+                      child: EmptyState(
+                        icon: Icons.group_work_outlined,
+                        title: 'No Groups Yet',
+                        description:
+                            'Create or join a group to start booking shared resources.',
+                        action: PrimaryButton(
+                          onPressed: () => context.push('/groups/create'),
+                          child: const Text('Create Your First Group'),
+                        ),
+                      ),
+                    );
+                  }
 
-                return RefreshIndicator(
-                  onRefresh: () => ref.read(myGroupsProvider.notifier).refresh(),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: groups.length,
-                    itemBuilder: (context, index) {
-                      final group = groups[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => context.push('/groups/${group.id}'),
-                          child: Card(
-                            child: Padding(
-                              padding: kCardPadding,
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Icon(Icons.group_outlined, size: 24),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                  return KeyedSubtree(
+                    key: const ValueKey('data'),
+                    child: RefreshIndicator(
+                      onRefresh: () =>
+                          ref.read(myGroupsProvider.notifier).refresh(),
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: groups.length,
+                        itemBuilder: (context, index) {
+                          final group = groups[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Entrance(
+                              delay: Duration(milliseconds: index * 60),
+                              child: PressableScale(
+                                onTap: () =>
+                                    context.push('/groups/${group.id}'),
+                                child: Card(
+                                  child: Padding(
+                                    padding: kCardPadding,
+                                    child: Row(
                                       children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(group.name).h4(),
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainerHighest,
+                                            borderRadius: BorderRadius.circular(
+                                              8,
                                             ),
-                                            const SizedBox(width: 8),
-                                            PrimaryBadge(
-                                              child: Text(group.role),
-                                            ),
-                                          ],
+                                          ),
+                                          child: const Icon(
+                                            Icons.group_outlined,
+                                            size: 24,
+                                          ),
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text('${group.memberCount} member${group.memberCount == 1 ? '' : 's'}')
-                                            .muted()
-                                            .small(),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      group.name,
+                                                    ).h4(),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  PrimaryBadge(
+                                                    child: Text(group.role),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '${group.memberCount} member${group.memberCount == 1 ? '' : 's'}',
+                                              ).muted().small(),
+                                            ],
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -187,28 +217,28 @@ class GroupsListScreen extends ConsumerWidget {
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          border: Border(
-            top: BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant,
-              width: 1,
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            border: Border(
+              top: BorderSide(
+                color: Theme.of(context).colorScheme.outlineVariant,
+                width: 1,
+              ),
             ),
           ),
-        ),
-        child: PrimaryButton(
-          expand: true,
-          onPressed: () => context.push('/quick-book'),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.bolt_outlined, size: 18),
-              SizedBox(width: 8),
-              Text('Quick Book'),
-            ],
+          child: PrimaryButton(
+            expand: true,
+            onPressed: () => context.push('/quick-book'),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.bolt_outlined, size: 18),
+                SizedBox(width: 8),
+                Text('Quick Book'),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

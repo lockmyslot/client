@@ -23,10 +23,14 @@ class GroupMember {
       id: json['id'] as String? ?? json['user_id'] as String? ?? '',
       groupId: json['group_id'] as String? ?? json['groupId'] as String? ?? '',
       userId: json['user_id'] as String? ?? userMap?['id'] as String? ?? '',
-      displayName: json['display_name'] as String? ?? userMap?['display_name'] as String? ?? json['displayName'] as String? ?? 'User',
+      displayName:
+          json['display_name'] as String? ??
+          userMap?['display_name'] as String? ??
+          json['displayName'] as String? ??
+          'User',
       role: json['role'] as String? ?? 'MEMBER',
-      joinedAt: json['joined_at'] != null 
-          ? DateTime.parse(json['joined_at'] as String) 
+      joinedAt: json['joined_at'] != null
+          ? DateTime.parse(json['joined_at'] as String)
           : DateTime.now(),
     );
   }

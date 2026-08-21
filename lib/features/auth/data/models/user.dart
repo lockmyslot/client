@@ -16,13 +16,16 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
-      displayName: json['display_name'] as String? ?? json['displayName'] as String? ?? '',
+      displayName:
+          json['display_name'] as String? ??
+          json['displayName'] as String? ??
+          '',
       authToken: json['auth_token'] as String? ?? json['authToken'] as String?,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String) 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
-      updatedAt: json['updated_at'] != null 
-          ? DateTime.parse(json['updated_at'] as String) 
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
           : DateTime.now(),
     );
   }

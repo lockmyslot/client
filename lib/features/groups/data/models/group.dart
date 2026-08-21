@@ -21,11 +21,13 @@ class Group {
     return Group(
       id: json['id'] as String,
       name: json['name'] as String? ?? '',
-      inviteCode: json['invite_code'] as String? ?? json['inviteCode'] as String?,
+      inviteCode:
+          json['invite_code'] as String? ?? json['inviteCode'] as String?,
       role: json['role'] as String? ?? 'MEMBER',
-      memberCount: json['member_count'] as int? ?? json['memberCount'] as int? ?? 1,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String) 
+      memberCount:
+          json['member_count'] as int? ?? json['memberCount'] as int? ?? 1,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
     );
   }

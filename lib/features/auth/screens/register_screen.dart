@@ -58,48 +58,80 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             padding: const EdgeInsets.all(24.0),
             child: Container(
               constraints: const BoxConstraints(maxWidth: 400),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Icon(Icons.lock_clock_outlined, size: 48),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Welcome to Lock My Slot',
-                        textAlign: TextAlign.center,
-                      ).h2(),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Multi-tenant resource booking simplified.',
-                        textAlign: TextAlign.center,
-                      ).muted().small(),
-                      const SizedBox(height: 32),
-                      const Text('What should we call you?').small().semiBold(),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _nameController,
-                        textCapitalization: TextCapitalization.words,
-                        decoration: const InputDecoration(
-                          hintText: 'Enter your display name',
+              child: Entrance(
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Entrance(
+                          delay: const Duration(milliseconds: 80),
+                          curve: Curves.elasticOut,
+                          child: const Icon(
+                            Icons.lock_clock_outlined,
+                            size: 48,
+                          ),
                         ),
-                        onSubmitted: (_) => _handleRegister(),
-                      ),
-                      if (_errorMessage != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ).small(),
+                        const SizedBox(height: 16),
+                        Entrance(
+                          delay: const Duration(milliseconds: 140),
+                          child: const Text(
+                            'Welcome to Lock My Slot',
+                            textAlign: TextAlign.center,
+                          ).h2(),
+                        ),
+                        const SizedBox(height: 8),
+                        Entrance(
+                          delay: const Duration(milliseconds: 200),
+                          child: const Text(
+                            'Multi-tenant resource booking simplified.',
+                            textAlign: TextAlign.center,
+                          ).muted().small(),
+                        ),
+                        const SizedBox(height: 32),
+                        Entrance(
+                          delay: const Duration(milliseconds: 260),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'What should we call you?',
+                              ).small().semiBold(),
+                              const SizedBox(height: 8),
+                              TextField(
+                                controller: _nameController,
+                                textCapitalization: TextCapitalization.words,
+                                decoration: const InputDecoration(
+                                  hintText: 'Enter your display name',
+                                ),
+                                onSubmitted: (_) => _handleRegister(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_errorMessage != null) ...[
+                          const SizedBox(height: 12),
+                          SlideFadeSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: Text(
+                              _errorMessage!,
+                              key: const ValueKey('register-error'),
+                              style: const TextStyle(color: Colors.red),
+                            ).small(),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        Entrance(
+                          delay: const Duration(milliseconds: 340),
+                          child: PrimaryButton(
+                            onPressed: _handleRegister,
+                            child: const Text('Get Started'),
+                          ),
+                        ),
                       ],
-                      const SizedBox(height: 24),
-                      PrimaryButton(
-                        onPressed: _handleRegister,
-                        child: const Text('Get Started'),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),

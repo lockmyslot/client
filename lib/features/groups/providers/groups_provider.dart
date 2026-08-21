@@ -3,9 +3,11 @@ import '../data/groups_repository.dart';
 import '../data/models/group.dart';
 import '../data/models/group_member.dart';
 
-final myGroupsProvider = AsyncNotifierProvider<MyGroupsNotifier, List<Group>>(() {
-  return MyGroupsNotifier();
-});
+final myGroupsProvider = AsyncNotifierProvider<MyGroupsNotifier, List<Group>>(
+  () {
+    return MyGroupsNotifier();
+  },
+);
 
 class MyGroupsNotifier extends AsyncNotifier<List<Group>> {
   @override
@@ -34,12 +36,18 @@ class MyGroupsNotifier extends AsyncNotifier<List<Group>> {
   }
 }
 
-final groupDetailProvider = FutureProvider.family<Group, String>((ref, groupId) async {
+final groupDetailProvider = FutureProvider.family<Group, String>((
+  ref,
+  groupId,
+) async {
   final repo = ref.watch(groupsRepositoryProvider);
   return await repo.getGroupDetail(groupId);
 });
 
-final groupMembersProvider = FutureProvider.family<List<GroupMember>, String>((ref, groupId) async {
+final groupMembersProvider = FutureProvider.family<List<GroupMember>, String>((
+  ref,
+  groupId,
+) async {
   final repo = ref.watch(groupsRepositoryProvider);
   return await repo.getGroupMembers(groupId);
 });

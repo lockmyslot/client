@@ -9,7 +9,7 @@ class SecureStorageService {
   static const String _userIdKey = 'user_id';
 
   SecureStorageService([FlutterSecureStorage? storage])
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   Future<void> saveAuthToken(String token) async {
     await _storage.write(key: _authTokenKey, value: token);
@@ -23,7 +23,10 @@ class SecureStorageService {
     await _storage.delete(key: _authTokenKey);
   }
 
-  Future<void> saveUserInfo({required String id, required String displayName}) async {
+  Future<void> saveUserInfo({
+    required String id,
+    required String displayName,
+  }) async {
     await _storage.write(key: _userIdKey, value: id);
     await _storage.write(key: _userDisplayNameKey, value: displayName);
   }

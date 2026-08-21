@@ -9,13 +9,11 @@ import '../../../shared/widgets/loading_overlay.dart';
 class CreateResourceScreen extends ConsumerStatefulWidget {
   final String groupId;
 
-  const CreateResourceScreen({
-    super.key,
-    required this.groupId,
-  });
+  const CreateResourceScreen({super.key, required this.groupId});
 
   @override
-  ConsumerState<CreateResourceScreen> createState() => _CreateResourceScreenState();
+  ConsumerState<CreateResourceScreen> createState() =>
+      _CreateResourceScreenState();
 }
 
 class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
@@ -39,7 +37,8 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
     final name = _nameController.text.trim();
     final description = _descController.text.trim();
     final capacity = int.tryParse(_capacityController.text.trim()) ?? 1;
-    final slotDurationMinutes = int.tryParse(_slotDurationController.text.trim()) ?? 60;
+    final slotDurationMinutes =
+        int.tryParse(_slotDurationController.text.trim()) ?? 60;
 
     if (name.isEmpty) {
       setState(() {
@@ -94,81 +93,91 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Center(
             child: SingleChildScrollView(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text('New Resource').h3(),
-                    const SizedBox(height: 4),
-                    const Text('Define a bookable resource like a room, court, or equipment.')
-                        .muted()
-                        .small(),
-                    const SizedBox(height: 24),
-                    const Text('Resource Name').small().semiBold(),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _nameController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        hintText: 'e.g., Washing Machine 1, Conference Room A',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('Description (optional)').small().semiBold(),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _descController,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        hintText: 'e.g., Located on 2nd floor, includes whiteboard',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Capacity').small().semiBold(),
-                              const SizedBox(height: 6),
-                              TextField(
-                                controller: _capacityController,
-                                decoration: const InputDecoration(hintText: '1'),
-                              ),
-                            ],
-                          ),
+              child: Entrance(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text('New Resource').h3(),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Define a bookable resource like a room, court, or equipment.',
+                      ).muted().small(),
+                      const SizedBox(height: 24),
+                      const Text('Resource Name').small().semiBold(),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _nameController,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: const InputDecoration(
+                          hintText:
+                              'e.g., Washing Machine 1, Conference Room A',
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Slot Duration (min)').small().semiBold(),
-                              const SizedBox(height: 6),
-                              TextField(
-                                controller: _slotDurationController,
-                                decoration: const InputDecoration(hintText: '60'),
-                              ),
-                            ],
-                          ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text('Description (optional)').small().semiBold(),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _descController,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: const InputDecoration(
+                          hintText:
+                              'e.g., Located on 2nd floor, includes whiteboard',
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Capacity').small().semiBold(),
+                                const SizedBox(height: 6),
+                                TextField(
+                                  controller: _capacityController,
+                                  decoration: const InputDecoration(
+                                    hintText: '1',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Slot Duration (min)',
+                                ).small().semiBold(),
+                                const SizedBox(height: 6),
+                                TextField(
+                                  controller: _slotDurationController,
+                                  decoration: const InputDecoration(
+                                    hintText: '60',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_errorMessage != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                        ).small(),
                       ],
-                    ),
-                    if (_errorMessage != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: Colors.red),
-                      ).small(),
+                      const SizedBox(height: 24),
+                      PrimaryButton(
+                        onPressed: _handleCreate,
+                        child: const Text('Save Resource'),
+                      ),
                     ],
-                    const SizedBox(height: 24),
-                    PrimaryButton(
-                      onPressed: _handleCreate,
-                      child: const Text('Save Resource'),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

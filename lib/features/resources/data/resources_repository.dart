@@ -14,7 +14,9 @@ class ResourcesRepository {
       ApiConstants.resources(groupId),
       fromJson: (json) {
         if (json is List) {
-          return json.map((e) => Resource.fromJson(e as Map<String, dynamic>)).toList();
+          return json
+              .map((e) => Resource.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
         return [];
       },
@@ -41,7 +43,8 @@ class ResourcesRepository {
       ApiConstants.resources(groupId),
       body: {
         'name': name,
-        if (description != null && description.isNotEmpty) 'description': description,
+        if (description != null && description.isNotEmpty)
+          'description': description,
         'capacity': capacity,
         'slot_duration_minutes': slotDurationMinutes,
       },
@@ -67,12 +70,17 @@ class ResourcesRepository {
     await _apiClient.delete(ApiConstants.resourceDetail(groupId, resourceId));
   }
 
-  Future<List<BookingRule>> getBookingRules(String groupId, String resourceId) async {
+  Future<List<BookingRule>> getBookingRules(
+    String groupId,
+    String resourceId,
+  ) async {
     final response = await _apiClient.get<List<BookingRule>>(
       ApiConstants.bookingRules(groupId, resourceId),
       fromJson: (json) {
         if (json is List) {
-          return json.map((e) => BookingRule.fromJson(e as Map<String, dynamic>)).toList();
+          return json
+              .map((e) => BookingRule.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
         return [];
       },
@@ -91,7 +99,9 @@ class ResourcesRepository {
       body: body,
       fromJson: (json) {
         if (json is List) {
-          return json.map((e) => BookingRule.fromJson(e as Map<String, dynamic>)).toList();
+          return json
+              .map((e) => BookingRule.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
         return [];
       },

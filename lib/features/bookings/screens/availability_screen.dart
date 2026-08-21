@@ -21,7 +21,12 @@ class AvailabilityScreen extends ConsumerStatefulWidget {
 class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
   @override
   Widget build(BuildContext context) {
-    final resourceAsync = ref.watch(resourceDetailProvider((groupId: widget.groupId, resourceId: widget.resourceId)));
+    final resourceAsync = ref.watch(
+      resourceDetailProvider((
+        groupId: widget.groupId,
+        resourceId: widget.resourceId,
+      )),
+    );
 
     return Scaffold(
       appBar: AppBar(

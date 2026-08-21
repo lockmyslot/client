@@ -63,9 +63,13 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                   final item = items[index];
                   final isSelected = id(item) == selectedId;
                   return ListTile(
-                    trailing: isSelected ? const Icon(Icons.check_outlined) : null,
+                    trailing: isSelected
+                        ? const Icon(Icons.check_outlined)
+                        : null,
                     title: Text(label(item)),
-                    subtitle: subtitle != null ? Text(subtitle(item) ?? '') : null,
+                    subtitle: subtitle != null
+                        ? Text(subtitle(item) ?? '')
+                        : null,
                     onTap: () => Navigator.pop(context, item),
                   );
                 },
@@ -83,7 +87,8 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       items: groups,
       id: (g) => g.id,
       label: (g) => g.name,
-      subtitle: (g) => '${g.memberCount} member${g.memberCount == 1 ? '' : 's'}',
+      subtitle: (g) =>
+          '${g.memberCount} member${g.memberCount == 1 ? '' : 's'}',
       selectedId: _selectedGroupId,
     );
     if (group != null && group.id != _selectedGroupId) {
@@ -101,7 +106,8 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       items: resources,
       id: (r) => r.id,
       label: (r) => r.name,
-      subtitle: (r) => 'Capacity ${r.capacity} • ${r.slotDurationMinutes} min slots',
+      subtitle: (r) =>
+          'Capacity ${r.capacity} • ${r.slotDurationMinutes} min slots',
       selectedId: _selectedResourceId,
     );
     if (resource != null) {
@@ -120,7 +126,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
   }) {
     final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
     final textColor = enabled ? null : mutedColor;
-    return Card(
+    final card = Card(
       margin: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
@@ -147,7 +153,9 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                       value,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: textColor != null ? TextStyle(color: textColor) : null,
+                      style: textColor != null
+                          ? TextStyle(color: textColor)
+                          : null,
                     ),
                   ],
                 ),
@@ -159,19 +167,36 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
         ),
       ),
     );
+
+    return enabled ? PressableScale(onTap: null, child: card) : card;
   }
 
   Widget _buildHint() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.bolt_outlined, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
-            const SizedBox(height: 12),
-            const Text('Select a group and resource to start booking.').muted().p(),
-          ],
+    return Entrance(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Entrance(
+                delay: const Duration(milliseconds: 80),
+                curve: Curves.elasticOut,
+                child: Icon(
+                  Icons.bolt_outlined,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Entrance(
+                delay: const Duration(milliseconds: 160),
+                child: const Text(
+                  'Select a group and resource to start booking.',
+                ).muted().p(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -200,7 +225,8 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
           onRetry: () => ref.read(myGroupsProvider.notifier).refresh(),
         ),
         data: (groups) {
-          final hasValidInitialGroup = _selectedGroupId != null &&
+          final hasValidInitialGroup =
+              _selectedGroupId != null &&
               groups.any((g) => g.id == _selectedGroupId);
           if (_selectedGroupId != null && !hasValidInitialGroup) {
             _selectedGroupId = null;
@@ -218,7 +244,8 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
             return EmptyState(
               icon: Icons.bolt_outlined,
               title: 'No Groups Yet',
-              description: 'Create or join a group before you can book resources.',
+              description:
+                  'Create or join a group before you can book resources.',
               action: PrimaryButton(
                 onPressed: () => context.push('/groups/create'),
                 child: const Text('Create Your First Group'),

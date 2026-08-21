@@ -39,7 +39,9 @@ class BookingsRepository {
       query: query.isNotEmpty ? query : null,
       fromJson: (json) {
         if (json is List) {
-          return json.map((e) => Booking.fromJson(e as Map<String, dynamic>)).toList();
+          return json
+              .map((e) => Booking.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
         return [];
       },
@@ -84,7 +86,9 @@ class BookingsRepository {
       query: query.isNotEmpty ? query : null,
       fromJson: (json) {
         if (json is List) {
-          return json.map((e) => Booking.fromJson(e as Map<String, dynamic>)).toList();
+          return json
+              .map((e) => Booking.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
         return [];
       },

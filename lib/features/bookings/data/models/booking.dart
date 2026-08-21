@@ -32,16 +32,29 @@ class Booking {
 
     return Booking(
       id: json['id'] as String,
-      resourceId: json['resource_id'] as String? ?? json['resourceId'] as String? ?? '',
-      resourceName: json['resource_name'] as String? ?? resourceMap?['name'] as String?,
-      userId: json['user_id'] as String? ?? json['userId'] as String? ?? userMap?['id'] as String? ?? '',
-      userDisplayName: json['user_display_name'] as String? ?? userMap?['display_name'] as String? ?? json['userDisplayName'] as String?,
+      resourceId:
+          json['resource_id'] as String? ?? json['resourceId'] as String? ?? '',
+      resourceName:
+          json['resource_name'] as String? ?? resourceMap?['name'] as String?,
+      userId:
+          json['user_id'] as String? ??
+          json['userId'] as String? ??
+          userMap?['id'] as String? ??
+          '',
+      userDisplayName:
+          json['user_display_name'] as String? ??
+          userMap?['display_name'] as String? ??
+          json['userDisplayName'] as String?,
       groupId: json['group_id'] as String? ?? json['groupId'] as String? ?? '',
-      startTime: DateTime.parse(json['start_time'] as String? ?? json['startTime'] as String),
-      endTime: DateTime.parse(json['end_time'] as String? ?? json['endTime'] as String),
+      startTime: DateTime.parse(
+        json['start_time'] as String? ?? json['startTime'] as String,
+      ),
+      endTime: DateTime.parse(
+        json['end_time'] as String? ?? json['endTime'] as String,
+      ),
       status: json['status'] as String? ?? 'CONFIRMED',
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String) 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
     );
   }

@@ -9,10 +9,7 @@ import '../../../shared/widgets/error_display.dart';
 class ResourcesListScreen extends ConsumerWidget {
   final String groupId;
 
-  const ResourcesListScreen({
-    super.key,
-    required this.groupId,
-  });
+  const ResourcesListScreen({super.key, required this.groupId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,7 +34,8 @@ class ResourcesListScreen extends ConsumerWidget {
             return const EmptyState(
               icon: Icons.inventory_2_outlined,
               title: 'No Resources Available',
-              description: 'There are no active resources set up in this group yet.',
+              description:
+                  'There are no active resources set up in this group yet.',
             );
           }
 
@@ -48,16 +46,15 @@ class ResourcesListScreen extends ConsumerWidget {
               final resource = resources[index];
               final cardWidget = Card(
                 child: GestureDetector(
-                  onTap: () => context.push('/groups/$groupId/resources/${resource.id}'),
+                  onTap: () =>
+                      context.push('/groups/$groupId/resources/${resource.id}'),
                   child: Padding(
                     padding: kCardPadding,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          children: [
-                            Expanded(child: Text(resource.name).h4()),
-                          ],
+                          children: [Expanded(child: Text(resource.name).h4())],
                         ),
                         if (resource.description != null) ...[
                           const SizedBox(height: 4),
@@ -68,10 +65,14 @@ class ResourcesListScreen extends ConsumerWidget {
                           children: [
                             Text('Capacity: ${resource.capacity}').small(),
                             const SizedBox(width: 16),
-                            Text('Slot: ${resource.slotDurationMinutes} mins').small(),
+                            Text(
+                              'Slot: ${resource.slotDurationMinutes} mins',
+                            ).small(),
                             const Spacer(),
                             PrimaryButton(
-                              onPressed: () => context.push('/groups/$groupId/resources/${resource.id}/book'),
+                              onPressed: () => context.push(
+                                '/groups/$groupId/resources/${resource.id}/book',
+                              ),
                               child: const Text('Book'),
                             ),
                           ],
