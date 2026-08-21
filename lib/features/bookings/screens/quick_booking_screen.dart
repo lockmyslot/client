@@ -51,7 +51,6 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                   final item = items[index];
                   final isSelected = id(item) == selectedId;
                   return ListTile(
-                    leading: const Icon(Icons.radio_button_unchecked),
                     trailing: isSelected ? const Icon(Icons.check_outlined) : null,
                     title: Text(label(item)),
                     subtitle: subtitle != null ? Text(subtitle(item) ?? '') : null,
