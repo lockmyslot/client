@@ -21,38 +21,32 @@ class GroupDetailScreen extends ConsumerWidget {
     final groupAsync = ref.watch(groupDetailProvider(groupId));
     final resourcesAsync = ref.watch(groupResourcesProvider(groupId));
 
-    final bottomBar = groupAsync.when(
-      data: (group) => group.isAdmin
-          ? SafeArea(
-              top: false,
-              child: Container(
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                border: Border(
-                  top: BorderSide(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: PrimaryButton(
-                expand: true,
-                onPressed: () => context.push('/groups/$groupId/resources/create'),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_outlined, size: 18),
-                    SizedBox(width: 8),
-                    Text('Add Resource'),
-                  ],
-                ),
-              ),
-              ),
-            )
-          : null,
-      loading: () => null,
-      error: (_, __) => null,
+    final bottomBar = SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 1,
+            ),
+          ),
+        ),
+        child: PrimaryButton(
+          expand: true,
+          onPressed: () => context.push('/quick-book?group=$groupId'),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.bolt_outlined, size: 18),
+              SizedBox(width: 8),
+              Text('Quick Book'),
+            ],
+          ),
+        ),
+      ),
     );
 
     return Scaffold(
@@ -67,14 +61,16 @@ class GroupDetailScreen extends ConsumerWidget {
           onPressed: () => context.go('/groups'),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.people_outlined),
-            onPressed: () => context.push('/groups/$groupId/members'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.bookmark_outline),
-            onPressed: () => context.push('/groups/$groupId/my_bookings'),
-          ),
+          if (groupAsync.when(
+            data: (group) => group.isAdmin,
+            loading: () => false,
+            error: (_, __) => false,
+          ))
+            const IconButton(
+              icon: Icon(Icons.verified_user_outlined),
+              tooltip: 'Admin',
+              onPressed: null,
+            ),
         ],
       ),
       bottomNavigationBar: bottomBar,
@@ -100,16 +96,16 @@ class GroupDetailScreen extends ConsumerWidget {
                     child: SizedBox(
                       height: 40,
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // Member Count (Tap to View Members)
                           Expanded(
                             child: InkWell(
                               onTap: () => context.push('/groups/$groupId/members'),
                               borderRadius: BorderRadius.circular(12),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              child: Center(
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Icon(Icons.people_outline, size: 18),
                                     const SizedBox(width: 6),
@@ -120,16 +116,6 @@ class GroupDetailScreen extends ConsumerWidget {
                             ),
                           ),
                           Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.verified_user_outlined, size: 18),
-                                const SizedBox(width: 6),
-                                Text(group.role),
-                              ],
-                            ),
-                          ),
                           if (group.inviteCode != null && group.inviteCode!.isNotEmpty) ...[
                             Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
                             Expanded(
@@ -138,10 +124,9 @@ class GroupDetailScreen extends ConsumerWidget {
                                   Clipboard.setData(ClipboardData(text: group.inviteCode!));
                                 },
                                 borderRadius: BorderRadius.circular(12),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                child: Center(
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const Icon(Icons.vpn_key_outlined, size: 18),
                                       const SizedBox(width: 6),
@@ -152,6 +137,24 @@ class GroupDetailScreen extends ConsumerWidget {
                               ),
                             ),
                           ],
+                          if (group.inviteCode != null && group.inviteCode!.isNotEmpty)
+                            Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => context.push('/groups/$groupId/my_bookings'),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.bookmark_outline, size: 18),
+                                    const SizedBox(width: 6),
+                                    const Text('Bookings'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -168,9 +171,23 @@ class GroupDetailScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Resources').h3(),
-                    IconButton(
-                      icon: const Icon(Icons.refresh_outlined, size: 16),
-                      onPressed: () => ref.invalidate(groupResourcesProvider(groupId)),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (groupAsync.when(
+                          data: (group) => group.isAdmin,
+                          loading: () => false,
+                          error: (_, __) => false,
+                        ))
+                          IconButton(
+                            icon: const Icon(Icons.add_outlined),
+                            onPressed: () => context.push('/groups/$groupId/resources/create'),
+                          ),
+                        IconButton(
+                          icon: const Icon(Icons.refresh_outlined, size: 16),
+                          onPressed: () => ref.invalidate(groupResourcesProvider(groupId)),
+                        ),
+                      ],
                     ),
                   ],
                 ),

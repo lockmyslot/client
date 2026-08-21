@@ -88,7 +88,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/quick-book',
         pageBuilder: (context, state) => _buildSmoothTransition(
           state: state,
-          child: const QuickBookingScreen(),
+          child: QuickBookingScreen(
+            initialGroupId: state.uri.queryParameters['group'],
+          ),
         ),
       ),
       GoRoute(

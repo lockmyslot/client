@@ -11,7 +11,9 @@ import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 
 class QuickBookingScreen extends ConsumerStatefulWidget {
-  const QuickBookingScreen({super.key});
+  final String? initialGroupId;
+
+  const QuickBookingScreen({super.key, this.initialGroupId});
 
   @override
   ConsumerState<QuickBookingScreen> createState() => _QuickBookingScreenState();
@@ -22,6 +24,16 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
   String? _selectedResourceId;
   bool _autoOpenedGroupPicker = false;
   bool _autoOpenResourcePicker = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialGroupId = widget.initialGroupId;
+    if (initialGroupId != null) {
+      _selectedGroupId = initialGroupId;
+      _autoOpenResourcePicker = true;
+    }
+  }
 
   Future<T?> _showPickerSheet<T>({
     required String title,
@@ -114,7 +126,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
               Expanded(
@@ -188,6 +200,13 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
           onRetry: () => ref.read(myGroupsProvider.notifier).refresh(),
         ),
         data: (groups) {
+          final hasValidInitialGroup = _selectedGroupId != null &&
+              groups.any((g) => g.id == _selectedGroupId);
+          if (_selectedGroupId != null && !hasValidInitialGroup) {
+            _selectedGroupId = null;
+            _autoOpenResourcePicker = false;
+          }
+
           if (!_autoOpenedGroupPicker && _selectedGroupId == null) {
             _autoOpenedGroupPicker = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {

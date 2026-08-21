@@ -272,22 +272,27 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Column(
-                              children: [
-                                const Text('Bookings').small().muted(),
-                                Text('${userStats.bookingsToday}${userStats.maxBookingsPerDay != null ? '/${userStats.maxBookingsPerDay}' : ''}')
-                                    .h4(),
-                              ],
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text('Bookings').small().muted(),
+                                  Text('${userStats.bookingsToday}${userStats.maxBookingsPerDay != null ? '/${userStats.maxBookingsPerDay}' : ''}')
+                                      .h4(),
+                                ],
+                              ),
                             ),
                             Container(height: 20, width: 1, color: Theme.of(context).colorScheme.outlineVariant),
-                            Column(
-                              children: [
-                                const Text('Hours Used').small().muted(),
-                                Text('${userStats.hoursToday.toStringAsFixed(1)}${userStats.maxHoursPerDay != null ? '/${userStats.maxHoursPerDay}' : ''}h')
-                                    .h4(),
-                              ],
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text('Hours Used').small().muted(),
+                                  Text('${userStats.hoursToday.toStringAsFixed(1)}${userStats.maxHoursPerDay != null ? '/${userStats.maxHoursPerDay}' : ''}h')
+                                      .h4(),
+                                ],
+                              ),
                             ),
                           ],
                         ),
