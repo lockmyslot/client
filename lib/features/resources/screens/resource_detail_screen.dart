@@ -42,9 +42,11 @@ class ResourceDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
         // Fixed Bottom Action Bar for Booking a Slot
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           border: Border(
@@ -65,6 +67,7 @@ class ResourceDetailScreen extends ConsumerWidget {
               Text('Book a Slot'),
             ],
           ),
+        ),
         ),
       ),
       body: resourceAsync.when(

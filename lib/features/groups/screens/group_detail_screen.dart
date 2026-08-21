@@ -23,8 +23,10 @@ class GroupDetailScreen extends ConsumerWidget {
 
     final bottomBar = groupAsync.when(
       data: (group) => group.isAdmin
-          ? Container(
-              padding: const EdgeInsets.all(14),
+          ? SafeArea(
+              top: false,
+              child: Container(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 border: Border(
@@ -45,6 +47,7 @@ class GroupDetailScreen extends ConsumerWidget {
                     Text('Add Resource'),
                   ],
                 ),
+              ),
               ),
             )
           : null,

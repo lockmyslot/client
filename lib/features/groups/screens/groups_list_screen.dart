@@ -184,8 +184,10 @@ class GroupsListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(14),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           border: Border(
@@ -206,6 +208,7 @@ class GroupsListScreen extends ConsumerWidget {
               Text('Quick Book'),
             ],
           ),
+        ),
         ),
       ),
     );
