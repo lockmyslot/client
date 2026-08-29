@@ -80,6 +80,29 @@ class OutlineButton extends StatelessWidget {
   }
 }
 
+/// Attaches action content to the bottom of an [AppBar] so it reads as part
+/// of the top bar. Pass to `AppBar(bottom: ...)`.
+class AppBarToolbar extends StatelessWidget implements PreferredSizeWidget {
+  final Widget child;
+  final double height;
+
+  const AppBarToolbar({super.key, required this.child, this.height = 48});
+
+  @override
+  Size get preferredSize => Size.fromHeight(height);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: child,
+      ),
+    );
+  }
+}
+
 /// A small status pill (maps shadcn [PrimaryBadge]).
 class PrimaryBadge extends StatelessWidget {
   final Widget child;

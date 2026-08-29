@@ -117,7 +117,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
     }
   }
 
-  Widget _buildPickerCard({
+  Widget _buildToolbarPickerCell({
     required String label,
     required String value,
     required IconData icon,
@@ -126,49 +126,104 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
   }) {
     final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
     final textColor = enabled ? null : mutedColor;
-    final card = Card(
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(icon, size: 14, color: textColor),
-                        const SizedBox(width: 4),
-                        Text(label).small().muted(),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      value,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textColor != null
-                          ? TextStyle(color: textColor)
-                          : null,
-                    ),
-                  ],
-                ),
+    return InkWell(
+      onTap: enabled ? onTap : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: textColor),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label).small().muted(),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textColor != null
+                        ? TextStyle(color: textColor)
+                        : null,
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Icon(Icons.chevron_right_outlined, size: 20, color: textColor),
-            ],
-          ),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right_outlined, size: 18, color: textColor),
+          ],
         ),
       ),
     );
+  }
 
-    return enabled ? PressableScale(onTap: null, child: card) : card;
+  Widget _toolbarDivider(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 24,
+      color: Theme.of(context).colorScheme.outlineVariant,
+    );
+  }
+
+  Widget _buildResourcePickerCell(AsyncValue<List<Resource>>? resourcesAsync) {
+    if (_selectedGroupId == null) {
+      return _buildToolbarPickerCell(
+        label: 'Resource',
+        value: 'Select a group first',
+        icon: Icons.perm_media_outlined,
+        onTap: null,
+        enabled: false,
+      );
+    }
+    return resourcesAsync!.when(
+      loading: () => _buildToolbarPickerCell(
+        label: 'Resource',
+        value: 'Loading…',
+        icon: Icons.perm_media_outlined,
+        onTap: null,
+        enabled: false,
+      ),
+      error: (err, _) => _buildToolbarPickerCell(
+        label: 'Resource',
+        value: 'Failed to load',
+        icon: Icons.perm_media_outlined,
+        onTap: null,
+        enabled: false,
+      ),
+      data: (resources) {
+        final activeResources = resources.where((r) => r.isActive).toList();
+        if (activeResources.isEmpty) {
+          return _buildToolbarPickerCell(
+            label: 'Resource',
+            value: 'No active resources',
+            icon: Icons.perm_media_outlined,
+            onTap: null,
+            enabled: false,
+          );
+        }
+        if (_autoOpenResourcePicker && _selectedResourceId == null) {
+          _autoOpenResourcePicker = false;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _selectedResourceId == null) {
+              _pickResource(activeResources);
+            }
+          });
+        }
+        final selectedResource = activeResources
+            .where((r) => r.id == _selectedResourceId)
+            .firstOrNull;
+        return _buildToolbarPickerCell(
+          label: 'Resource',
+          value: selectedResource?.name ?? 'Select Resource',
+          icon: Icons.perm_media_outlined,
+          onTap: () => _pickResource(activeResources),
+        );
+      },
+    );
   }
 
   Widget _buildHint() {
@@ -210,6 +265,32 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
         ? ref.watch(groupResourcesProvider(selectedGroupId))
         : null;
 
+    final pickerToolbar = groupsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (groups) {
+        if (groups.isEmpty) return const SizedBox.shrink();
+        final selectedGroup = _selectedGroupId != null
+            ? groups.where((g) => g.id == _selectedGroupId).firstOrNull
+            : null;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: _buildToolbarPickerCell(
+                label: 'Group',
+                value: selectedGroup?.name ?? 'Select Group',
+                icon: Icons.group_outlined,
+                onTap: () => _pickGroup(groups),
+              ),
+            ),
+            _toolbarDivider(context),
+            Expanded(child: _buildResourcePickerCell(resourcesAsync)),
+          ],
+        );
+      },
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quick Book'),
@@ -217,6 +298,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
           icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
         ),
+        bottom: AppBarToolbar(child: pickerToolbar),
       ),
       body: groupsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -253,89 +335,8 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
             );
           }
 
-          final selectedGroup = _selectedGroupId != null
-              ? groups.where((g) => g.id == _selectedGroupId).firstOrNull
-              : null;
-          final activeResources = (resourcesAsync?.value ?? const <Resource>[])
-              .where((r) => r.isActive)
-              .toList();
-
-          final Widget resourcePicker;
-          if (selectedGroupId == null) {
-            resourcePicker = _buildPickerCard(
-              label: 'Resource',
-              value: 'Select a group first',
-              icon: Icons.perm_media_outlined,
-              onTap: null,
-              enabled: false,
-            );
-          } else {
-            resourcePicker = resourcesAsync!.when(
-              loading: () => _buildPickerCard(
-                label: 'Resource',
-                value: 'Loading…',
-                icon: Icons.perm_media_outlined,
-                onTap: null,
-                enabled: false,
-              ),
-              error: (err, _) => _buildPickerCard(
-                label: 'Resource',
-                value: 'Failed to load',
-                icon: Icons.perm_media_outlined,
-                onTap: null,
-                enabled: false,
-              ),
-              data: (resources) {
-                if (activeResources.isEmpty) {
-                  return _buildPickerCard(
-                    label: 'Resource',
-                    value: 'No active resources',
-                    icon: Icons.perm_media_outlined,
-                    onTap: null,
-                    enabled: false,
-                  );
-                }
-                if (_autoOpenResourcePicker && _selectedResourceId == null) {
-                  _autoOpenResourcePicker = false;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted && _selectedResourceId == null) {
-                      _pickResource(activeResources);
-                    }
-                  });
-                }
-                final selectedResource = activeResources
-                    .where((r) => r.id == _selectedResourceId)
-                    .firstOrNull;
-                return _buildPickerCard(
-                  label: 'Resource',
-                  value: selectedResource?.name ?? 'Select Resource',
-                  icon: Icons.perm_media_outlined,
-                  onTap: () => _pickResource(activeResources),
-                );
-              },
-            );
-          }
-
           return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _buildPickerCard(
-                        label: 'Group',
-                        value: selectedGroup?.name ?? 'Select Group',
-                        icon: Icons.group_outlined,
-                        onTap: () => _pickGroup(groups),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(child: resourcePicker),
-                  ],
-                ),
-              ),
               if (_selectedGroupId != null && _selectedResourceId != null)
                 Expanded(
                   child: BookingDetailsForm(

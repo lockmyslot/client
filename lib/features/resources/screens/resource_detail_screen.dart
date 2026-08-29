@@ -19,6 +19,14 @@ class ResourceDetailScreen extends ConsumerWidget {
     required this.resourceId,
   });
 
+  Widget _toolbarDivider(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 20,
+      color: Theme.of(context).colorScheme.outlineVariant,
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resourceAsync = ref.watch(
@@ -50,6 +58,38 @@ class ResourceDetailScreen extends ConsumerWidget {
                 context.push('/groups/$groupId/resources/$resourceId/rules'),
           ),
         ],
+        bottom: AppBarToolbar(
+          child: resourceAsync.when(
+            data: (res) => Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.people_outline, size: 18),
+                      const SizedBox(width: 6),
+                      Text('${res.capacity}'),
+                    ],
+                  ),
+                ),
+                _toolbarDivider(context),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.timer_outlined, size: 18),
+                      const SizedBox(width: 6),
+                      Text('${res.slotDurationMinutes} min'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+        ),
       ),
       bottomNavigationBar: SafeArea(
         top: false,
@@ -128,65 +168,6 @@ class ResourceDetailScreen extends ConsumerWidget {
                         Text(resource.description!).muted().p(),
                         const SizedBox(height: 10),
                       ],
-
-                      // Metadata Stats Card
-                      Entrance(
-                        delay: const Duration(milliseconds: 80),
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            child: SizedBox(
-                              height: 40,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.people_outline,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text('${resource.capacity}'),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 20,
-                                    width: 1,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.outlineVariant,
-                                  ),
-                                  Expanded(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.timer_outlined,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          '${resource.slotDurationMinutes} min',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
 
                       // Resource Schedule Section (Upcoming Bookings)
                       Row(

@@ -57,16 +57,20 @@ class BookingRule {
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{'day_scope': dayScope};
     if (id != null) map['id'] = id;
-    if (maxBookingsPerDay != null)
+    if (maxBookingsPerDay != null) {
       map['max_bookings_per_day'] = maxBookingsPerDay;
+    }
     if (maxHoursPerDay != null) map['max_hours_per_day'] = maxHoursPerDay;
     if (cooldownMinutes != null) map['cooldown_minutes'] = cooldownMinutes;
-    if (minDurationMinutes != null)
+    if (minDurationMinutes != null) {
       map['min_duration_minutes'] = minDurationMinutes;
-    if (maxDurationMinutes != null)
+    }
+    if (maxDurationMinutes != null) {
       map['max_duration_minutes'] = maxDurationMinutes;
-    if (maxAdvanceBookingDays != null)
+    }
+    if (maxAdvanceBookingDays != null) {
       map['max_advance_booking_days'] = maxAdvanceBookingDays;
+    }
     if (availableFrom != null) map['available_from'] = availableFrom;
     if (availableUntil != null) map['available_until'] = availableUntil;
     return map;

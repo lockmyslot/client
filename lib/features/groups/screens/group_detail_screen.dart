@@ -1,10 +1,10 @@
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/groups_provider.dart';
 import '../../resources/providers/resources_provider.dart';
 import '../../../core/ui/ui.dart';
+import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 
@@ -12,6 +12,14 @@ class GroupDetailScreen extends ConsumerWidget {
   final String groupId;
 
   const GroupDetailScreen({super.key, required this.groupId});
+
+  Widget _toolbarDivider(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 20,
+      color: Theme.of(context).colorScheme.outlineVariant,
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,6 +77,70 @@ class GroupDetailScreen extends ConsumerWidget {
               onPressed: null,
             ),
         ],
+        bottom: AppBarToolbar(
+          child: groupAsync.when(
+            data: (group) => Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => context.push('/groups/$groupId/members'),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.people_outline, size: 18),
+                        const SizedBox(width: 6),
+                        Text('${group.memberCount}'),
+                      ],
+                    ),
+                  ),
+                ),
+                _toolbarDivider(context),
+                if (group.inviteCode != null &&
+                    group.inviteCode!.isNotEmpty) ...[
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        DeepLinkUtils.showInviteSheet(
+                          context,
+                          groupName: group.name,
+                          inviteCode: group.inviteCode!,
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.vpn_key_outlined, size: 18),
+                          const SizedBox(width: 6),
+                          Text(group.inviteCode!).mono(),
+                        ],
+                      ),
+                    ),
+                  ),
+                  _toolbarDivider(context),
+                ],
+                Expanded(
+                  child: InkWell(
+                    onTap: () => context.push('/groups/$groupId/my_bookings'),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.bookmark_outline, size: 18),
+                        const SizedBox(width: 6),
+                        const Text('Bookings'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+        ),
       ),
       bottomNavigationBar: bottomBar,
       body: SlideFadeSwitcher(
@@ -92,123 +164,6 @@ class GroupDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Group Details Header Metadata Card
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
-                  child: Entrance(
-                    delay: const Duration(milliseconds: 60),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        child: SizedBox(
-                          height: 40,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Member Count (Tap to View Members)
-                              Expanded(
-                                child: InkWell(
-                                  onTap: () =>
-                                      context.push('/groups/$groupId/members'),
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Center(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.people_outline,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text('${group.memberCount}'),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                height: 20,
-                                width: 1,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outlineVariant,
-                              ),
-                              if (group.inviteCode != null &&
-                                  group.inviteCode!.isNotEmpty) ...[
-                                Container(
-                                  height: 20,
-                                  width: 1,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.outlineVariant,
-                                ),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      Clipboard.setData(
-                                        ClipboardData(text: group.inviteCode!),
-                                      );
-                                    },
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Center(
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.vpn_key_outlined,
-                                            size: 18,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(group.inviteCode!).mono(),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                              if (group.inviteCode != null &&
-                                  group.inviteCode!.isNotEmpty)
-                                Container(
-                                  height: 20,
-                                  width: 1,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.outlineVariant,
-                                ),
-                              Expanded(
-                                child: InkWell(
-                                  onTap: () => context.push(
-                                    '/groups/$groupId/my_bookings',
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Center(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.bookmark_outline,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        const Text('Bookings'),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
                 // Resources Section Title
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14),

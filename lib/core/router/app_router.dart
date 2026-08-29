@@ -80,10 +80,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isLoggingIn = state.matchedLocation == '/register';
 
       if (!authState.isAuthenticated) {
-        return isLoggingIn ? null : '/register';
+        if (isLoggingIn) return null;
+        final target = state.uri.toString();
+        if (target.isNotEmpty && target != '/' && target != '/groups') {
+          return '/register?returnTo=${Uri.encodeComponent(target)}';
+        }
+        return '/register';
       }
 
       if (isLoggingIn) {
+        final returnTo = state.uri.queryParameters['returnTo'];
+        if (returnTo != null && returnTo.isNotEmpty) {
+          final decoded = Uri.decodeComponent(returnTo);
+          if (decoded.startsWith('/') && !decoded.startsWith('/register')) {
+            return decoded;
+          }
+        }
         return '/groups';
       }
 
@@ -94,6 +106,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/register',
         pageBuilder: (context, state) =>
             _buildSmoothTransition(state: state, child: const RegisterScreen()),
+      ),
+      GoRoute(
+        path: '/join',
+        pageBuilder: (context, state) => _buildSmoothTransition(
+          state: state,
+          child: JoinGroupScreen(
+            initialCode: state.uri.queryParameters['code'],
+          ),
+        ),
       ),
       GoRoute(
         path: '/quick-book',
@@ -122,7 +143,9 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'join',
             pageBuilder: (context, state) => _buildSmoothTransition(
               state: state,
-              child: const JoinGroupScreen(),
+              child: JoinGroupScreen(
+                initialCode: state.uri.queryParameters['code'],
+              ),
             ),
           ),
           GoRoute(

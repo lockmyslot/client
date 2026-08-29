@@ -437,22 +437,30 @@ class _RuleFormData {
 
   void populate(BookingRule rule) {
     isEnabled = true;
-    if (rule.maxBookingsPerDay != null)
+    if (rule.maxBookingsPerDay != null) {
       maxBookingsController.text = rule.maxBookingsPerDay.toString();
-    if (rule.maxHoursPerDay != null)
+    }
+    if (rule.maxHoursPerDay != null) {
       maxHoursController.text = rule.maxHoursPerDay.toString();
-    if (rule.cooldownMinutes != null)
+    }
+    if (rule.cooldownMinutes != null) {
       cooldownController.text = rule.cooldownMinutes.toString();
-    if (rule.minDurationMinutes != null)
+    }
+    if (rule.minDurationMinutes != null) {
       minDurationController.text = rule.minDurationMinutes.toString();
-    if (rule.maxDurationMinutes != null)
+    }
+    if (rule.maxDurationMinutes != null) {
       maxDurationController.text = rule.maxDurationMinutes.toString();
-    if (rule.maxAdvanceBookingDays != null)
+    }
+    if (rule.maxAdvanceBookingDays != null) {
       maxAdvanceController.text = rule.maxAdvanceBookingDays.toString();
-    if (rule.availableFrom != null)
+    }
+    if (rule.availableFrom != null) {
       availableFromController.text = rule.availableFrom!;
-    if (rule.availableUntil != null)
+    }
+    if (rule.availableUntil != null) {
       availableUntilController.text = rule.availableUntil!;
+    }
   }
 
   BookingRule toBookingRule() {

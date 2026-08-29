@@ -50,14 +50,14 @@ class ValidationException extends ApiException {
 
 class NetworkException extends ApiException {
   const NetworkException([
-    String message =
+    super.message =
         'Network connection failed. Please check your internet connection.',
-  ]) : super(message);
+  ]);
 }
 
 class ServerException extends ApiException {
   const ServerException([
-    String message = 'An unexpected server error occurred.',
-    int? statusCode,
-  ]) : super(message, statusCode);
+    super.message = 'An unexpected server error occurred.',
+    super.statusCode,
+  ]);
 }

@@ -65,154 +65,140 @@ class GroupsListScreen extends ConsumerWidget {
             },
           ),
         ],
+        bottom: AppBarToolbar(
+          child: Row(
+            children: [
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: () => context.push('/groups/join'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                  ),
+                  icon: const Icon(Icons.vpn_key_outlined, size: 16),
+                  label: const Text('Join Group'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => context.push('/groups/create'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                  ),
+                  icon: const Icon(Icons.add_outlined, size: 16),
+                  label: const Text('Create Group'),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SecondaryButton(
-                    onPressed: () => context.push('/groups/join'),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.vpn_key_outlined, size: 16),
-                        SizedBox(width: 8),
-                        Text('Join Group'),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: PrimaryButton(
-                    onPressed: () => context.push('/groups/create'),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add_outlined, size: 16),
-                        SizedBox(width: 8),
-                        Text('Create Group'),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+      body: SlideFadeSwitcher(
+        child: groupsAsync.when(
+          loading: () => const KeyedSubtree(
+            key: ValueKey('loading'),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (err, stack) => KeyedSubtree(
+            key: const ValueKey('error'),
+            child: ErrorDisplay(
+              error: err.toString(),
+              onRetry: () => ref.read(myGroupsProvider.notifier).refresh(),
             ),
           ),
-          Expanded(
-            child: SlideFadeSwitcher(
-              child: groupsAsync.when(
-                loading: () => const KeyedSubtree(
-                  key: ValueKey('loading'),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (err, stack) => KeyedSubtree(
-                  key: const ValueKey('error'),
-                  child: ErrorDisplay(
-                    error: err.toString(),
-                    onRetry: () =>
-                        ref.read(myGroupsProvider.notifier).refresh(),
+          data: (groups) {
+            if (groups.isEmpty) {
+              return KeyedSubtree(
+                key: const ValueKey('empty'),
+                child: EmptyState(
+                  icon: Icons.group_work_outlined,
+                  title: 'No Groups Yet',
+                  description:
+                      'Create or join a group to start booking shared resources.',
+                  action: PrimaryButton(
+                    onPressed: () => context.push('/groups/create'),
+                    child: const Text('Create Your First Group'),
                   ),
                 ),
-                data: (groups) {
-                  if (groups.isEmpty) {
-                    return KeyedSubtree(
-                      key: const ValueKey('empty'),
-                      child: EmptyState(
-                        icon: Icons.group_work_outlined,
-                        title: 'No Groups Yet',
-                        description:
-                            'Create or join a group to start booking shared resources.',
-                        action: PrimaryButton(
-                          onPressed: () => context.push('/groups/create'),
-                          child: const Text('Create Your First Group'),
-                        ),
-                      ),
-                    );
-                  }
+              );
+            }
 
-                  return KeyedSubtree(
-                    key: const ValueKey('data'),
-                    child: RefreshIndicator(
-                      onRefresh: () =>
-                          ref.read(myGroupsProvider.notifier).refresh(),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: groups.length,
-                        itemBuilder: (context, index) {
-                          final group = groups[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: Entrance(
-                              delay: Duration(milliseconds: index * 60),
-                              child: PressableScale(
-                                onTap: () =>
-                                    context.push('/groups/${group.id}'),
-                                child: Card(
-                                  child: Padding(
-                                    padding: kCardPadding,
-                                    child: Row(
+            return KeyedSubtree(
+              key: const ValueKey('data'),
+              child: RefreshIndicator(
+                onRefresh: () => ref.read(myGroupsProvider.notifier).refresh(),
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: groups.length,
+                  itemBuilder: (context, index) {
+                    final group = groups[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Entrance(
+                        delay: Duration(milliseconds: index * 60),
+                        child: PressableScale(
+                          onTap: () => context.push('/groups/${group.id}'),
+                          child: Card(
+                            child: Padding(
+                              padding: kCardPadding,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(
+                                      Icons.group_outlined,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .surfaceContainerHighest,
-                                            borderRadius: BorderRadius.circular(
-                                              8,
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(group.name).h4(),
                                             ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.group_outlined,
-                                            size: 24,
-                                          ),
+                                            const SizedBox(width: 8),
+                                            PrimaryBadge(
+                                              child: Text(group.role),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      group.name,
-                                                    ).h4(),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  PrimaryBadge(
-                                                    child: Text(group.role),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                '${group.memberCount} member${group.memberCount == 1 ? '' : 's'}',
-                                              ).muted().small(),
-                                            ],
-                                          ),
-                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${group.memberCount} member${group.memberCount == 1 ? '' : 's'}',
+                                        ).muted().small(),
                                       ],
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
                             ),
-                          );
-                        },
+                          ),
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
       bottomNavigationBar: SafeArea(
         top: false,

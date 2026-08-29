@@ -7,16 +7,35 @@ import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/loading_overlay.dart';
 
 class JoinGroupScreen extends ConsumerStatefulWidget {
-  const JoinGroupScreen({super.key});
+  final String? initialCode;
+
+  const JoinGroupScreen({super.key, this.initialCode});
 
   @override
   ConsumerState<JoinGroupScreen> createState() => _JoinGroupScreenState();
 }
 
 class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
-  final _codeController = TextEditingController();
+  late final TextEditingController _codeController;
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _codeController = TextEditingController(
+      text: widget.initialCode?.trim().toUpperCase() ?? '',
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant JoinGroupScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialCode != oldWidget.initialCode &&
+        widget.initialCode != null) {
+      _codeController.text = widget.initialCode!.trim().toUpperCase();
+    }
+  }
 
   @override
   void dispose() {

@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +5,7 @@ import '../providers/groups_provider.dart';
 import '../data/groups_repository.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/error_display.dart';
 
@@ -25,6 +25,45 @@ class MembersScreen extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
+        ),
+        bottom: AppBarToolbar(
+          child: groupAsync.when(
+            data: (group) {
+              final inviteCode = group.inviteCode;
+              if (inviteCode == null || inviteCode.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Row(
+                children: [
+                  const Icon(Icons.vpn_key_outlined, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Group Invite Code').small().muted(),
+                        Text(inviteCode).mono().semiBold(),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      DeepLinkUtils.showInviteSheet(
+                        context,
+                        groupName: group.name,
+                        inviteCode: inviteCode,
+                      );
+                    },
+                    icon: const Icon(Icons.share_outlined, size: 16),
+                    label: const Text('Share'),
+                  ),
+                ],
+              );
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
         ),
       ),
       body: SlideFadeSwitcher(
@@ -48,51 +87,6 @@ class MembersScreen extends ConsumerWidget {
               key: const ValueKey('data'),
               child: Column(
                 children: [
-                  if (group?.inviteCode != null) ...[
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Entrance(
-                        delay: const Duration(milliseconds: 60),
-                        child: Card(
-                          child: Padding(
-                            padding: kCardPadding,
-                            child: Row(
-                              children: [
-                                const Icon(Icons.vpn_key_outlined, size: 24),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Group Invite Code',
-                                      ).small().semiBold(),
-                                      Text(group!.inviteCode!).mono().h4(),
-                                    ],
-                                  ),
-                                ),
-                                SecondaryButton(
-                                  onPressed: () {
-                                    Clipboard.setData(
-                                      ClipboardData(text: group.inviteCode!),
-                                    );
-                                  },
-                                  child: const Row(
-                                    children: [
-                                      Icon(Icons.copy_outlined, size: 14),
-                                      SizedBox(width: 4),
-                                      Text('Copy'),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
