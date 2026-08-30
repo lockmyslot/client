@@ -7,8 +7,19 @@ class ErrorDisplay extends StatelessWidget {
 
   const ErrorDisplay({super.key, required this.error, this.onRetry});
 
+  bool get _isOffline =>
+      error.toLowerCase().contains('offline') ||
+      error.toLowerCase().contains('network') ||
+      error.toLowerCase().contains('connection');
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final icon = _isOffline ? Icons.wifi_off_outlined : Icons.error_outline;
+    final iconColor = _isOffline
+        ? theme.colorScheme.tertiary
+        : theme.colorScheme.error;
+
     return Entrance(
       child: Center(
         child: Padding(
@@ -20,18 +31,25 @@ class ErrorDisplay extends StatelessWidget {
                 delay: const Duration(milliseconds: 60),
                 curve: Curves.elasticOut,
                 child: Icon(
-                  Icons.error_outline,
+                  icon,
                   size: 48,
-                  color: Theme.of(context).colorScheme.error,
+                  color: iconColor,
                 ),
               ),
               const SizedBox(height: 16),
+              if (_isOffline) ...[
+                Entrance(
+                  delay: const Duration(milliseconds: 100),
+                  child: const Text('Offline Mode').h3(),
+                ),
+                const SizedBox(height: 6),
+              ],
               Entrance(
                 delay: const Duration(milliseconds: 140),
-                child: Text(error, textAlign: TextAlign.center).p(),
+                child: Text(error, textAlign: TextAlign.center).p().muted(),
               ),
               if (onRetry != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Entrance(
                   delay: const Duration(milliseconds: 220),
                   child: OutlineButton(
@@ -47,3 +65,4 @@ class ErrorDisplay extends StatelessWidget {
     );
   }
 }
+

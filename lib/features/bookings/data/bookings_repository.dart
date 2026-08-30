@@ -1,13 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/api_exceptions.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/storage/local_cache_service.dart';
 import 'models/booking.dart';
 import 'models/availability.dart';
 
 class BookingsRepository {
   final ApiClient _apiClient;
+  final LocalCacheService? _cache;
 
-  BookingsRepository(this._apiClient);
+  BookingsRepository(this._apiClient, [this._cache]);
 
   Future<Availability> getAvailability(
     String groupId,
@@ -76,27 +79,53 @@ class BookingsRepository {
     String? from,
     String? to,
   }) async {
+    final cacheKey = 'my_bookings_$groupId';
     final query = <String, dynamic>{};
     if (status != null) query['status'] = status;
     if (from != null) query['from'] = from;
     if (to != null) query['to'] = to;
 
-    final response = await _apiClient.get<List<Booking>>(
-      ApiConstants.myBookings(groupId),
-      query: query.isNotEmpty ? query : null,
-      fromJson: (json) {
-        if (json is List) {
-          return json
-              .map((e) => Booking.fromJson(e as Map<String, dynamic>))
-              .toList();
+    try {
+      final response = await _apiClient.get<List<Booking>>(
+        ApiConstants.myBookings(groupId),
+        query: query.isNotEmpty ? query : null,
+        fromJson: (json) {
+          if (json is List) {
+            return json
+                .map((e) => Booking.fromJson(e as Map<String, dynamic>))
+                .toList();
+          }
+          return [];
+        },
+      );
+      final bookings = response.data;
+      if (query.isEmpty) {
+        await _cache?.setList(
+          cacheKey,
+          bookings.map((b) => b.toJson()).toList(),
+        );
+      }
+      return bookings;
+    } on NetworkException {
+      if (query.isEmpty) {
+        final cached = await _cache?.getList<Booking>(
+          cacheKey,
+          (json) => Booking.fromJson(json as Map<String, dynamic>),
+        );
+        if (cached != null) {
+          return cached;
         }
-        return [];
-      },
-    );
-    return response.data;
+      }
+      throw const OfflineException(
+        'You are offline and no cached bookings were found for this group.',
+      );
+    }
   }
 }
 
 final bookingsRepositoryProvider = Provider<BookingsRepository>((ref) {
-  return BookingsRepository(ref.watch(apiClientProvider));
+  return BookingsRepository(
+    ref.watch(apiClientProvider),
+    ref.watch(localCacheServiceProvider),
+  );
 });

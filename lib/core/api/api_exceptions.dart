@@ -55,6 +55,13 @@ class NetworkException extends ApiException {
   ]);
 }
 
+class OfflineException extends ApiException {
+  const OfflineException([
+    super.message =
+        'You appear to be offline. No cached data is available for this resource.',
+  ]);
+}
+
 class ServerException extends ApiException {
   const ServerException([
     super.message = 'An unexpected server error occurred.',
