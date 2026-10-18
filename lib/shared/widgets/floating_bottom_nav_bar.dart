@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class FloatingBottomNavBar extends StatelessWidget {
   final int currentIndex;
+  final double? pageProgress;
   final ValueChanged<int> onTap;
   final VoidCallback? onFabPressed;
   final IconData? fabIcon;
@@ -11,11 +12,28 @@ class FloatingBottomNavBar extends StatelessWidget {
   const FloatingBottomNavBar({
     super.key,
     required this.currentIndex,
+    this.pageProgress,
     required this.onTap,
     this.onFabPressed,
     this.fabIcon,
     this.fabTooltip,
   });
+
+  double _getTabWidth(BuildContext context, String label) {
+    final textTheme = Theme.of(context).textTheme;
+    final style = (textTheme.labelMedium ?? const TextStyle()).copyWith(
+      fontWeight: FontWeight.w600,
+    );
+
+    final textPainter = TextPainter(
+      text: TextSpan(text: label, style: style),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    // 14.0 horizontal padding * 2 + 20.0 icon + 6.0 gap + textPainter width
+    return 28.0 + 20.0 + 6.0 + textPainter.size.width;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,16 +63,48 @@ class FloatingBottomNavBar extends StatelessWidget {
       ),
     ];
 
+    final currentProgress =
+        (pageProgress ?? currentIndex.toDouble()).clamp(0.0, 2.0);
     final hasFab = onFabPressed != null && fabIcon != null;
 
     final blurGradient = LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        colorScheme.surfaceContainerHigh.withAlpha(200),
-        colorScheme.surfaceContainer.withAlpha(150),
+        colorScheme.surfaceContainerHigh.withValues(alpha: 0.78),
+        colorScheme.surfaceContainer.withValues(alpha: 0.58),
       ],
     );
+
+    // Dynamic width and left offset calculations for each tab
+    const double itemMargin = 4.0;
+    final List<double> tabWidths = items.map((item) {
+      return _getTabWidth(context, item.label);
+    }).toList();
+
+    final List<double> tabLefts = [];
+    double currentLeftOffset = 0.0;
+    for (int i = 0; i < tabWidths.length; i++) {
+      tabLefts.add(currentLeftOffset);
+      currentLeftOffset += tabWidths[i] + itemMargin;
+    }
+
+    final double totalTabsWidth =
+        tabWidths.reduce((a, b) => a + b) + (itemMargin * (items.length - 1));
+
+    // Interpolate current highlight pill width and left position
+    double slidingLeft;
+    double slidingWidth;
+
+    if (currentProgress <= 1.0) {
+      final t = currentProgress;
+      slidingLeft = lerpDouble(tabLefts[0], tabLefts[1], t)!;
+      slidingWidth = lerpDouble(tabWidths[0], tabWidths[1], t)!;
+    } else {
+      final t = currentProgress - 1.0;
+      slidingLeft = lerpDouble(tabLefts[1], tabLefts[2], t)!;
+      slidingWidth = lerpDouble(tabWidths[1], tabWidths[2], t)!;
+    }
 
     return AnimatedSlide(
       duration: const Duration(milliseconds: 200),
@@ -71,10 +121,10 @@ class FloatingBottomNavBar extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 1. Navigation Tabs Floating Pill with Blur BG Gradient
+                  // 1. Navigation Tabs Floating Pill with Dynamic Width & Sliding Highlight
                   Material(
                     elevation: 3,
-                    shadowColor: colorScheme.shadow.withAlpha(30),
+                    shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(32),
                     color: Colors.transparent,
                     child: ClipRRect(
@@ -89,88 +139,121 @@ class FloatingBottomNavBar extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(32),
                             gradient: blurGradient,
+                            border: Border.all(
+                              color: colorScheme.outlineVariant
+                                  .withValues(alpha: 0.35),
+                              width: 1,
+                            ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(items.length, (index) {
-                              final item = items[index];
-                              final isSelected = index == currentIndex;
-
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 2),
-                                child: Tooltip(
-                                  message: item.label,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    borderRadius: BorderRadius.circular(24),
-                                    clipBehavior: Clip.antiAlias,
-                                    child: InkWell(
-                                      onTap: () => onTap(index),
+                          child: SizedBox(
+                            width: totalTabsWidth,
+                            height: 36,
+                            child: Stack(
+                              children: [
+                                // Sliding & Morphing Width Highlight Pill Background
+                                Positioned(
+                                  left: slidingLeft,
+                                  top: 0,
+                                  width: slidingWidth,
+                                  height: 36,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.secondaryContainer,
                                       borderRadius: BorderRadius.circular(24),
-                                      splashColor: colorScheme.primary
-                                          .withAlpha(30),
-                                      highlightColor: Colors.transparent,
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 200,
-                                        ),
-                                        curve: Curves.easeInOutCubic,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? colorScheme.secondaryContainer
-                                              : Colors.transparent,
-                                          borderRadius:
-                                              BorderRadius.circular(24),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              isSelected
-                                                  ? item.activeIcon
-                                                  : item.icon,
-                                              size: 20,
-                                              color: isSelected
-                                                  ? colorScheme
-                                                      .onSecondaryContainer
-                                                  : colorScheme.onSurfaceVariant,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              item.label,
-                                              style: (textTheme.labelMedium ??
-                                                      const TextStyle())
-                                                  .copyWith(
-                                                color: isSelected
-                                                    ? colorScheme
-                                                        .onSecondaryContainer
-                                                    : colorScheme
-                                                        .onSurfaceVariant,
-                                                fontWeight: isSelected
-                                                    ? FontWeight.w600
-                                                    : FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
                                     ),
                                   ),
                                 ),
-                              );
-                            }),
+
+                                // Tab Items Row (Natural Content Widths)
+                                Row(
+                                  children: List.generate(items.length, (index) {
+                                    final item = items[index];
+                                    final itemWidth = tabWidths[index];
+                                    final distance =
+                                        (currentProgress - index).abs();
+                                    final selectionAmount =
+                                        (1.0 - distance).clamp(0.0, 1.0);
+
+                                    final contentColor = Color.lerp(
+                                      colorScheme.onSurfaceVariant,
+                                      colorScheme.onSecondaryContainer,
+                                      selectionAmount,
+                                    )!;
+
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                        right: index < items.length - 1
+                                            ? itemMargin
+                                            : 0,
+                                      ),
+                                      child: SizedBox(
+                                        width: itemWidth,
+                                        height: 36,
+                                        child: Tooltip(
+                                          message: item.label,
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            borderRadius:
+                                                BorderRadius.circular(24),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: InkWell(
+                                              onTap: () => onTap(index),
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                              splashColor: colorScheme.primary
+                                                  .withValues(alpha: 0.12),
+                                              highlightColor:
+                                                  Colors.transparent,
+                                              child: Center(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(
+                                                      selectionAmount > 0.5
+                                                          ? item.activeIcon
+                                                          : item.icon,
+                                                      size: 19,
+                                                      color: contentColor,
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    Text(
+                                                      item.label,
+                                                      style: (textTheme
+                                                                  .labelMedium ??
+                                                              const TextStyle())
+                                                          .copyWith(
+                                                        color: contentColor,
+                                                        fontWeight:
+                                                            selectionAmount >
+                                                                    0.5
+                                                                ? FontWeight
+                                                                    .w600
+                                                                : FontWeight
+                                                                    .w500,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
 
-                  // 2. Separate Circle Action Button with Blur BG Gradient
+                  // 2. Separate Circle Action Button
                   AnimatedSize(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOutCubic,
@@ -183,7 +266,8 @@ class FloatingBottomNavBar extends StatelessWidget {
                                 message: fabTooltip ?? 'Action',
                                 child: Material(
                                   elevation: 3,
-                                  shadowColor: colorScheme.shadow.withAlpha(30),
+                                  shadowColor: colorScheme.shadow
+                                      .withValues(alpha: 0.12),
                                   color: Colors.transparent,
                                   shape: const CircleBorder(),
                                   clipBehavior: Clip.antiAlias,
@@ -199,6 +283,11 @@ class FloatingBottomNavBar extends StatelessWidget {
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           gradient: blurGradient,
+                                          border: Border.all(
+                                            color: colorScheme.outlineVariant
+                                                .withValues(alpha: 0.35),
+                                            width: 1,
+                                          ),
                                         ),
                                         child: InkWell(
                                           onTap: onFabPressed,

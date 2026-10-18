@@ -20,13 +20,26 @@ class MainShellScreen extends StatefulWidget {
 
 class _MainShellScreenState extends State<MainShellScreen> {
   late final PageController _pageController;
+  double _pageProgress = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(
-      initialPage: widget.navigationShell.currentIndex,
-    );
+    final initial = widget.navigationShell.currentIndex;
+    _pageController = PageController(initialPage: initial);
+    _pageProgress = initial.toDouble();
+    _pageController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_pageController.hasClients && _pageController.page != null) {
+      final newProgress = _pageController.page!;
+      if ((newProgress - _pageProgress).abs() > 0.001) {
+        setState(() {
+          _pageProgress = newProgress;
+        });
+      }
+    }
   }
 
   @override
@@ -46,6 +59,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   @override
   void dispose() {
+    _pageController.removeListener(_onScroll);
     _pageController.dispose();
     super.dispose();
   }
@@ -87,6 +101,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
       ),
       bottomNavigationBar: FloatingBottomNavBar(
         currentIndex: currentIndex,
+        pageProgress: _pageProgress,
         onTap: (newIndex) {
           widget.navigationShell.goBranch(
             newIndex,
