@@ -457,6 +457,13 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                                 icon = Icons.check_outlined;
                                 iconColor = cs.onPrimaryContainer;
                                 textColor = cs.onPrimaryContainer;
+                              } else if (slot.isMaintenance) {
+                                chipBg = Colors.orange.withValues(alpha: 0.10);
+                                chipBorder = Colors.orange.shade300;
+                                borderWidth = 1;
+                                icon = Icons.build_circle_outlined;
+                                iconColor = Colors.orange.shade800;
+                                textColor = Colors.orange.shade900;
                               } else if (isAvail) {
                                 chipBg = cs.surface;
                                 chipBorder = cs.outline;

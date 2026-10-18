@@ -64,6 +64,7 @@ class TimeSlot {
   bool get isFull => status.toLowerCase() == 'full';
   bool get isCooldown => status.toLowerCase() == 'cooldown';
   bool get isUnavailable => status.toLowerCase() == 'unavailable';
+  bool get isMaintenance => status.toLowerCase() == 'maintenance';
 
   factory TimeSlot.fromJson(Map<String, dynamic> json) {
     return TimeSlot(

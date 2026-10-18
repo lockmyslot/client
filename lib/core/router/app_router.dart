@@ -12,6 +12,7 @@ import '../../features/groups/screens/members_screen.dart';
 import '../../features/resources/screens/create_resource_screen.dart';
 import '../../features/resources/screens/resource_detail_screen.dart';
 import '../../features/resources/screens/booking_rules_screen.dart';
+import '../../features/resources/screens/maintenance_tasks_screen.dart';
 import '../../features/bookings/screens/availability_screen.dart';
 import '../../features/bookings/screens/quick_booking_screen.dart';
 import '../../features/bookings/screens/bookings_calendar_screen.dart';
@@ -238,6 +239,20 @@ final routerProvider = Provider<GoRouter>((ref) {
                       return _buildSmoothTransition(
                         state: state,
                         child: BookingsCalendarScreen(
+                          groupId: groupId,
+                          resourceId: resourceId,
+                        ),
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'maintenance',
+                    pageBuilder: (context, state) {
+                      final groupId = state.pathParameters['group_id']!;
+                      final resourceId = state.pathParameters['resource_id']!;
+                      return _buildSmoothTransition(
+                        state: state,
+                        child: MaintenanceTasksScreen(
                           groupId: groupId,
                           resourceId: resourceId,
                         ),

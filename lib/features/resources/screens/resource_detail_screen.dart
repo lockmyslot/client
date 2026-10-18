@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/resources_provider.dart';
+import '../providers/maintenance_provider.dart';
 import '../../bookings/data/models/booking.dart';
 import '../../bookings/providers/bookings_provider.dart';
 import '../../../core/ui/ui.dart';
@@ -40,6 +41,14 @@ class ResourceDetailScreen extends ConsumerWidget {
       )),
     );
 
+    final maintenanceAsync = ref.watch(
+      resourceMaintenanceProvider((
+        groupId: groupId,
+        resourceId: resourceId,
+        status: null,
+      )),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: resourceAsync.when(
@@ -53,6 +62,14 @@ class ResourceDetailScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            tooltip: 'Maintenance',
+            icon: const Icon(Icons.handyman_outlined),
+            onPressed: () => context.push(
+              '/groups/$groupId/resources/$resourceId/maintenance',
+            ),
+          ),
+          IconButton(
+            tooltip: 'Rules',
             icon: const Icon(Icons.settings_outlined),
             onPressed: () =>
                 context.push('/groups/$groupId/resources/$resourceId/rules'),
@@ -155,6 +172,13 @@ class ResourceDetailScreen extends ConsumerWidget {
                       date: null,
                     )),
                   );
+                  ref.invalidate(
+                    resourceMaintenanceProvider((
+                      groupId: groupId,
+                      resourceId: resourceId,
+                      status: null,
+                    )),
+                  );
                 },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -168,6 +192,99 @@ class ResourceDetailScreen extends ConsumerWidget {
                         Text(resource.description!).muted().p(),
                         const SizedBox(height: 10),
                       ],
+
+                      // Active / Upcoming Maintenance Alert Banner (if any)
+                      maintenanceAsync.when(
+                        data: (tasks) {
+                          final active = tasks
+                              .where((t) => t.isInProgress || t.isScheduled)
+                              .toList();
+                          if (active.isEmpty) return const SizedBox.shrink();
+
+                          final inProgress =
+                              active.where((t) => t.isInProgress).toList();
+                          final isCurrentlyUnderMaintenance =
+                              inProgress.isNotEmpty;
+                          final displayTask = isCurrentlyUnderMaintenance
+                              ? inProgress.first
+                              : active.first;
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 14),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isCurrentlyUnderMaintenance
+                                  ? Colors.orange.withValues(alpha: 0.12)
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer
+                                      .withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isCurrentlyUnderMaintenance
+                                    ? Colors.orange.shade400
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isCurrentlyUnderMaintenance
+                                      ? Icons.build_circle
+                                      : Icons.info_outline,
+                                  color: isCurrentlyUnderMaintenance
+                                      ? Colors.orange.shade800
+                                      : Theme.of(context).colorScheme.primary,
+                                  size: 22,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        isCurrentlyUnderMaintenance
+                                            ? 'Currently Under Maintenance'
+                                            : 'Maintenance Scheduled',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: isCurrentlyUnderMaintenance
+                                              ? Colors.orange.shade900
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${displayTask.title} (${displayTask.isRecurring ? displayTask.recurrenceSummary : AppDateUtils.formatDate(displayTask.startTime)})',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () => context.push(
+                                    '/groups/$groupId/resources/$resourceId/maintenance',
+                                  ),
+                                  child: const Text('View'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
 
                       // Resource Schedule Section (Upcoming Bookings)
                       Row(

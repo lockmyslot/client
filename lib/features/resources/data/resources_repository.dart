@@ -5,6 +5,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/storage/local_cache_service.dart';
 import 'models/resource.dart';
 import 'models/booking_rule.dart';
+import 'models/maintenance_task.dart';
 
 class ResourcesRepository {
   final ApiClient _apiClient;
@@ -172,6 +173,108 @@ class ResourcesRepository {
       updatedRules.map((r) => r.toJson()).toList(),
     );
     return updatedRules;
+  }
+
+  Future<List<MaintenanceTask>> getResourceMaintenance(
+    String groupId,
+    String resourceId, {
+    String? status,
+    String? from,
+    String? to,
+  }) async {
+    final query = <String, dynamic>{
+      if (status != null && status.isNotEmpty) 'status': status,
+      if (from != null && from.isNotEmpty) 'from': from,
+      if (to != null && to.isNotEmpty) 'to': to,
+    };
+    final response = await _apiClient.get<List<MaintenanceTask>>(
+      ApiConstants.resourceMaintenance(groupId, resourceId),
+      query: query,
+      fromJson: (json) {
+        if (json is List) {
+          return json
+              .map((e) => MaintenanceTask.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+        return [];
+      },
+    );
+    return response.data;
+  }
+
+  Future<List<MaintenanceTask>> getGroupMaintenance(
+    String groupId, {
+    String? status,
+    String? from,
+    String? to,
+  }) async {
+    final query = <String, dynamic>{
+      if (status != null && status.isNotEmpty) 'status': status,
+      if (from != null && from.isNotEmpty) 'from': from,
+      if (to != null && to.isNotEmpty) 'to': to,
+    };
+    final response = await _apiClient.get<List<MaintenanceTask>>(
+      ApiConstants.groupMaintenance(groupId),
+      query: query,
+      fromJson: (json) {
+        if (json is List) {
+          return json
+              .map((e) => MaintenanceTask.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+        return [];
+      },
+    );
+    return response.data;
+  }
+
+  Future<MaintenanceTask> getMaintenanceDetail(
+    String groupId,
+    String resourceId,
+    String taskId,
+  ) async {
+    final response = await _apiClient.get<MaintenanceTask>(
+      ApiConstants.maintenanceDetail(groupId, resourceId, taskId),
+      fromJson: (json) => MaintenanceTask.fromJson(json as Map<String, dynamic>),
+    );
+    return response.data;
+  }
+
+  Future<MaintenanceTask> createMaintenanceTask(
+    String groupId,
+    String resourceId,
+    Map<String, dynamic> body,
+  ) async {
+    final response = await _apiClient.post<MaintenanceTask>(
+      ApiConstants.resourceMaintenance(groupId, resourceId),
+      body: body,
+      fromJson: (json) => MaintenanceTask.fromJson(json as Map<String, dynamic>),
+    );
+    return response.data;
+  }
+
+  Future<MaintenanceTask> updateMaintenanceTask(
+    String groupId,
+    String resourceId,
+    String taskId,
+    Map<String, dynamic> body,
+  ) async {
+    final response = await _apiClient.patch<MaintenanceTask>(
+      ApiConstants.maintenanceDetail(groupId, resourceId, taskId),
+      body: body,
+      fromJson: (json) => MaintenanceTask.fromJson(json as Map<String, dynamic>),
+    );
+    return response.data;
+  }
+
+  Future<void> deleteMaintenanceTask(
+    String groupId,
+    String resourceId,
+    String taskId,
+  ) async {
+    await _apiClient.delete(
+      ApiConstants.maintenanceDetail(groupId, resourceId, taskId),
+    );
   }
 }
 
