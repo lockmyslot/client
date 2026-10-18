@@ -16,8 +16,9 @@ class AppTheme {
       brightness: Brightness.dark,
       fontFamily: _fontFamily,
       colorScheme: cs,
-      appBarTheme: AppBarTheme(
-        shape: Border(bottom: BorderSide(color: cs.outlineVariant, width: 1)),
+      appBarTheme: const AppBarTheme(
+        elevation: 0,
+        scrolledUnderElevation: 0,
       ),
     );
   }
@@ -34,8 +35,9 @@ class AppTheme {
       brightness: Brightness.light,
       fontFamily: _fontFamily,
       colorScheme: cs,
-      appBarTheme: AppBarTheme(
-        shape: Border(bottom: BorderSide(color: cs.outlineVariant, width: 1)),
+      appBarTheme: const AppBarTheme(
+        elevation: 0,
+        scrolledUnderElevation: 0,
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class FloatingBottomNavBar extends StatelessWidget {
@@ -46,6 +47,15 @@ class FloatingBottomNavBar extends StatelessWidget {
 
     final hasFab = onFabPressed != null && fabIcon != null;
 
+    final blurGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        colorScheme.surfaceContainerHigh.withOpacity(0.78),
+        colorScheme.surfaceContainer.withOpacity(0.58),
+      ],
+    );
+
     return AnimatedSlide(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOutCubic,
@@ -61,98 +71,106 @@ class FloatingBottomNavBar extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 1. Navigation Tabs Floating Pill
+                  // 1. Navigation Tabs Floating Pill with Blur BG Gradient
                   Material(
                     elevation: 3,
-                    shadowColor: colorScheme.shadow.withOpacity(0.14),
+                    shadowColor: colorScheme.shadow.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(32),
-                    color: colorScheme.surfaceContainerHigh,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
-                        border: Border.all(
-                          color: colorScheme.outlineVariant.withOpacity(0.35),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(items.length, (index) {
-                          final item = items[index];
-                          final isSelected = index == currentIndex;
+                    color: Colors.transparent,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(32),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(32),
+                            gradient: blurGradient,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(items.length, (index) {
+                              final item = items[index];
+                              final isSelected = index == currentIndex;
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2),
-                            child: Tooltip(
-                              message: item.label,
-                              child: Material(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(24),
-                                clipBehavior: Clip.antiAlias,
-                                child: InkWell(
-                                  onTap: () => onTap(index),
-                                  borderRadius: BorderRadius.circular(24),
-                                  splashColor:
-                                      colorScheme.primary.withOpacity(0.12),
-                                  highlightColor: Colors.transparent,
-                                  child: AnimatedContainer(
-                                    duration: const Duration(
-                                      milliseconds: 200,
-                                    ),
-                                    curve: Curves.easeInOutCubic,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? colorScheme.secondaryContainer
-                                          : Colors.transparent,
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 2),
+                                child: Tooltip(
+                                  message: item.label,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(24),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: InkWell(
+                                      onTap: () => onTap(index),
                                       borderRadius: BorderRadius.circular(24),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          isSelected
-                                              ? item.activeIcon
-                                              : item.icon,
-                                          size: 20,
+                                      splashColor: colorScheme.primary
+                                          .withOpacity(0.12),
+                                      highlightColor: Colors.transparent,
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        curve: Curves.easeInOutCubic,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
                                           color: isSelected
-                                              ? colorScheme.onSecondaryContainer
-                                              : colorScheme.onSurfaceVariant,
+                                              ? colorScheme.secondaryContainer
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              BorderRadius.circular(24),
                                         ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          item.label,
-                                          style: (textTheme.labelMedium ??
-                                                  const TextStyle())
-                                              .copyWith(
-                                            color: isSelected
-                                                ? colorScheme.onSecondaryContainer
-                                                : colorScheme.onSurfaceVariant,
-                                            fontWeight: isSelected
-                                                ? FontWeight.bold
-                                                : FontWeight.w500,
-                                          ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              isSelected
+                                                  ? item.activeIcon
+                                                  : item.icon,
+                                              size: 20,
+                                              color: isSelected
+                                                  ? colorScheme
+                                                      .onSecondaryContainer
+                                                  : colorScheme.onSurfaceVariant,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              item.label,
+                                              style: (textTheme.labelMedium ??
+                                                      const TextStyle())
+                                                  .copyWith(
+                                                color: isSelected
+                                                    ? colorScheme
+                                                        .onSecondaryContainer
+                                                    : colorScheme
+                                                        .onSurfaceVariant,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          );
-                        }),
+                              );
+                            }),
+                          ),
+                        ),
                       ),
                     ),
                   ),
 
-                  // 2. Separate Circle Action Button
+                  // 2. Separate Circle Action Button with Blur BG Gradient
                   AnimatedSize(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOutCubic,
@@ -160,49 +178,54 @@ class FloatingBottomNavBar extends StatelessWidget {
                         ? Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 10),
                               Tooltip(
                                 message: fabTooltip ?? 'Action',
                                 child: Material(
                                   elevation: 3,
                                   shadowColor:
-                                      colorScheme.shadow.withOpacity(0.14),
-                                  color: colorScheme.surfaceContainerHigh,
+                                      colorScheme.shadow.withOpacity(0.12),
+                                  color: Colors.transparent,
                                   shape: const CircleBorder(),
                                   clipBehavior: Clip.antiAlias,
-                                  child: InkWell(
-                                    onTap: onFabPressed,
-                                    customBorder: const CircleBorder(),
-                                    child: Container(
-                                      width: 48,
-                                      height: 48,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: colorScheme.outlineVariant
-                                              .withOpacity(0.35),
-                                          width: 1,
-                                        ),
+                                  child: ClipOval(
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                        sigmaX: 12,
+                                        sigmaY: 12,
                                       ),
-                                      child: AnimatedSwitcher(
-                                        duration: const Duration(
-                                          milliseconds: 150,
+                                      child: Container(
+                                        width: 52,
+                                        height: 52,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: blurGradient,
                                         ),
-                                        transitionBuilder:
-                                            (child, animation) =>
-                                                FadeTransition(
-                                          opacity: animation,
-                                          child: ScaleTransition(
-                                            scale: animation,
-                                            child: child,
+                                        child: InkWell(
+                                          onTap: onFabPressed,
+                                          customBorder: const CircleBorder(),
+                                          child: Center(
+                                            child: AnimatedSwitcher(
+                                              duration: const Duration(
+                                                milliseconds: 150,
+                                              ),
+                                              transitionBuilder:
+                                                  (child, animation) =>
+                                                      FadeTransition(
+                                                opacity: animation,
+                                                child: ScaleTransition(
+                                                  scale: animation,
+                                                  child: child,
+                                                ),
+                                              ),
+                                              child: Icon(
+                                                fabIcon,
+                                                key: ValueKey(fabIcon),
+                                                size: 22,
+                                                color: colorScheme.primary,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                        child: Icon(
-                                          fabIcon,
-                                          key: ValueKey(fabIcon),
-                                          size: 20,
-                                          color: colorScheme.primary,
                                         ),
                                       ),
                                     ),
