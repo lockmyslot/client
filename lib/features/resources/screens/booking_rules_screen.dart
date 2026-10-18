@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../data/models/booking_rule.dart';
-import '../data/resources_repository.dart';
 import '../providers/booking_rules_provider.dart';
+import '../data/resources_repository.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/error_display.dart';
 
@@ -18,7 +17,24 @@ class BookingRulesScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<BookingRulesScreen> createState() => _BookingRulesScreenState();
+  ConsumerState<BookingRulesScreen> createState() =>
+      _BookingRulesScreenState();
+}
+
+class _RuleFormData {
+  bool isEnabled = false;
+
+  final maxBookingsController = TextEditingController();
+  final maxHoursController = TextEditingController();
+  final cooldownController = TextEditingController();
+  final maxAdvanceController = TextEditingController();
+
+  void dispose() {
+    maxBookingsController.dispose();
+    maxHoursController.dispose();
+    cooldownController.dispose();
+    maxAdvanceController.dispose();
+  }
 }
 
 class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
@@ -37,39 +53,76 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
   String _selectedScope = 'WEEKDAY';
   final Map<String, _RuleFormData> _formData = {};
   bool _isLoading = false;
-  String? _errorMessage;
+  bool _isPopulated = false;
 
   @override
   void initState() {
     super.initState();
     for (final scope in _dayScopes) {
-      _formData[scope] = _RuleFormData(scope);
+      _formData[scope] = _RuleFormData();
     }
+  }
+
+  @override
+  void dispose() {
+    for (final data in _formData.values) {
+      data.dispose();
+    }
+    super.dispose();
   }
 
   void _populateExistingRules(List<BookingRule> rules) {
+    if (_isPopulated) return;
     for (final rule in rules) {
-      if (_formData.containsKey(rule.dayScope)) {
-        _formData[rule.dayScope]!.populate(rule);
+      final scope = rule.dayScope.toUpperCase();
+      if (_formData.containsKey(scope)) {
+        final form = _formData[scope]!;
+        form.isEnabled = true;
+        if (rule.maxBookingsPerDay != null) {
+          form.maxBookingsController.text = rule.maxBookingsPerDay.toString();
+        }
+        if (rule.maxHoursPerDay != null) {
+          form.maxHoursController.text = rule.maxHoursPerDay.toString();
+        }
+        if (rule.cooldownMinutes != null) {
+          form.cooldownController.text = rule.cooldownMinutes.toString();
+        }
+        if (rule.maxAdvanceBookingDays != null) {
+          form.maxAdvanceController.text =
+              rule.maxAdvanceBookingDays.toString();
+        }
       }
     }
+    _isPopulated = true;
   }
 
   Future<void> _handleSaveAll() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
+    setState(() => _isLoading = true);
     try {
+      final repo = ref.read(resourcesRepositoryProvider);
       final List<BookingRule> rulesToSave = [];
-      for (final form in _formData.values) {
+
+      for (final scope in _dayScopes) {
+        final form = _formData[scope]!;
         if (form.isEnabled) {
-          rulesToSave.add(form.toBookingRule());
+          final maxBookings = int.tryParse(form.maxBookingsController.text);
+          final maxHours = int.tryParse(form.maxHoursController.text);
+          final cooldown = int.tryParse(form.cooldownController.text);
+          final maxAdv = int.tryParse(form.maxAdvanceController.text);
+
+          rulesToSave.add(
+            BookingRule(
+              id: null,
+              dayScope: scope,
+              maxBookingsPerDay: maxBookings,
+              maxHoursPerDay: maxHours,
+              cooldownMinutes: cooldown,
+              maxAdvanceBookingDays: maxAdv,
+            ),
+          );
         }
       }
 
-      final repo = ref.read(resourcesRepositoryProvider);
       await repo.updateBookingRules(
         widget.groupId,
         widget.resourceId,
@@ -84,15 +137,18 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
       );
 
       if (mounted) {
-        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Booking rules saved successfully.')),
+        );
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = e.toString();
-        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save rules: $e')));
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -106,378 +162,181 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Configure Booking Rules'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_outlined),
-          onPressed: () => context.pop(),
-        ),
-        actions: [
-          PrimaryButton(
-            onPressed: _isLoading ? null : _handleSaveAll,
-            child: _isLoading
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Save Rules'),
+      body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverAppBar.large(
+            title: const Text('Booking Rules'),
+            pinned: true,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: PrimaryButton(
+                  onPressed: _isLoading ? null : _handleSaveAll,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Save Rules'),
+                ),
+              ),
+            ],
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            sliver: rulesAsync.when(
+              loading: () => const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, _) => SliverFillRemaining(
+                child: ErrorDisplay(
+                  error: err.toString(),
+                  onRetry: () => ref.invalidate(
+                    bookingRulesProvider((
+                      groupId: widget.groupId,
+                      resourceId: widget.resourceId,
+                    )),
+                  ),
+                ),
+              ),
+              data: (existingRules) {
+                _populateExistingRules(existingRules);
+                final currentForm = _formData[_selectedScope]!;
+
+                return SliverList(
+                  delegate: SliverChildListDelegate([
+                    const Text('Rule Scope').h4(),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Day-specific rules (e.g. FRIDAY) override broader rules (e.g. WEEKDAY).',
+                    ).muted().small(),
+                    const SizedBox(height: 16),
+
+                    // Day Scope Chips Horizontal Bar
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _dayScopes.map((scope) {
+                          final isSelected = scope == _selectedScope;
+                          final form = _formData[scope]!;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: FilterChip(
+                              selected: isSelected,
+                              label: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(scope),
+                                  if (form.isEnabled) ...[
+                                    const SizedBox(width: 4),
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              onSelected: (_) {
+                                setState(() => _selectedScope = scope);
+                              },
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Enable / Disable Scope Toggle
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        'Enable rules for $_selectedScope',
+                      ).semiBold(),
+                      subtitle: const Text(
+                        'Active rules will restrict booking times for this scope.',
+                      ).small().muted(),
+                      value: currentForm.isEnabled,
+                      onChanged: (val) {
+                        setState(() => currentForm.isEnabled = val);
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    if (currentForm.isEnabled) ...[
+                      // Limits
+                      Card(
+                        elevation: 0,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerLow,
+                        child: Padding(
+                          padding: kCardPadding,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Booking Limits').h4(),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: currentForm.maxBookingsController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Max Bookings / User / Day',
+                                  hintText: 'e.g. 2 (leave blank = unlimited)',
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: currentForm.maxHoursController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Max Hours / User / Day',
+                                  hintText: 'e.g. 3 (leave blank = unlimited)',
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: currentForm.cooldownController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText:
+                                      'Cooldown Minutes Between Bookings',
+                                  hintText: 'e.g. 30 (leave blank = none)',
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: currentForm.maxAdvanceController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Max Advance Booking (Days)',
+                                  hintText: 'e.g. 7 (leave blank = unlimited)',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ]),
+                );
+              },
+            ),
           ),
         ],
       ),
-      body: rulesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => ErrorDisplay(
-          error: err.toString(),
-          onRetry: () => ref.invalidate(
-            bookingRulesProvider((
-              groupId: widget.groupId,
-              resourceId: widget.resourceId,
-            )),
-          ),
-        ),
-        data: (existingRules) {
-          _populateExistingRules(existingRules);
-          final currentForm = _formData[_selectedScope]!;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Rule Priority').h4(),
-                const SizedBox(height: 4),
-                const Text(
-                  'Day-specific rules (e.g. FRIDAY) override broader rules (e.g. WEEKDAY).',
-                ).muted().small(),
-                const SizedBox(height: 16),
-
-                // Day Scope Chips Horizontal Bar
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: _dayScopes.map((scope) {
-                      final isSelected = scope == _selectedScope;
-                      final form = _formData[scope]!;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() => _selectedScope = scope);
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 240),
-                            curve: Curves.easeOutBack,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(
-                                      context,
-                                    ).colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  scope,
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary
-                                        : null,
-                                  ),
-                                ).small(),
-                                if (form.isEnabled) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.check_circle_outline,
-                                    size: 12,
-                                    color: isSelected
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary
-                                        : Colors.green,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                SlideFadeSwitcher(
-                  duration: const Duration(milliseconds: 350),
-                  child: KeyedSubtree(
-                    key: ValueKey('rule-$_selectedScope'),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text('Rule for $_selectedScope').h3(),
-                                ),
-                                Checkbox(
-                                  value: currentForm.isEnabled,
-                                  onChanged: (val) {
-                                    setState(() {
-                                      currentForm.isEnabled = val == true;
-                                    });
-                                  },
-                                ),
-                                const SizedBox(width: 8),
-                                const Text('Enable Rule for Scope').small(),
-                              ],
-                            ),
-                            SlideFadeSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              child: currentForm.isEnabled
-                                  ? KeyedSubtree(
-                                      key: const ValueKey('enabled'),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(height: 20),
-
-                                          // Form controls
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: _buildNumberField(
-                                                  'Max Bookings / Day',
-                                                  currentForm
-                                                      .maxBookingsController,
-                                                  'No limit',
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: _buildNumberField(
-                                                  'Max Hours / Day',
-                                                  currentForm
-                                                      .maxHoursController,
-                                                  'No limit',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 16),
-
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: _buildNumberField(
-                                                  'Cooldown (Minutes)',
-                                                  currentForm
-                                                      .cooldownController,
-                                                  'None',
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: _buildNumberField(
-                                                  'Max Advance (Days)',
-                                                  currentForm
-                                                      .maxAdvanceController,
-                                                  'No limit',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 16),
-
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: _buildNumberField(
-                                                  'Min Duration (Min)',
-                                                  currentForm
-                                                      .minDurationController,
-                                                  '1 slot',
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: _buildNumberField(
-                                                  'Max Duration (Min)',
-                                                  currentForm
-                                                      .maxDurationController,
-                                                  'No limit',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 16),
-
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: _buildTimeField(
-                                                  'Available From',
-                                                  currentForm
-                                                      .availableFromController,
-                                                  '00:00',
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: _buildTimeField(
-                                                  'Available Until',
-                                                  currentForm
-                                                      .availableUntilController,
-                                                  '24:00',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : KeyedSubtree(
-                                      key: ValueKey('disabled'),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(height: 12),
-                                          Text(
-                                            'Rule disabled for this scope. Default settings apply.',
-                                          ).muted().small(),
-                                        ],
-                                      ),
-                                    ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                  ).small(),
-                ],
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildNumberField(
-    String label,
-    TextEditingController controller,
-    String placeholder,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label).small().semiBold(),
-        const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(hintText: placeholder),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimeField(
-    String label,
-    TextEditingController controller,
-    String placeholder,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label).small().semiBold(),
-        const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(hintText: placeholder),
-        ),
-      ],
-    );
-  }
-}
-
-class _RuleFormData {
-  final String dayScope;
-  bool isEnabled = false;
-  final TextEditingController maxBookingsController = TextEditingController();
-  final TextEditingController maxHoursController = TextEditingController();
-  final TextEditingController cooldownController = TextEditingController();
-  final TextEditingController minDurationController = TextEditingController();
-  final TextEditingController maxDurationController = TextEditingController();
-  final TextEditingController maxAdvanceController = TextEditingController();
-  final TextEditingController availableFromController = TextEditingController();
-  final TextEditingController availableUntilController =
-      TextEditingController();
-
-  _RuleFormData(this.dayScope);
-
-  void populate(BookingRule rule) {
-    isEnabled = true;
-    if (rule.maxBookingsPerDay != null) {
-      maxBookingsController.text = rule.maxBookingsPerDay.toString();
-    }
-    if (rule.maxHoursPerDay != null) {
-      maxHoursController.text = rule.maxHoursPerDay.toString();
-    }
-    if (rule.cooldownMinutes != null) {
-      cooldownController.text = rule.cooldownMinutes.toString();
-    }
-    if (rule.minDurationMinutes != null) {
-      minDurationController.text = rule.minDurationMinutes.toString();
-    }
-    if (rule.maxDurationMinutes != null) {
-      maxDurationController.text = rule.maxDurationMinutes.toString();
-    }
-    if (rule.maxAdvanceBookingDays != null) {
-      maxAdvanceController.text = rule.maxAdvanceBookingDays.toString();
-    }
-    if (rule.availableFrom != null) {
-      availableFromController.text = rule.availableFrom!;
-    }
-    if (rule.availableUntil != null) {
-      availableUntilController.text = rule.availableUntil!;
-    }
-  }
-
-  BookingRule toBookingRule() {
-    return BookingRule(
-      dayScope: dayScope,
-      maxBookingsPerDay: int.tryParse(maxBookingsController.text.trim()),
-      maxHoursPerDay: int.tryParse(maxHoursController.text.trim()),
-      cooldownMinutes: int.tryParse(cooldownController.text.trim()),
-      minDurationMinutes: int.tryParse(minDurationController.text.trim()),
-      maxDurationMinutes: int.tryParse(maxDurationController.text.trim()),
-      maxAdvanceBookingDays: int.tryParse(maxAdvanceController.text.trim()),
-      availableFrom: availableFromController.text.trim().isNotEmpty
-          ? availableFromController.text.trim()
-          : null,
-      availableUntil: availableUntilController.text.trim().isNotEmpty
-          ? availableUntilController.text.trim()
-          : null,
     );
   }
 }

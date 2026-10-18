@@ -14,84 +14,117 @@ class ResourcesListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resourcesAsync = ref.watch(groupResourcesProvider(groupId));
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Resources'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_outlined),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: resourcesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => ErrorDisplay(
-          error: err.toString(),
-          onRetry: () => ref.invalidate(groupResourcesProvider(groupId)),
-        ),
-        data: (resources) {
-          if (resources.isEmpty) {
-            return const EmptyState(
-              icon: Icons.inventory_2_outlined,
-              title: 'No Resources Available',
-              description:
-                  'There are no active resources set up in this group yet.',
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: resources.length,
-            itemBuilder: (context, index) {
-              final resource = resources[index];
-              final cardWidget = Card(
-                child: GestureDetector(
-                  onTap: () =>
-                      context.push('/groups/$groupId/resources/${resource.id}'),
-                  child: Padding(
-                    padding: kCardPadding,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [Expanded(child: Text(resource.name).h4())],
-                        ),
-                        if (resource.description != null) ...[
-                          const SizedBox(height: 4),
-                          Text(resource.description!).muted().small(),
-                        ],
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Text('Capacity: ${resource.capacity}').small(),
-                            const SizedBox(width: 16),
-                            Text(
-                              'Slot: ${resource.slotDurationMinutes} mins',
-                            ).small(),
-                            const Spacer(),
-                            PrimaryButton(
-                              onPressed: () => context.push(
-                                '/groups/$groupId/resources/${resource.id}/book',
-                              ),
-                              child: const Text('Book'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(groupResourcesProvider(groupId));
+        },
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            const SliverAppBar.large(
+              title: Text('Resources'),
+              pinned: true,
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: resourcesAsync.when(
+                loading: () => const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (err, _) => SliverFillRemaining(
+                  child: ErrorDisplay(
+                    error: err.toString(),
+                    onRetry: () =>
+                        ref.invalidate(groupResourcesProvider(groupId)),
                   ),
                 ),
-              );
+                data: (resources) {
+                  if (resources.isEmpty) {
+                    return const SliverFillRemaining(
+                      child: EmptyState(
+                        icon: Icons.inventory_2_outlined,
+                        title: 'No Resources Available',
+                        description:
+                            'There are no active resources set up in this group yet.',
+                      ),
+                    );
+                  }
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: resource.isActive
-                    ? cardWidget
-                    : Opacity(opacity: 0.55, child: cardWidget),
-              );
-            },
-          );
-        },
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final resource = resources[index];
+                        final cardWidget = Card(
+                          elevation: 0,
+                          color: colorScheme.surfaceContainerLow,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: colorScheme.outlineVariant
+                                  .withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: GestureDetector(
+                            onTap: () => context.push(
+                              '/groups/$groupId/resources/${resource.id}',
+                            ),
+                            child: Padding(
+                              padding: kCardPadding,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(child: Text(resource.name).h4()),
+                                    ],
+                                  ),
+                                  if (resource.description != null) ...[
+                                    const SizedBox(height: 4),
+                                    Text(resource.description!).muted().small(),
+                                  ],
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Capacity: ${resource.capacity}',
+                                      ).small(),
+                                      const SizedBox(width: 16),
+                                      Text(
+                                        'Slot: ${resource.slotDurationMinutes} mins',
+                                      ).small(),
+                                      const Spacer(),
+                                      PrimaryButton(
+                                        onPressed: () => context.push(
+                                          '/groups/$groupId/resources/${resource.id}/book',
+                                        ),
+                                        child: const Text('Book'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: resource.isActive
+                              ? cardWidget
+                              : Opacity(opacity: 0.55, child: cardWidget),
+                        );
+                      },
+                      childCount: resources.length,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
