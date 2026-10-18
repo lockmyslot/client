@@ -51,8 +51,8 @@ class FloatingBottomNavBar extends StatelessWidget {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        colorScheme.surfaceContainerHigh.withOpacity(0.78),
-        colorScheme.surfaceContainer.withOpacity(0.58),
+        colorScheme.surfaceContainerHigh.withAlpha(200),
+        colorScheme.surfaceContainer.withAlpha(150),
       ],
     );
 
@@ -74,7 +74,7 @@ class FloatingBottomNavBar extends StatelessWidget {
                   // 1. Navigation Tabs Floating Pill with Blur BG Gradient
                   Material(
                     elevation: 3,
-                    shadowColor: colorScheme.shadow.withOpacity(0.12),
+                    shadowColor: colorScheme.shadow.withAlpha(30),
                     borderRadius: BorderRadius.circular(32),
                     color: Colors.transparent,
                     child: ClipRRect(
@@ -109,7 +109,7 @@ class FloatingBottomNavBar extends StatelessWidget {
                                       onTap: () => onTap(index),
                                       borderRadius: BorderRadius.circular(24),
                                       splashColor: colorScheme.primary
-                                          .withOpacity(0.12),
+                                          .withAlpha(30),
                                       highlightColor: Colors.transparent,
                                       child: AnimatedContainer(
                                         duration: const Duration(
@@ -152,7 +152,7 @@ class FloatingBottomNavBar extends StatelessWidget {
                                                     : colorScheme
                                                         .onSurfaceVariant,
                                                 fontWeight: isSelected
-                                                    ? FontWeight.bold
+                                                    ? FontWeight.w600
                                                     : FontWeight.w500,
                                               ),
                                             ),
@@ -183,8 +183,7 @@ class FloatingBottomNavBar extends StatelessWidget {
                                 message: fabTooltip ?? 'Action',
                                 child: Material(
                                   elevation: 3,
-                                  shadowColor:
-                                      colorScheme.shadow.withOpacity(0.12),
+                                  shadowColor: colorScheme.shadow.withAlpha(30),
                                   color: Colors.transparent,
                                   shape: const CircleBorder(),
                                   clipBehavior: Clip.antiAlias,

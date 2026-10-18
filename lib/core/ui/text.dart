@@ -27,7 +27,7 @@ extension LockMySlotText on Widget {
   /// Display / large heading.
   Widget h1() => _styled(
     style: (tt, _) => tt.displaySmall?.copyWith(
-      fontWeight: FontWeight.bold,
+      fontWeight: FontWeight.w600,
       letterSpacing: -0.5,
     ),
   );
@@ -35,7 +35,7 @@ extension LockMySlotText on Widget {
   /// Heading 2, with a bottom border (mirrors shadcn's h2).
   Widget h2() => _styled(
     style: (tt, _) => tt.headlineMedium?.copyWith(
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w600,
       letterSpacing: -0.3,
     ),
     wrapper: (context, child) => Padding(
@@ -56,14 +56,14 @@ extension LockMySlotText on Widget {
   /// Heading 3.
   Widget h3() => _styled(
     style: (tt, _) => tt.headlineSmall?.copyWith(
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w500,
       letterSpacing: -0.2,
     ),
   );
 
   /// Heading 4.
   Widget h4() => _styled(
-    style: (tt, _) => tt.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+    style: (tt, _) => tt.titleLarge?.copyWith(fontWeight: FontWeight.w500),
   );
 
   /// Paragraph with top spacing (mirrors shadcn's p).
@@ -87,7 +87,7 @@ extension LockMySlotText on Widget {
 
   /// Large text.
   Widget textLarge() => _styled(
-    style: (tt, _) => tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+    style: (tt, _) => tt.titleMedium?.copyWith(fontWeight: FontWeight.w500),
   );
 
   /// Muted (secondary) foreground color.
@@ -102,9 +102,9 @@ extension LockMySlotText on Widget {
     ),
   );
 
-  /// Semi-bold weight.
+  /// Medium weight.
   Widget semiBold() =>
-      _styled(style: (_, __) => const TextStyle(fontWeight: FontWeight.w600));
+      _styled(style: (_, __) => const TextStyle(fontWeight: FontWeight.w500));
 
   /// Bold weight.
   Widget bold() =>

@@ -16,9 +16,31 @@ class AppTheme {
       brightness: Brightness.dark,
       fontFamily: _fontFamily,
       colorScheme: cs,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
+        backgroundColor: cs.surface,
+        foregroundColor: cs.onSurface,
+        titleTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 26,
+          fontWeight: FontWeight.bold,
+          color: cs.onSurface,
+        ),
+      ),
+      textTheme: TextTheme(
+        headlineMedium: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 36,
+          fontWeight: FontWeight.bold,
+          color: cs.onSurface,
+        ),
+        headlineLarge: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 40,
+          fontWeight: FontWeight.bold,
+          color: cs.onSurface,
+        ),
       ),
     );
   }
@@ -35,9 +57,31 @@ class AppTheme {
       brightness: Brightness.light,
       fontFamily: _fontFamily,
       colorScheme: cs,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
+        backgroundColor: cs.surface,
+        foregroundColor: cs.onSurface,
+        titleTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 26,
+          fontWeight: FontWeight.bold,
+          color: cs.onSurface,
+        ),
+      ),
+      textTheme: TextTheme(
+        headlineMedium: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 36,
+          fontWeight: FontWeight.bold,
+          color: cs.onSurface,
+        ),
+        headlineLarge: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 40,
+          fontWeight: FontWeight.bold,
+          color: cs.onSurface,
+        ),
       ),
     );
   }
