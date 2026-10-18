@@ -1,5 +1,5 @@
 class ApiConstants {
-  static String baseUrl = 'http://192.168.1.6:3000/api/v1';
+  static String baseUrl = 'http://127.0.0.1:3000/api/v1';
 
   // Auth
   static const String register = '/auth/register';
@@ -32,4 +32,16 @@ class ApiConstants {
   static String cancelBooking(String groupId, String bookingId) =>
       '/groups/$groupId/bookings/$bookingId';
   static String myBookings(String groupId) => '/groups/$groupId/my_bookings';
+
+  // Maintenance
+  static String resourceMaintenance(String groupId, String resourceId) =>
+      '/groups/$groupId/resources/$resourceId/maintenance';
+  static String groupMaintenance(String groupId) =>
+      '/groups/$groupId/maintenance';
+  static String maintenanceDetail(
+    String groupId,
+    String resourceId,
+    String taskId,
+  ) =>
+      '/groups/$groupId/resources/$resourceId/maintenance/$taskId';
 }
