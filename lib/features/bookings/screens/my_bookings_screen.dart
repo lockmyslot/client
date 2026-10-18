@@ -46,7 +46,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
                 child: Row(
                   children: [
                     _buildFilterChip('All', null),
@@ -58,36 +58,39 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                 ),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-              sliver: bookingsAsync.when(
-                loading: () => const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (err, _) => SliverFillRemaining(
-                  child: ErrorDisplay(
-                    error: err.toString(),
-                    onRetry: () => ref.invalidate(
-                      myBookingsProvider((
-                        groupId: widget.groupId,
-                        status: _selectedStatusFilter,
-                      )),
-                    ),
+            bookingsAsync.when(
+              loading: () => const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, _) => SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorDisplay(
+                  error: err.toString(),
+                  onRetry: () => ref.invalidate(
+                    myBookingsProvider((
+                      groupId: widget.groupId,
+                      status: _selectedStatusFilter,
+                    )),
                   ),
                 ),
-                data: (bookings) {
-                  if (bookings.isEmpty) {
-                    return SliverFillRemaining(
-                      child: EmptyState(
-                        icon: Icons.bookmark_border,
-                        title: 'No Personal Bookings',
-                        description:
-                            'You have no active or past bookings in this group.',
-                      ),
-                    );
-                  }
+              ),
+              data: (bookings) {
+                if (bookings.isEmpty) {
+                  return const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      icon: Icons.bookmark_border,
+                      title: 'No Personal Bookings',
+                      description:
+                          'You have no active or past bookings in this group.',
+                    ),
+                  );
+                }
 
-                  return SliverList(
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                  sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final booking = bookings[index];
@@ -209,9 +212,9 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                       },
                       childCount: bookings.length,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ],
         ),

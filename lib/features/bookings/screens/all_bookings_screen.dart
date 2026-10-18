@@ -98,11 +98,12 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SingleChildScrollView(
+                      clipBehavior: Clip.none,
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
@@ -170,6 +171,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                     if (groupNames.length > 1) ...[
                       const SizedBox(height: 8),
                       SingleChildScrollView(
+                        clipBehavior: Clip.none,
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
@@ -185,7 +187,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                             ),
                             ...groupNames.entries.map((entry) {
                               final isSelected =
-                                  _selectedGroupFilter == entry.key;
+                                    _selectedGroupFilter == entry.key;
                               return Padding(
                                 padding: const EdgeInsets.only(left: 8),
                                 child: ChoiceChip(
@@ -212,39 +214,39 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                 ),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-              sliver: bookingsAsync.when(
-                loading: () => const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (err, _) => SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: ErrorDisplay(
-                    error: err.toString(),
-                    onRetry: () => ref.invalidate(
-                      allBookingsProvider((
-                        groupId: _selectedGroupFilter,
-                        status: _selectedStatusFilter,
-                      )),
-                    ),
+            bookingsAsync.when(
+              loading: () => const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, _) => SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorDisplay(
+                  error: err.toString(),
+                  onRetry: () => ref.invalidate(
+                    allBookingsProvider((
+                      groupId: _selectedGroupFilter,
+                      status: _selectedStatusFilter,
+                    )),
                   ),
                 ),
-                data: (bookings) {
-                  if (bookings.isEmpty) {
-                    return const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: EmptyState(
-                        icon: Icons.bookmark_border_outlined,
-                        title: 'No Bookings Found',
-                        description:
-                            'You have no bookings matching the criteria.',
-                      ),
-                    );
-                  }
+              ),
+              data: (bookings) {
+                if (bookings.isEmpty) {
+                  return const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      icon: Icons.bookmark_border_outlined,
+                      title: 'No Bookings Found',
+                      description:
+                          'You have no bookings matching the criteria.',
+                    ),
+                  );
+                }
 
-                  return SliverList(
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final booking = bookings[index];
@@ -401,9 +403,9 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                       },
                       childCount: bookings.length,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ],
         ),
