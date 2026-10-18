@@ -63,25 +63,25 @@ flutter:
   uses-material-design: true
 
   fonts:
-    - family: GoogleSansFlex
+    - family: GoogleSansFlexRounded
       fonts:
-        - asset: assets/fonts/GoogleSansFlex-100.ttf
+        - asset: assets/fonts/GoogleSansRounded-Thin.ttf
           weight: 100
-        - asset: assets/fonts/GoogleSansFlex-200.ttf
+        - asset: assets/fonts/GoogleSansRounded-ExtraLight.ttf
           weight: 200
-        - asset: assets/fonts/GoogleSansFlex-300.ttf
+        - asset: assets/fonts/GoogleSansRounded-Light.ttf
           weight: 300
-        - asset: assets/fonts/GoogleSansFlex-400.ttf
+        - asset: assets/fonts/GoogleSansRounded-Regular.ttf
           weight: 400
-        - asset: assets/fonts/GoogleSansFlex-500.ttf
+        - asset: assets/fonts/GoogleSansRounded-Medium.ttf
           weight: 500
-        - asset: assets/fonts/GoogleSansFlex-600.ttf
+        - asset: assets/fonts/GoogleSansRounded-Bold.ttf
           weight: 600
-        - asset: assets/fonts/GoogleSansFlex-700.ttf
+        - asset: assets/fonts/GoogleSansRounded-Bold.ttf
           weight: 700
-        - asset: assets/fonts/GoogleSansFlex-800.ttf
+        - asset: assets/fonts/GoogleSansRounded-Bold.ttf
           weight: 800
-        - asset: assets/fonts/GoogleSansFlex-900.ttf
+        - asset: assets/fonts/GoogleSansRounded-Bold.ttf
           weight: 900
     - family: GoogleSansCode
       fonts:

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   static const Color _seedColor = Color(0xFF3F51B5);
-  static const String _fontFamily = 'GoogleSansFlex';
+  static const String _fontFamily = 'GoogleSansFlexRounded';
 
   static ThemeData darkTheme([ColorScheme? colorScheme]) {
     final cs =
