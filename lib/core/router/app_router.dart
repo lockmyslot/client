@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/register_screen.dart';
+import '../../features/home/screens/main_shell_screen.dart';
 import '../../features/groups/screens/groups_list_screen.dart';
 import '../../features/groups/screens/create_group_screen.dart';
 import '../../features/groups/screens/join_group_screen.dart';
@@ -17,6 +18,8 @@ import '../../features/bookings/screens/availability_screen.dart';
 import '../../features/bookings/screens/quick_booking_screen.dart';
 import '../../features/bookings/screens/bookings_calendar_screen.dart';
 import '../../features/bookings/screens/my_bookings_screen.dart';
+import '../../features/bookings/screens/all_bookings_screen.dart';
+import '../../features/profile/screens/me_profile_screen.dart';
 
 CustomTransitionPage<void> _buildSmoothTransition({
   required GoRouterState state,
@@ -50,8 +53,6 @@ CustomTransitionPage<void> _buildSmoothTransition({
         reverseCurve: Curves.easeInCubic,
       );
 
-      // The outgoing page is pushed slightly to the left while the incoming
-      // one slides in, producing a subtle parallax effect.
       final secondarySlide = Tween<Offset>(
         begin: Offset.zero,
         end: const Offset(-0.04, 0.0),
@@ -83,7 +84,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (!authState.isAuthenticated) {
         if (isLoggingIn) return null;
         final target = state.uri.toString();
-        if (target.isNotEmpty && target != '/' && target != '/groups') {
+        if (target.isNotEmpty &&
+            target != '/' &&
+            target != '/groups' &&
+            target != '/bookings' &&
+            target != '/me') {
           return '/register?returnTo=${Uri.encodeComponent(target)}';
         }
         return '/register';
@@ -126,140 +131,165 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ),
       ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainShellScreen(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/groups',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: GroupsListScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/bookings',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: AllBookingsScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/me',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: MeProfileScreen()),
+              ),
+            ],
+          ),
+        ],
+      ),
       GoRoute(
-        path: '/groups',
+        path: '/groups/create',
         pageBuilder: (context, state) => _buildSmoothTransition(
           state: state,
-          child: const GroupsListScreen(),
+          child: const CreateGroupScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/groups/join',
+        pageBuilder: (context, state) => _buildSmoothTransition(
+          state: state,
+          child: JoinGroupScreen(
+            initialCode: state.uri.queryParameters['code'],
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/groups/:group_id',
+        pageBuilder: (context, state) {
+          final groupId = state.pathParameters['group_id']!;
+          return _buildSmoothTransition(
+            state: state,
+            child: GroupDetailScreen(groupId: groupId),
+          );
+        },
         routes: [
           GoRoute(
-            path: 'create',
-            pageBuilder: (context, state) => _buildSmoothTransition(
-              state: state,
-              child: const CreateGroupScreen(),
-            ),
-          ),
-          GoRoute(
-            path: 'join',
-            pageBuilder: (context, state) => _buildSmoothTransition(
-              state: state,
-              child: JoinGroupScreen(
-                initialCode: state.uri.queryParameters['code'],
-              ),
-            ),
-          ),
-          GoRoute(
-            path: ':group_id',
+            path: 'members',
             pageBuilder: (context, state) {
               final groupId = state.pathParameters['group_id']!;
               return _buildSmoothTransition(
                 state: state,
-                child: GroupDetailScreen(groupId: groupId),
+                child: MembersScreen(groupId: groupId),
+              );
+            },
+          ),
+          GoRoute(
+            path: 'my_bookings',
+            pageBuilder: (context, state) {
+              final groupId = state.pathParameters['group_id']!;
+              return _buildSmoothTransition(
+                state: state,
+                child: MyBookingsScreen(groupId: groupId),
+              );
+            },
+          ),
+          GoRoute(
+            path: 'resources/create',
+            pageBuilder: (context, state) {
+              final groupId = state.pathParameters['group_id']!;
+              return _buildSmoothTransition(
+                state: state,
+                child: CreateResourceScreen(groupId: groupId),
+              );
+            },
+          ),
+          GoRoute(
+            path: 'resources/:resource_id',
+            pageBuilder: (context, state) {
+              final groupId = state.pathParameters['group_id']!;
+              final resourceId = state.pathParameters['resource_id']!;
+              return _buildSmoothTransition(
+                state: state,
+                child: ResourceDetailScreen(
+                  groupId: groupId,
+                  resourceId: resourceId,
+                ),
               );
             },
             routes: [
               GoRoute(
-                path: 'members',
-                pageBuilder: (context, state) {
-                  final groupId = state.pathParameters['group_id']!;
-                  return _buildSmoothTransition(
-                    state: state,
-                    child: MembersScreen(groupId: groupId),
-                  );
-                },
-              ),
-              GoRoute(
-                path: 'my_bookings',
-                pageBuilder: (context, state) {
-                  final groupId = state.pathParameters['group_id']!;
-                  return _buildSmoothTransition(
-                    state: state,
-                    child: MyBookingsScreen(groupId: groupId),
-                  );
-                },
-              ),
-              GoRoute(
-                path: 'resources/create',
-                pageBuilder: (context, state) {
-                  final groupId = state.pathParameters['group_id']!;
-                  return _buildSmoothTransition(
-                    state: state,
-                    child: CreateResourceScreen(groupId: groupId),
-                  );
-                },
-              ),
-              GoRoute(
-                path: 'resources/:resource_id',
+                path: 'rules',
                 pageBuilder: (context, state) {
                   final groupId = state.pathParameters['group_id']!;
                   final resourceId = state.pathParameters['resource_id']!;
                   return _buildSmoothTransition(
                     state: state,
-                    child: ResourceDetailScreen(
+                    child: BookingRulesScreen(
                       groupId: groupId,
                       resourceId: resourceId,
                     ),
                   );
                 },
-                routes: [
-                  GoRoute(
-                    path: 'rules',
-                    pageBuilder: (context, state) {
-                      final groupId = state.pathParameters['group_id']!;
-                      final resourceId = state.pathParameters['resource_id']!;
-                      return _buildSmoothTransition(
-                        state: state,
-                        child: BookingRulesScreen(
-                          groupId: groupId,
-                          resourceId: resourceId,
-                        ),
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'book',
-                    pageBuilder: (context, state) {
-                      final groupId = state.pathParameters['group_id']!;
-                      final resourceId = state.pathParameters['resource_id']!;
-                      return _buildSmoothTransition(
-                        state: state,
-                        child: AvailabilityScreen(
-                          groupId: groupId,
-                          resourceId: resourceId,
-                        ),
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'bookings',
-                    pageBuilder: (context, state) {
-                      final groupId = state.pathParameters['group_id']!;
-                      final resourceId = state.pathParameters['resource_id']!;
-                      return _buildSmoothTransition(
-                        state: state,
-                        child: BookingsCalendarScreen(
-                          groupId: groupId,
-                          resourceId: resourceId,
-                        ),
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'maintenance',
-                    pageBuilder: (context, state) {
-                      final groupId = state.pathParameters['group_id']!;
-                      final resourceId = state.pathParameters['resource_id']!;
-                      return _buildSmoothTransition(
-                        state: state,
-                        child: MaintenanceTasksScreen(
-                          groupId: groupId,
-                          resourceId: resourceId,
-                        ),
-                      );
-                    },
-                  ),
-                ],
+              ),
+              GoRoute(
+                path: 'book',
+                pageBuilder: (context, state) {
+                  final groupId = state.pathParameters['group_id']!;
+                  final resourceId = state.pathParameters['resource_id']!;
+                  return _buildSmoothTransition(
+                    state: state,
+                    child: AvailabilityScreen(
+                      groupId: groupId,
+                      resourceId: resourceId,
+                    ),
+                  );
+                },
+              ),
+              GoRoute(
+                path: 'bookings',
+                pageBuilder: (context, state) {
+                  final groupId = state.pathParameters['group_id']!;
+                  final resourceId = state.pathParameters['resource_id']!;
+                  return _buildSmoothTransition(
+                    state: state,
+                    child: BookingsCalendarScreen(
+                      groupId: groupId,
+                      resourceId: resourceId,
+                    ),
+                  );
+                },
+              ),
+              GoRoute(
+                path: 'maintenance',
+                pageBuilder: (context, state) {
+                  final groupId = state.pathParameters['group_id']!;
+                  final resourceId = state.pathParameters['resource_id']!;
+                  return _buildSmoothTransition(
+                    state: state,
+                    child: MaintenanceTasksScreen(
+                      groupId: groupId,
+                      resourceId: resourceId,
+                    ),
+                  );
+                },
               ),
             ],
           ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/groups_provider.dart';
-import '../../auth/providers/auth_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -13,91 +12,12 @@ class GroupsListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groupsAsync = ref.watch(myGroupsProvider);
-    final user = ref.watch(authProvider).user;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Groups'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.account_circle_outlined, size: 32),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(user?.displayName ?? 'User Profile').h3(),
-                                const Text('Member').small().muted(),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    SecondaryButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
-                    ),
-                    const SizedBox(width: 12),
-                    PrimaryButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        ref.read(authProvider.notifier).logout();
-                      },
-                      child: const Text('Logout'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-        bottom: AppBarToolbar(
-          child: Row(
-            children: [
-              Expanded(
-                child: FilledButton.tonalIcon(
-                  onPressed: () => context.push('/groups/join'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                  ),
-                  icon: const Icon(Icons.vpn_key_outlined, size: 16),
-                  label: const Text('Join Group'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () => context.push('/groups/create'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                  ),
-                  icon: const Icon(Icons.add_outlined, size: 16),
-                  label: const Text('Create Group'),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
       body: SlideFadeSwitcher(
         child: groupsAsync.when(
@@ -134,7 +54,7 @@ class GroupsListScreen extends ConsumerWidget {
               child: RefreshIndicator(
                 onRefresh: () => ref.read(myGroupsProvider.notifier).refresh(),
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                   itemCount: groups.length,
                   itemBuilder: (context, index) {
                     final group = groups[index];
@@ -145,6 +65,14 @@ class GroupsListScreen extends ConsumerWidget {
                         child: PressableScale(
                           onTap: () => context.push('/groups/${group.id}'),
                           child: Card(
+                            elevation: 0,
+                            color: colorScheme.surfaceContainerLow,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(
+                                color: colorScheme.outlineVariant.withOpacity(0.4),
+                              ),
+                            ),
                             child: Padding(
                               padding: kCardPadding,
                               child: Row(
@@ -152,14 +80,13 @@ class GroupsListScreen extends ConsumerWidget {
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(8),
+                                      color: colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.group_outlined,
                                       size: 24,
+                                      color: colorScheme.onPrimaryContainer,
                                     ),
                                   ),
                                   const SizedBox(width: 16),
@@ -174,8 +101,23 @@ class GroupsListScreen extends ConsumerWidget {
                                               child: Text(group.name).h4(),
                                             ),
                                             const SizedBox(width: 8),
-                                            PrimaryBadge(
-                                              child: Text(group.role),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: colorScheme.secondaryContainer,
+                                                borderRadius: BorderRadius.circular(16),
+                                              ),
+                                              child: Text(
+                                                group.role,
+                                                style: TextStyle(
+                                                  color: colorScheme.onSecondaryContainer,
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -198,33 +140,6 @@ class GroupsListScreen extends ConsumerWidget {
               ),
             );
           },
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            border: Border(
-              top: BorderSide(
-                color: Theme.of(context).colorScheme.outlineVariant,
-                width: 1,
-              ),
-            ),
-          ),
-          child: PrimaryButton(
-            expand: true,
-            onPressed: () => context.push('/quick-book'),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.bolt_outlined, size: 18),
-                SizedBox(width: 8),
-                Text('Quick Book'),
-              ],
-            ),
-          ),
         ),
       ),
     );
