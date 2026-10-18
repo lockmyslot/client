@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/ui/ui.dart';
 
 class EmptyState extends StatelessWidget {
   final IconData icon;
@@ -17,41 +16,43 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Entrance(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Entrance(
-                delay: const Duration(milliseconds: 60),
-                curve: Curves.elasticOut,
-                child: Icon(icon, size: 56, color: cs.onSurfaceVariant),
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 40,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
               ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+            if (action != null) ...[
               const SizedBox(height: 16),
-              Entrance(
-                delay: const Duration(milliseconds: 140),
-                child: Text(title, textAlign: TextAlign.center).h3(),
-              ),
-              const SizedBox(height: 8),
-              Entrance(
-                delay: const Duration(milliseconds: 220),
-                child: Text(
-                  description,
-                  textAlign: TextAlign.center,
-                ).muted().p(),
-              ),
-              if (action != null) ...[
-                const SizedBox(height: 24),
-                Entrance(
-                  delay: const Duration(milliseconds: 300),
-                  child: action!,
-                ),
-              ],
+              action!,
             ],
-          ),
+          ],
         ),
       ),
     );

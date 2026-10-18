@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/my_bookings_provider.dart';
-import '../data/bookings_repository.dart';
 import '../../groups/providers/groups_provider.dart';
+import '../data/bookings_repository.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
@@ -17,14 +18,51 @@ class AllBookingsScreen extends ConsumerStatefulWidget {
 }
 
 class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
-  String? _selectedStatusFilter;
   String? _selectedGroupFilter;
+  String? _selectedStatusFilter;
+
+  Widget _buildStatusBadge(String status) {
+    Color bg;
+    Color fg;
+
+    switch (status.toUpperCase()) {
+      case 'CONFIRMED':
+        bg = Colors.green.withValues(alpha: 0.12);
+        fg = Colors.green.shade700;
+        break;
+      case 'CANCELLED':
+        bg = Colors.red.withValues(alpha: 0.12);
+        fg = Colors.red.shade700;
+        break;
+      case 'COMPLETED':
+        bg = Colors.blue.withValues(alpha: 0.12);
+        fg = Colors.blue.shade700;
+        break;
+      default:
+        bg = Colors.grey.withValues(alpha: 0.12);
+        fg = Colors.grey.shade700;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          color: fg,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final groupsAsync = ref.watch(myGroupsProvider);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     final bookingsAsync = ref.watch(
       allBookingsProvider((
@@ -33,7 +71,8 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
       )),
     );
 
-    final Map<String, String> groupNames = {};
+    final groupsAsync = ref.watch(myGroupsProvider);
+    final groupNames = <String, String>{};
     groupsAsync.whenData((groups) {
       for (final g in groups) {
         groupNames[g.id] = g.name;
@@ -42,48 +81,134 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(
-          allBookingsProvider((
-            groupId: _selectedGroupFilter,
-            status: _selectedStatusFilter,
-          )),
-        ),
+        onRefresh: () async {
+          ref.invalidate(
+            allBookingsProvider((
+              groupId: _selectedGroupFilter,
+              status: _selectedStatusFilter,
+            )),
+          );
+        },
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            const SliverAppBar.large(
-              title: Text('Bookings'),
+            SliverAppBar.large(
+              title: const Text('Bookings'),
               pinned: true,
             ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildM3FilterChip('All', null),
-                      const SizedBox(width: 8),
-                      _buildM3FilterChip('Confirmed', 'CONFIRMED'),
-                      const SizedBox(width: 8),
-                      _buildM3FilterChip('Cancelled', 'CANCELLED'),
-                      groupsAsync.maybeWhen(
-                        data: (groups) {
-                          if (groups.length <= 1) {
-                            return const SizedBox.shrink();
-                          }
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const SizedBox(width: 8),
-                              _buildM3GroupFilterMenu(groups),
-                            ],
-                          );
-                        },
-                        orElse: () => const SizedBox.shrink(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          FilterChip(
+                            selected: _selectedStatusFilter == null,
+                            label: const Text('All Status'),
+                            onSelected: (_) {
+                              setState(() => _selectedStatusFilter = null);
+                            },
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FilterChip(
+                            selected: _selectedStatusFilter == 'CONFIRMED',
+                            label: const Text('Confirmed'),
+                            onSelected: (_) {
+                              setState(() {
+                                _selectedStatusFilter =
+                                    _selectedStatusFilter == 'CONFIRMED'
+                                        ? null
+                                        : 'CONFIRMED';
+                              });
+                            },
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FilterChip(
+                            selected: _selectedStatusFilter == 'CANCELLED',
+                            label: const Text('Cancelled'),
+                            onSelected: (_) {
+                              setState(() {
+                                _selectedStatusFilter =
+                                    _selectedStatusFilter == 'CANCELLED'
+                                        ? null
+                                        : 'CANCELLED';
+                              });
+                            },
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FilterChip(
+                            selected: _selectedStatusFilter == 'COMPLETED',
+                            label: const Text('Completed'),
+                            onSelected: (_) {
+                              setState(() {
+                                _selectedStatusFilter =
+                                    _selectedStatusFilter == 'COMPLETED'
+                                        ? null
+                                        : 'COMPLETED';
+                              });
+                            },
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (groupNames.length > 1) ...[
+                      const SizedBox(height: 8),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            ChoiceChip(
+                              selected: _selectedGroupFilter == null,
+                              label: const Text('All Groups'),
+                              onSelected: (_) {
+                                setState(() => _selectedGroupFilter = null);
+                              },
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            ...groupNames.entries.map((entry) {
+                              final isSelected =
+                                  _selectedGroupFilter == entry.key;
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: ChoiceChip(
+                                  selected: isSelected,
+                                  label: Text(entry.value),
+                                  onSelected: (_) {
+                                    setState(() {
+                                      _selectedGroupFilter = isSelected
+                                          ? null
+                                          : entry.key;
+                                    });
+                                  },
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -91,9 +216,11 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               sliver: bookingsAsync.when(
                 loading: () => const SliverFillRemaining(
+                  hasScrollBody: false,
                   child: Center(child: CircularProgressIndicator()),
                 ),
                 error: (err, _) => SliverFillRemaining(
+                  hasScrollBody: false,
                   child: ErrorDisplay(
                     error: err.toString(),
                     onRetry: () => ref.invalidate(
@@ -106,7 +233,8 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                 ),
                 data: (bookings) {
                   if (bookings.isEmpty) {
-                    return SliverFillRemaining(
+                    return const SliverFillRemaining(
+                      hasScrollBody: false,
                       child: EmptyState(
                         icon: Icons.bookmark_border_outlined,
                         title: 'No Bookings Found',
@@ -137,14 +265,13 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                 borderRadius: BorderRadius.circular(16),
                                 side: BorderSide(
                                   color: colorScheme.outlineVariant
-                                      .withOpacity(0.4),
+                                      .withValues(alpha: 0.4),
                                 ),
                               ),
                               child: Padding(
                                 padding: kCardPadding,
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       crossAxisAlignment:
@@ -188,8 +315,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: colorScheme.surfaceContainer,
-                                        borderRadius:
-                                            BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Row(
                                         children: [
@@ -211,7 +337,8 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                         ],
                                       ),
                                     ),
-                                    if (booking.isConfirmed &&
+                                    if (booking.status.toUpperCase() ==
+                                            'CONFIRMED' &&
                                         isUpcoming) ...[
                                       const SizedBox(height: 12),
                                       Align(
@@ -238,21 +365,21 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                                   );
                                               ref.invalidate(
                                                 allBookingsProvider((
-                                                  groupId: _selectedGroupFilter,
-                                                  status: _selectedStatusFilter,
+                                                  groupId:
+                                                      _selectedGroupFilter,
+                                                  status:
+                                                      _selectedStatusFilter,
                                                 )),
                                               );
                                             }
                                           },
                                           style: OutlinedButton.styleFrom(
-                                            foregroundColor:
-                                                colorScheme.error,
+                                            foregroundColor: colorScheme.error,
                                             side: BorderSide(
                                               color: colorScheme.error
-                                                  .withOpacity(0.5),
+                                                  .withValues(alpha: 0.5),
                                             ),
-                                            padding:
-                                                const EdgeInsets.symmetric(
+                                            padding: const EdgeInsets.symmetric(
                                               horizontal: 12,
                                               vertical: 6,
                                             ),
@@ -279,94 +406,6 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildM3FilterChip(String label, String? value) {
-    final isSelected = _selectedStatusFilter == value;
-    return FilterChip(
-      selected: isSelected,
-      label: Text(label),
-      onSelected: (_) {
-        setState(() => _selectedStatusFilter = value);
-      },
-      showCheckmark: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    );
-  }
-
-  Widget _buildM3GroupFilterMenu(List<dynamic> groups) {
-    final selectedName = groups
-        .firstWhere(
-          (g) => g.id == _selectedGroupFilter,
-          orElse: () => null,
-        )
-        ?.name;
-
-    return PopupMenuButton<String?>(
-      initialValue: _selectedGroupFilter,
-      onSelected: (value) {
-        setState(() => _selectedGroupFilter = value);
-      },
-      child: FilterChip(
-        selected: _selectedGroupFilter != null,
-        label: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(selectedName ?? 'All Groups'),
-            const SizedBox(width: 4),
-            const Icon(Icons.arrow_drop_down, size: 18),
-          ],
-        ),
-        onSelected: null,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      itemBuilder: (context) => [
-        const PopupMenuItem<String?>(
-          value: null,
-          child: Text('All Groups'),
-        ),
-        ...groups.map(
-          (g) => PopupMenuItem<String?>(
-            value: g.id as String,
-            child: Text(g.name as String),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusBadge(String status) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isConfirmed = status.toUpperCase() == 'CONFIRMED';
-    final isCancelled = status.toUpperCase() == 'CANCELLED';
-
-    final bg = isConfirmed
-        ? colorScheme.secondaryContainer
-        : isCancelled
-            ? colorScheme.errorContainer
-            : colorScheme.surfaceContainerHighest;
-
-    final fg = isConfirmed
-        ? colorScheme.onSecondaryContainer
-        : isCancelled
-            ? colorScheme.onErrorContainer
-            : colorScheme.onSurfaceVariant;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          color: fg,
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
