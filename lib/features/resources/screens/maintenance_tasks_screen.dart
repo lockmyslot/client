@@ -5,6 +5,9 @@ import '../data/models/maintenance_task.dart';
 import '../providers/maintenance_provider.dart';
 import '../providers/resources_provider.dart';
 import 'schedule_maintenance_sheet.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../groups/data/models/group_member.dart';
+import '../../groups/providers/groups_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -123,10 +126,108 @@ class _MaintenanceTasksScreenState
     }
   }
 
+  Future<void> _showAssignMemberDialog(
+    MaintenanceTask task,
+    List<GroupMember> members,
+  ) async {
+    String? chosenUserId = task.assignedToId;
+
+    final selected = await showDialog<String?>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text('Assign Maintenance Task'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select a member to assign to "${task.title}":',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String?>(
+                  initialValue: chosenUserId,
+                  decoration: const InputDecoration(
+                    labelText: 'Assignee',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    const DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('Unassigned'),
+                    ),
+                    ...members.map(
+                      (m) => DropdownMenuItem<String?>(
+                        value: m.userId,
+                        child: Text(
+                          m.displayName + (m.isAdmin ? ' (Admin)' : ''),
+                        ),
+                      ),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    setDialogState(() => chosenUserId = val);
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(task.assignedToId),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(ctx).pop(chosenUserId),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    if (selected != task.assignedToId) {
+      try {
+        await ref
+            .read(maintenanceActionsProvider.notifier)
+            .updateMaintenanceTask(
+              groupId: widget.groupId,
+              resourceId: widget.resourceId,
+              taskId: task.id,
+              body: {'assigned_to_id': selected},
+            );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Assignee updated successfully')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update assignee: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+
+    final authState = ref.watch(authProvider);
+    final currentUser = authState.user;
+    final membersAsync = ref.watch(groupMembersProvider(widget.groupId));
+    final members = membersAsync.value ?? [];
+    final currentMember =
+        members.where((m) => m.userId == currentUser?.id).firstOrNull;
+    final isAdmin = currentMember?.isAdmin ?? false;
 
     final resourceAsync = ref.watch(
       resourceDetailProvider((
@@ -189,6 +290,8 @@ class _MaintenanceTasksScreenState
               children: [
                 _buildFilterChip('ALL', 'All'),
                 const SizedBox(width: 8),
+                _buildFilterChip('ASSIGNED_TO_ME', 'Assigned to Me'),
+                const SizedBox(width: 8),
                 _buildFilterChip('ACTIVE', 'Active / Scheduled'),
                 const SizedBox(width: 8),
                 _buildFilterChip('RECURRING', 'Recurring'),
@@ -209,6 +312,10 @@ class _MaintenanceTasksScreenState
               ),
               data: (tasks) {
                 final filtered = tasks.where((t) {
+                  if (_selectedFilter == 'ASSIGNED_TO_ME') {
+                    return t.assignedToId != null &&
+                        t.assignedToId == currentUser?.id;
+                  }
                   if (_selectedFilter == 'ACTIVE') {
                     return t.isScheduled || t.isInProgress;
                   }
@@ -227,7 +334,9 @@ class _MaintenanceTasksScreenState
                     title: 'No Maintenance Tasks',
                     description: _selectedFilter == 'ALL'
                         ? 'No maintenance tasks scheduled for this resource yet.'
-                        : 'No tasks match the selected filter.',
+                        : (_selectedFilter == 'ASSIGNED_TO_ME'
+                            ? 'You have no maintenance tasks assigned to you.'
+                            : 'No tasks match the selected filter.'),
                     action: PrimaryButton(
                       onPressed: () {
                         final resName = resourceAsync.value?.name ?? 'Resource';
@@ -253,7 +362,14 @@ class _MaintenanceTasksScreenState
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (ctx, index) {
                       final task = filtered[index];
-                      return _buildTaskCard(task, cs, theme);
+                      return _buildTaskCard(
+                        task,
+                        cs,
+                        theme,
+                        members,
+                        isAdmin,
+                        currentUser?.id,
+                      );
                     },
                   ),
                 );
@@ -280,9 +396,14 @@ class _MaintenanceTasksScreenState
     MaintenanceTask task,
     ColorScheme cs,
     ThemeData theme,
+    List<GroupMember> members,
+    bool isAdmin,
+    String? currentUserId,
   ) {
     final statusColor = _getStatusColor(task.status, cs);
     final statusIcon = _getStatusIcon(task.status);
+    final isAssignee = task.assignedToId != null && task.assignedToId == currentUserId;
+    final canManageStatus = isAdmin || isAssignee;
 
     return Card(
       elevation: 0,
@@ -352,68 +473,167 @@ class _MaintenanceTasksScreenState
                     ),
                   ),
                 ),
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, size: 20),
-                  onSelected: (val) {
-                    if (val == 'IN_PROGRESS' ||
-                        val == 'COMPLETED' ||
-                        val == 'CANCELLED') {
-                      _updateStatus(task, val);
-                    } else if (val == 'DELETE') {
-                      _confirmDelete(task);
-                    }
-                  },
-                  itemBuilder: (ctx) => [
-                    if (task.isScheduled)
-                      const PopupMenuItem(
-                        value: 'IN_PROGRESS',
-                        child: Row(
-                          children: [
-                            Icon(Icons.play_arrow_outlined, size: 18),
-                            SizedBox(width: 8),
-                            Text('Mark In Progress'),
-                          ],
+                if (canManageStatus || isAdmin)
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, size: 20),
+                    onSelected: (val) {
+                      if (val == 'IN_PROGRESS' ||
+                          val == 'COMPLETED' ||
+                          val == 'CANCELLED') {
+                        _updateStatus(task, val);
+                      } else if (val == 'DELETE') {
+                        _confirmDelete(task);
+                      } else if (val == 'ASSIGN') {
+                        _showAssignMemberDialog(task, members);
+                      }
+                    },
+                    itemBuilder: (ctx) => [
+                      if (isAdmin)
+                        const PopupMenuItem(
+                          value: 'ASSIGN',
+                          child: Row(
+                            children: [
+                              Icon(Icons.person_add_outlined, size: 18),
+                              SizedBox(width: 8),
+                              Text('Assign Member'),
+                            ],
+                          ),
                         ),
-                      ),
-                    if (task.isScheduled || task.isInProgress) ...[
-                      const PopupMenuItem(
-                        value: 'COMPLETED',
-                        child: Row(
-                          children: [
-                            Icon(Icons.check_circle_outline, size: 18),
-                            SizedBox(width: 8),
-                            Text('Mark Completed'),
-                          ],
+                      if (canManageStatus && task.isScheduled)
+                        const PopupMenuItem(
+                          value: 'IN_PROGRESS',
+                          child: Row(
+                            children: [
+                              Icon(Icons.play_arrow_outlined, size: 18),
+                              SizedBox(width: 8),
+                              Text('Mark In Progress'),
+                            ],
+                          ),
                         ),
+                      if (canManageStatus && (task.isScheduled || task.isInProgress))
+                        const PopupMenuItem(
+                          value: 'COMPLETED',
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle_outline, size: 18),
+                              SizedBox(width: 8),
+                              Text('Mark Completed'),
+                            ],
+                          ),
+                        ),
+                      if (isAdmin && (task.isScheduled || task.isInProgress))
+                        const PopupMenuItem(
+                          value: 'CANCELLED',
+                          child: Row(
+                            children: [
+                              Icon(Icons.cancel_outlined, size: 18),
+                              SizedBox(width: 8),
+                              Text('Cancel Schedule'),
+                            ],
+                          ),
+                        ),
+                      if (isAdmin)
+                        const PopupMenuItem(
+                          value: 'DELETE',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline,
+                                  color: Colors.red, size: 18),
+                              SizedBox(width: 8),
+                              Text('Delete Task',
+                                  style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Assignee Row
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: task.assignedToId != null
+                        ? (isAssignee
+                            ? cs.primary.withValues(alpha: 0.15)
+                            : cs.secondaryContainer.withValues(alpha: 0.5))
+                        : cs.surfaceContainerHighest.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isAssignee
+                          ? cs.primary.withValues(alpha: 0.4)
+                          : Colors.transparent,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        task.assignedToId != null
+                            ? Icons.person
+                            : Icons.person_off_outlined,
+                        size: 14,
+                        color: task.assignedToId != null
+                            ? (isAssignee
+                                ? cs.primary
+                                : cs.onSecondaryContainer)
+                            : cs.onSurfaceVariant,
                       ),
-                      const PopupMenuItem(
-                        value: 'CANCELLED',
-                        child: Row(
-                          children: [
-                            Icon(Icons.cancel_outlined, size: 18),
-                            SizedBox(width: 8),
-                            Text('Cancel Schedule'),
-                          ],
+                      const SizedBox(width: 5),
+                      Text(
+                        task.assignedToId != null
+                            ? (isAssignee
+                                ? 'Assigned to You (${task.assignedToName})'
+                                : 'Assigned: ${task.assignedToName}')
+                            : 'Unassigned',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: task.assignedToId != null
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          color: task.assignedToId != null
+                              ? (isAssignee
+                                  ? cs.primary
+                                  : cs.onSecondaryContainer)
+                              : cs.onSurfaceVariant,
                         ),
                       ),
                     ],
-                    const PopupMenuItem(
-                      value: 'DELETE',
+                  ),
+                ),
+                if (isAdmin) ...[
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () => _showAssignMemberDialog(task, members),
+                    borderRadius: BorderRadius.circular(6),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                       child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.delete_outline,
-                              color: Colors.red, size: 18),
-                          SizedBox(width: 8),
-                          Text('Delete Task',
-                              style: TextStyle(color: Colors.red)),
+                          Icon(Icons.edit_outlined, size: 13, color: cs.primary),
+                          const SizedBox(width: 3),
+                          Text(
+                            task.assignedToId != null ? 'Reassign' : 'Assign',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: cs.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ],
             ),
-            const SizedBox(height: 12),
+
+            const SizedBox(height: 10),
             const Divider(height: 1),
             const SizedBox(height: 10),
 

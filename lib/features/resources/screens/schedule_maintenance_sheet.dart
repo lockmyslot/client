@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/maintenance_provider.dart';
+import '../../groups/providers/groups_provider.dart';
 import '../../../core/api/api_exceptions.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
@@ -53,6 +54,7 @@ class _ScheduleMaintenanceSheetState
   DateTime _endDate = DateTime.now().add(const Duration(hours: 3));
   TimeOfDay _startTimeOfDay = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTimeOfDay = const TimeOfDay(hour: 11, minute: 0);
+  String? _selectedAssigneeId;
   bool _cancelConflicting = false;
   bool _isLoading = false;
 
@@ -140,6 +142,8 @@ class _ScheduleMaintenanceSheetState
       'title': _titleController.text.trim(),
       if (_descriptionController.text.trim().isNotEmpty)
         'description': _descriptionController.text.trim(),
+      if (_selectedAssigneeId != null)
+        'assigned_to_id': _selectedAssigneeId,
       'recurrence_type': _recurrenceType,
       'cancel_conflicting_bookings': forceOverride || _cancelConflicting,
     };
@@ -243,6 +247,7 @@ class _ScheduleMaintenanceSheetState
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+    final membersAsync = ref.watch(groupMembersProvider(widget.groupId));
 
     return Container(
       decoration: BoxDecoration(
@@ -326,6 +331,70 @@ class _ScheduleMaintenanceSheetState
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+              ),
+              const SizedBox(height: 14),
+
+              // Assignee Field (Optional)
+              membersAsync.when(
+                data: (members) {
+                  return DropdownButtonFormField<String?>(
+                    initialValue: _selectedAssigneeId,
+                    decoration: InputDecoration(
+                      labelText: 'Assign To (Optional)',
+                      hintText: 'Select a group member',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('Unassigned'),
+                      ),
+                      ...members.map(
+                        (m) => DropdownMenuItem<String?>(
+                          value: m.userId,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(m.displayName),
+                              if (m.isAdmin) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: cs.primaryContainer,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'Admin',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: cs.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      setState(() => _selectedAssigneeId = val);
+                    },
+                  );
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: LinearProgressIndicator(),
+                ),
+                error: (_, __) => const SizedBox.shrink(),
               ),
               const SizedBox(height: 18),
 

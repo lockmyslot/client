@@ -14,6 +14,8 @@ class MaintenanceTask {
   final DateTime endTime;
   final String createdById;
   final String? createdByName;
+  final String? assignedToId;
+  final String? assignedToName;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final int? cancelledBookingsCount;
@@ -34,6 +36,8 @@ class MaintenanceTask {
     required this.endTime,
     required this.createdById,
     this.createdByName,
+    this.assignedToId,
+    this.assignedToName,
     required this.createdAt,
     this.updatedAt,
     this.cancelledBookingsCount,
@@ -131,6 +135,18 @@ class MaintenanceTask {
       createdByName:
           json['created_by_name'] as String? ??
           json['createdByName'] as String?,
+      assignedToId:
+          json['assigned_to_id'] as String? ??
+          json['assignedToId'] as String? ??
+          (json['assigned_to'] is Map
+              ? (json['assigned_to'] as Map<String, dynamic>)['id'] as String?
+              : null),
+      assignedToName:
+          json['assigned_to_name'] as String? ??
+          json['assignedToName'] as String? ??
+          (json['assigned_to'] is Map
+              ? (json['assigned_to'] as Map<String, dynamic>)['display_name'] as String?
+              : null),
       createdAt:
           json['created_at'] != null
               ? DateTime.parse(json['created_at'] as String)
@@ -166,6 +182,8 @@ class MaintenanceTask {
       'end_time': endTime.toIso8601String(),
       'created_by': createdById,
       if (createdByName != null) 'created_by_name': createdByName,
+      if (assignedToId != null) 'assigned_to_id': assignedToId,
+      if (assignedToName != null) 'assigned_to_name': assignedToName,
       'created_at': createdAt.toIso8601String(),
       if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
     };
