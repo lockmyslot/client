@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/floating_bottom_nav_bar.dart';
 import '../../groups/widgets/group_actions_fab.dart';
+import '../../groups/screens/groups_list_screen.dart';
+import '../../bookings/screens/all_bookings_screen.dart';
+import '../../profile/screens/me_profile_screen.dart';
 
 class MainShellScreen extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -15,62 +18,51 @@ class MainShellScreen extends StatefulWidget {
   State<MainShellScreen> createState() => _MainShellScreenState();
 }
 
-class _MainShellScreenState extends State<MainShellScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final CurvedAnimation _animation;
-  int _currentIndex = 0;
-  int _previousIndex = 0;
+class _MainShellScreenState extends State<MainShellScreen> {
+  late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.navigationShell.currentIndex;
-    _previousIndex = _currentIndex;
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 280),
+    _pageController = PageController(
+      initialPage: widget.navigationShell.currentIndex,
     );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    );
-    _controller.forward(from: 1.0);
   }
 
   @override
   void didUpdateWidget(MainShellScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     final newIndex = widget.navigationShell.currentIndex;
-    if (newIndex != _currentIndex) {
-      setState(() {
-        _previousIndex = _currentIndex;
-        _currentIndex = newIndex;
-      });
-      _controller.forward(from: 0.0);
+    if (_pageController.hasClients &&
+        (_pageController.page?.round() ?? _pageController.initialPage) !=
+            newIndex) {
+      _pageController.animateToPage(
+        newIndex,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeInOutCubic,
+      );
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isForward = _currentIndex >= _previousIndex;
-    final beginOffset = Offset(isForward ? 0.22 : -0.22, 0.0);
+    final currentIndex = widget.navigationShell.currentIndex;
 
     VoidCallback? fabAction;
     IconData? fabIcon;
     String? fabTooltip;
 
-    if (_currentIndex == 0) {
+    if (currentIndex == 0) {
       fabIcon = Icons.add;
       fabTooltip = 'Group Options';
       fabAction = () => showGroupActionSheet(context);
-    } else if (_currentIndex == 1) {
+    } else if (currentIndex == 1) {
       fabIcon = Icons.bolt_outlined;
       fabTooltip = 'Quick Book';
       fabAction = () => context.push('/quick-book');
@@ -79,18 +71,22 @@ class _MainShellScreenState extends State<MainShellScreen>
     return Scaffold(
       extendBody: true,
       resizeToAvoidBottomInset: false,
-      body: FadeTransition(
-        opacity: _animation,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: beginOffset,
-            end: Offset.zero,
-          ).animate(_animation),
-          child: widget.navigationShell,
-        ),
+      body: PageView(
+        controller: _pageController,
+        physics: const BouncingScrollPhysics(),
+        onPageChanged: (index) {
+          if (index != widget.navigationShell.currentIndex) {
+            widget.navigationShell.goBranch(index);
+          }
+        },
+        children: const [
+          GroupsListScreen(),
+          AllBookingsScreen(),
+          MeProfileScreen(),
+        ],
       ),
       bottomNavigationBar: FloatingBottomNavBar(
-        currentIndex: _currentIndex,
+        currentIndex: currentIndex,
         onTap: (newIndex) {
           widget.navigationShell.goBranch(
             newIndex,
