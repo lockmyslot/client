@@ -59,59 +59,63 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Group'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_outlined),
-          onPressed: () => context.pop(),
-        ),
-      ),
       body: LoadingOverlay(
         isLoading: _isLoading,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Entrance(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text('New Group').h3(),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Create a group for your team, apartment, studio, or club.',
-                      ).muted().small(),
-                      const SizedBox(height: 24),
-                      const Text('Group Name').small().semiBold(),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _nameController,
-                        textCapitalization: TextCapitalization.words,
-                        decoration: const InputDecoration(
-                          hintText: 'e.g., Design Studio, Tennis Club',
-                        ),
-                        onSubmitted: (_) => _handleCreate(),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            const SliverAppBar.large(
+              title: Text('Create Group'),
+              pinned: true,
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Center(
+                  child: Entrance(
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('New Group').h3(),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Create a group for your team, apartment, studio, or club.',
+                          ).muted().small(),
+                          const SizedBox(height: 24),
+                          const Text('Group Name').small().semiBold(),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _nameController,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(
+                              hintText: 'e.g., Design Studio, Tennis Club',
+                            ),
+                            onSubmitted: (_) => _handleCreate(),
+                          ),
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _errorMessage!,
+                              style: const TextStyle(color: Colors.red),
+                            ).small(),
+                          ],
+                          const SizedBox(height: 24),
+                          PrimaryButton(
+                            onPressed: _handleCreate,
+                            child: const Text('Create Group'),
+                          ),
+                        ],
                       ),
-                      if (_errorMessage != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ).small(),
-                      ],
-                      const SizedBox(height: 24),
-                      PrimaryButton(
-                        onPressed: _handleCreate,
-                        child: const Text('Create Group'),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

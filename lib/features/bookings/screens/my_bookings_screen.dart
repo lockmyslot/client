@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../providers/my_bookings_provider.dart';
 import '../data/bookings_repository.dart';
 import '../../../core/ui/ui.dart';
@@ -31,169 +30,190 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Bookings'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_outlined),
-          onPressed: () => context.pop(),
+      body: RefreshIndicator(
+        onRefresh: () async => ref.invalidate(
+          myBookingsProvider((
+            groupId: widget.groupId,
+            status: _selectedStatusFilter,
+          )),
         ),
-        bottom: AppBarToolbar(
-          child: Row(
-            children: [
-              _buildFilterChip('All', null),
-              const SizedBox(width: 8),
-              _buildFilterChip('Confirmed', 'CONFIRMED'),
-              const SizedBox(width: 8),
-              _buildFilterChip('Cancelled', 'CANCELLED'),
-            ],
-          ),
-        ),
-      ),
-      body: SlideFadeSwitcher(
-        child: bookingsAsync.when(
-          loading: () => const KeyedSubtree(
-            key: ValueKey('loading'),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          error: (err, _) => KeyedSubtree(
-            key: const ValueKey('error'),
-            child: ErrorDisplay(
-              error: err.toString(),
-              onRetry: () => ref.invalidate(
-                myBookingsProvider((
-                  groupId: widget.groupId,
-                  status: _selectedStatusFilter,
-                )),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            const SliverAppBar.large(
+              title: Text('My Bookings'),
+              pinned: true,
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Row(
+                  children: [
+                    _buildFilterChip('All', null),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Confirmed', 'CONFIRMED'),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Cancelled', 'CANCELLED'),
+                  ],
+                ),
               ),
             ),
-          ),
-          data: (bookings) {
-            if (bookings.isEmpty) {
-              return KeyedSubtree(
-                key: ValueKey('empty-${_selectedStatusFilter ?? 'all'}'),
-                child: const EmptyState(
-                  icon: Icons.bookmark_border,
-                  title: 'No Personal Bookings',
-                  description:
-                      'You have no active or past bookings in this group.',
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              sliver: bookingsAsync.when(
+                loading: () => const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
                 ),
-              );
-            }
-
-            return KeyedSubtree(
-              key: ValueKey('data-${_selectedStatusFilter ?? 'all'}'),
-              child: RefreshIndicator(
-                onRefresh: () async => ref.invalidate(
-                  myBookingsProvider((
-                    groupId: widget.groupId,
-                    status: _selectedStatusFilter,
-                  )),
+                error: (err, _) => SliverFillRemaining(
+                  child: ErrorDisplay(
+                    error: err.toString(),
+                    onRetry: () => ref.invalidate(
+                      myBookingsProvider((
+                        groupId: widget.groupId,
+                        status: _selectedStatusFilter,
+                      )),
+                    ),
+                  ),
                 ),
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: bookings.length,
-                  itemBuilder: (context, index) {
-                    final booking = bookings[index];
-                    final isUpcoming = booking.startTime.isAfter(
-                      DateTime.now(),
-                    );
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Entrance(
-                        delay: Duration(milliseconds: index * 60),
-                        child: Card(
-                          child: Padding(
-                            padding: kCardPadding,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        booking.resourceName ??
-                                            'Resource Booking',
-                                      ).h3(),
-                                    ),
-                                    PrimaryBadge(child: Text(booking.status)),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.schedule_outlined,
-                                      size: 18,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        '${AppDateUtils.formatDisplayDate(booking.startTime)} · ${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}',
-                                      ).small(),
-                                    ),
-                                  ],
-                                ),
-                                if (booking.isConfirmed && isUpcoming) ...[
-                                  const SizedBox(height: 12),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: TextButton.icon(
-                                      onPressed: () async {
-                                        final confirmed = await ConfirmDialog.show(
-                                          context,
-                                          title: 'Cancel Booking',
-                                          message:
-                                              'Are you sure you want to cancel this booking?',
-                                          confirmText: 'Cancel Booking',
-                                          isDestructive: true,
-                                        );
-                                        if (confirmed == true) {
-                                          await ref
-                                              .read(bookingsRepositoryProvider)
-                                              .cancelBooking(
-                                                widget.groupId,
-                                                booking.id,
-                                              );
-                                          ref.invalidate(
-                                            myBookingsProvider((
-                                              groupId: widget.groupId,
-                                              status: _selectedStatusFilter,
-                                            )),
-                                          );
-                                        }
-                                      },
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Theme.of(
-                                          context,
-                                        ).colorScheme.error,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
-                                      ),
-                                      icon: const Icon(
-                                        Icons.close_outlined,
-                                        size: 18,
-                                      ),
-                                      label: const Text('Cancel'),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
+                data: (bookings) {
+                  if (bookings.isEmpty) {
+                    return SliverFillRemaining(
+                      child: EmptyState(
+                        icon: Icons.bookmark_border,
+                        title: 'No Personal Bookings',
+                        description:
+                            'You have no active or past bookings in this group.',
                       ),
                     );
-                  },
-                ),
+                  }
+
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final booking = bookings[index];
+                        final isUpcoming = booking.startTime.isAfter(
+                          DateTime.now(),
+                        );
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Entrance(
+                            delay: Duration(milliseconds: index * 60),
+                            child: Card(
+                              elevation: 0,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerLow,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                side: BorderSide(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .outlineVariant
+                                      .withOpacity(0.4),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: kCardPadding,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            booking.resourceName ??
+                                                'Resource Booking',
+                                          ).h3(),
+                                        ),
+                                        PrimaryBadge(
+                                          child: Text(booking.status),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.schedule_outlined,
+                                          size: 18,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            '${AppDateUtils.formatDisplayDate(booking.startTime)} · ${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}',
+                                          ).small(),
+                                        ),
+                                      ],
+                                    ),
+                                    if (booking.isConfirmed &&
+                                        isUpcoming) ...[
+                                      const SizedBox(height: 12),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: TextButton.icon(
+                                          onPressed: () async {
+                                            final confirmed =
+                                                await ConfirmDialog.show(
+                                              context,
+                                              title: 'Cancel Booking',
+                                              message:
+                                                  'Are you sure you want to cancel this booking?',
+                                              confirmText: 'Cancel Booking',
+                                              isDestructive: true,
+                                            );
+                                            if (confirmed == true) {
+                                              await ref
+                                                  .read(
+                                                    bookingsRepositoryProvider,
+                                                  )
+                                                  .cancelBooking(
+                                                    widget.groupId,
+                                                    booking.id,
+                                                  );
+                                              ref.invalidate(
+                                                myBookingsProvider((
+                                                  groupId: widget.groupId,
+                                                  status: _selectedStatusFilter,
+                                                )),
+                                              );
+                                            }
+                                          },
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: Theme.of(
+                                              context,
+                                            ).colorScheme.error,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 8,
+                                            ),
+                                          ),
+                                          icon: const Icon(
+                                            Icons.close_outlined,
+                                            size: 18,
+                                          ),
+                                          label: const Text('Cancel'),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      childCount: bookings.length,
+                    ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
@@ -201,25 +221,14 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
 
   Widget _buildFilterChip(String label, String? value) {
     final isSelected = _selectedStatusFilter == value;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedStatusFilter = value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 240),
-        curve: Curves.easeOutBack,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Theme.of(context).colorScheme.onPrimary : null,
-          ),
-        ).small(),
-      ),
+    return FilterChip(
+      selected: isSelected,
+      label: Text(label),
+      onSelected: (_) {
+        setState(() => _selectedStatusFilter = value);
+      },
+      showCheckmark: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }

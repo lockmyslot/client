@@ -20,7 +20,8 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
   final _capacityController = TextEditingController(text: '1');
-  final _slotDurationController = TextEditingController(text: '60');
+  final _durationController = TextEditingController(text: '60');
+
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -29,23 +30,19 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
     _nameController.dispose();
     _descController.dispose();
     _capacityController.dispose();
-    _slotDurationController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
 
   Future<void> _handleCreate() async {
     final name = _nameController.text.trim();
-    final description = _descController.text.trim();
-    final capacity = int.tryParse(_capacityController.text.trim()) ?? 1;
-    final slotDurationMinutes =
-        int.tryParse(_slotDurationController.text.trim()) ?? 60;
-
     if (name.isEmpty) {
-      setState(() {
-        _errorMessage = 'Please enter a resource name';
-      });
+      setState(() => _errorMessage = 'Resource name is required');
       return;
     }
+
+    final capacity = int.tryParse(_capacityController.text) ?? 1;
+    final duration = int.tryParse(_durationController.text) ?? 60;
 
     setState(() {
       _isLoading = true;
@@ -54,18 +51,17 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
 
     try {
       final repo = ref.read(resourcesRepositoryProvider);
-      final newResource = await repo.createResource(
+      await repo.createResource(
         widget.groupId,
         name: name,
-        description: description.isNotEmpty ? description : null,
+        description: _descController.text.trim(),
         capacity: capacity,
-        slotDurationMinutes: slotDurationMinutes,
+        slotDurationMinutes: duration,
       );
-
       ref.invalidate(groupResourcesProvider(widget.groupId));
 
       if (mounted) {
-        context.go('/groups/${widget.groupId}/resources/${newResource.id}');
+        context.pop();
       }
     } catch (e) {
       if (mounted) {
@@ -80,108 +76,113 @@ class _CreateResourceScreenState extends ConsumerState<CreateResourceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Resource'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_outlined),
-          onPressed: () => context.pop(),
-        ),
-      ),
       body: LoadingOverlay(
         isLoading: _isLoading,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Entrance(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 420),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text('New Resource').h3(),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Define a bookable resource like a room, court, or equipment.',
-                      ).muted().small(),
-                      const SizedBox(height: 24),
-                      const Text('Resource Name').small().semiBold(),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: _nameController,
-                        textCapitalization: TextCapitalization.words,
-                        decoration: const InputDecoration(
-                          hintText:
-                              'e.g., Washing Machine 1, Conference Room A',
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text('Description (optional)').small().semiBold(),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: _descController,
-                        textCapitalization: TextCapitalization.sentences,
-                        decoration: const InputDecoration(
-                          hintText:
-                              'e.g., Located on 2nd floor, includes whiteboard',
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            const SliverAppBar.large(
+              title: Text('Add Resource'),
+              pinned: true,
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Center(
+                  child: Entrance(
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Capacity').small().semiBold(),
-                                const SizedBox(height: 6),
-                                TextField(
-                                  controller: _capacityController,
-                                  decoration: const InputDecoration(
-                                    hintText: '1',
-                                  ),
-                                ),
-                              ],
+                          const Text('New Resource').h3(),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Define a bookable resource like a room, court, or equipment.',
+                          ).muted().small(),
+                          const SizedBox(height: 24),
+                          const Text('Resource Name').small().semiBold(),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: _nameController,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(
+                              hintText: 'e.g. Conference Room A, Court 1',
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Slot Duration (min)',
-                                ).small().semiBold(),
-                                const SizedBox(height: 6),
-                                TextField(
-                                  controller: _slotDurationController,
-                                  decoration: const InputDecoration(
-                                    hintText: '60',
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 16),
+                          const Text('Description (Optional)')
+                              .small()
+                              .semiBold(),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: _descController,
+                            decoration: const InputDecoration(
+                              hintText: 'Brief details about availability',
                             ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Capacity').small().semiBold(),
+                                    const SizedBox(height: 6),
+                                    TextField(
+                                      controller: _capacityController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: const InputDecoration(
+                                        hintText: '1',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Slot Duration (m)')
+                                        .small()
+                                        .semiBold(),
+                                    const SizedBox(height: 6),
+                                    TextField(
+                                      controller: _durationController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: const InputDecoration(
+                                        hintText: '60',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _errorMessage!,
+                              style: const TextStyle(color: Colors.red),
+                            ).small(),
+                          ],
+                          const SizedBox(height: 24),
+                          PrimaryButton(
+                            onPressed: _handleCreate,
+                            child: const Text('Create Resource'),
                           ),
                         ],
                       ),
-                      if (_errorMessage != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ).small(),
-                      ],
-                      const SizedBox(height: 24),
-                      PrimaryButton(
-                        onPressed: _handleCreate,
-                        child: const Text('Save Resource'),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -78,60 +78,64 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Join Group'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_outlined),
-          onPressed: () => context.pop(),
-        ),
-      ),
       body: LoadingOverlay(
         isLoading: _isLoading,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Entrance(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text('Join a Group').h3(),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Enter the 6-character invite code provided by your group admin.',
-                      ).muted().small(),
-                      const SizedBox(height: 24),
-                      const Text('Invite Code').small().semiBold(),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _codeController,
-                        textCapitalization: TextCapitalization.characters,
-                        decoration: const InputDecoration(
-                          hintText: 'e.g., AB12CD',
-                        ),
-                        maxLength: 6,
-                        onSubmitted: (_) => _handleJoin(),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            const SliverAppBar.large(
+              title: Text('Join Group'),
+              pinned: true,
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Center(
+                  child: Entrance(
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('Join a Group').h3(),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Enter the 6-character invite code provided by your group admin.',
+                          ).muted().small(),
+                          const SizedBox(height: 24),
+                          const Text('Invite Code').small().semiBold(),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _codeController,
+                            textCapitalization: TextCapitalization.characters,
+                            decoration: const InputDecoration(
+                              hintText: 'e.g., AB12CD',
+                            ),
+                            maxLength: 6,
+                            onSubmitted: (_) => _handleJoin(),
+                          ),
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _errorMessage!,
+                              style: const TextStyle(color: Colors.red),
+                            ).small(),
+                          ],
+                          const SizedBox(height: 24),
+                          PrimaryButton(
+                            onPressed: _handleJoin,
+                            child: const Text('Join Group'),
+                          ),
+                        ],
                       ),
-                      if (_errorMessage != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ).small(),
-                      ],
-                      const SizedBox(height: 24),
-                      PrimaryButton(
-                        onPressed: _handleJoin,
-                        child: const Text('Join Group'),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
