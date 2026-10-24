@@ -142,16 +142,6 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                 loading: () => const Text('Loading Resource...'),
                 error: (_, __) => const Text('Resource Detail'),
               ),
-              actions: [
-                if (isAdmin)
-                  IconButton(
-                    icon: const Icon(Icons.settings_outlined),
-                    tooltip: 'Settings',
-                    onPressed: () => context.push(
-                      '/groups/$groupId/resources/$resourceId/settings',
-                    ),
-                  ),
-              ],
               pinned: true,
             ),
             resourceAsync.maybeWhen(

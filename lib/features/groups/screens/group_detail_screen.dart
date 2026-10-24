@@ -277,20 +277,6 @@ class GroupDetailScreen extends ConsumerWidget {
                                       Expanded(
                                         child: Text(resource.name).h4(),
                                       ),
-                                      if (isAdmin)
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.settings_outlined,
-                                            size: 18,
-                                          ),
-                                          tooltip: 'Settings',
-                                          visualDensity: VisualDensity.compact,
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(),
-                                          onPressed: () => context.push(
-                                            '/groups/$groupId/resources/${resource.id}/settings',
-                                          ),
-                                        ),
                                     ],
                                   ),
                                   if (resource.description != null &&
