@@ -18,7 +18,71 @@ class MembersScreen extends ConsumerWidget {
     final groupAsync = ref.watch(groupDetailProvider(groupId));
     final membersAsync = ref.watch(groupMembersProvider(groupId));
 
+    final inviteCodeBar = groupAsync.maybeWhen(
+      data: (group) {
+        final inviteCode = group.inviteCode;
+        if (inviteCode == null || inviteCode.isEmpty) {
+          return null;
+        }
+        return SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.vpn_key_outlined, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Group Invite Code').small().muted(),
+                          Text(inviteCode).mono().semiBold(),
+                        ],
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        DeepLinkUtils.showInviteSheet(
+                          context,
+                          groupName: group.name,
+                          inviteCode: inviteCode,
+                        );
+                      },
+                      icon: const Icon(Icons.share_outlined, size: 16),
+                      label: const Text('Share'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      orElse: () => null,
+    );
+
     return Scaffold(
+      bottomNavigationBar: inviteCodeBar,
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
@@ -26,58 +90,8 @@ class MembersScreen extends ConsumerWidget {
             title: Text('Group Members'),
             pinned: true,
           ),
-          groupAsync.maybeWhen(
-            data: (group) {
-              final inviteCode = group.inviteCode;
-              if (inviteCode == null || inviteCode.isEmpty) {
-                return const SliverToBoxAdapter(child: SizedBox.shrink());
-              }
-              return SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: Card(
-                    elevation: 0,
-                    color: Theme.of(context).colorScheme.surfaceContainerLow,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.vpn_key_outlined, size: 18),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Group Invite Code').small().muted(),
-                                Text(inviteCode).mono().semiBold(),
-                              ],
-                            ),
-                          ),
-                          TextButton.icon(
-                            onPressed: () {
-                              DeepLinkUtils.showInviteSheet(
-                                context,
-                                groupName: group.name,
-                                inviteCode: inviteCode,
-                              );
-                            },
-                            icon: const Icon(Icons.share_outlined, size: 16),
-                            label: const Text('Share'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-            orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-          ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             sliver: membersAsync.when(
               loading: () => const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()),
