@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../constants/api_constants.dart';
 import '../storage/secure_storage.dart';
+import '../utils/app_logger.dart';
 import 'api_exceptions.dart';
 import 'api_response.dart';
 
@@ -69,22 +70,53 @@ class ApiClient {
     }
   }
 
+  Future<http.Response> _execute(
+    String method,
+    Uri uri,
+    Future<http.Response> Function(http.Client client) requestFn,
+  ) async {
+    final sw = Stopwatch()..start();
+    AppLogger.debug('--> $method $uri', tag: 'HTTP');
+    try {
+      final response = await _sendWithRetry(requestFn);
+      sw.stop();
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        AppLogger.debug(
+          '<-- $method $uri [${response.statusCode}] (${sw.elapsedMilliseconds}ms)',
+          tag: 'HTTP',
+        );
+      } else {
+        AppLogger.warning(
+          '<-- $method $uri [${response.statusCode}] (${sw.elapsedMilliseconds}ms): ${response.body}',
+          tag: 'HTTP',
+        );
+      }
+      return response;
+    } catch (e, stack) {
+      sw.stop();
+      AppLogger.error(
+        'HTTP error: $method $uri (${sw.elapsedMilliseconds}ms)',
+        tag: 'HTTP',
+        error: e,
+        stackTrace: stack,
+      );
+      if (e is ApiException) rethrow;
+      throw NetworkException(e.toString());
+    }
+  }
+
   Future<ApiResponse<T>> get<T>(
     String path, {
     Map<String, dynamic>? query,
     T Function(dynamic json)? fromJson,
   }) async {
-    final http.Response response;
-    try {
-      final uri = _buildUri(path, query);
-      final headers = await _getHeaders();
-      response = await _sendWithRetry(
-        (client) => client.get(uri, headers: headers),
-      );
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw NetworkException(e.toString());
-    }
+    final uri = _buildUri(path, query);
+    final headers = await _getHeaders();
+    final response = await _execute(
+      'GET',
+      uri,
+      (client) => client.get(uri, headers: headers),
+    );
     return _processResponse<T>(response, fromJson);
   }
 
@@ -93,18 +125,14 @@ class ApiClient {
     dynamic body,
     T Function(dynamic json)? fromJson,
   }) async {
-    final http.Response response;
-    try {
-      final uri = _buildUri(path);
-      final headers = await _getHeaders();
-      final encodedBody = body != null ? jsonEncode(body) : null;
-      response = await _sendWithRetry(
-        (client) => client.post(uri, headers: headers, body: encodedBody),
-      );
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw NetworkException(e.toString());
-    }
+    final uri = _buildUri(path);
+    final headers = await _getHeaders();
+    final encodedBody = body != null ? jsonEncode(body) : null;
+    final response = await _execute(
+      'POST',
+      uri,
+      (client) => client.post(uri, headers: headers, body: encodedBody),
+    );
     return _processResponse<T>(response, fromJson);
   }
 
@@ -113,18 +141,14 @@ class ApiClient {
     dynamic body,
     T Function(dynamic json)? fromJson,
   }) async {
-    final http.Response response;
-    try {
-      final uri = _buildUri(path);
-      final headers = await _getHeaders();
-      final encodedBody = body != null ? jsonEncode(body) : null;
-      response = await _sendWithRetry(
-        (client) => client.patch(uri, headers: headers, body: encodedBody),
-      );
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw NetworkException(e.toString());
-    }
+    final uri = _buildUri(path);
+    final headers = await _getHeaders();
+    final encodedBody = body != null ? jsonEncode(body) : null;
+    final response = await _execute(
+      'PATCH',
+      uri,
+      (client) => client.patch(uri, headers: headers, body: encodedBody),
+    );
     return _processResponse<T>(response, fromJson);
   }
 
@@ -133,33 +157,25 @@ class ApiClient {
     dynamic body,
     T Function(dynamic json)? fromJson,
   }) async {
-    final http.Response response;
-    try {
-      final uri = _buildUri(path);
-      final headers = await _getHeaders();
-      final encodedBody = body != null ? jsonEncode(body) : null;
-      response = await _sendWithRetry(
-        (client) => client.put(uri, headers: headers, body: encodedBody),
-      );
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw NetworkException(e.toString());
-    }
+    final uri = _buildUri(path);
+    final headers = await _getHeaders();
+    final encodedBody = body != null ? jsonEncode(body) : null;
+    final response = await _execute(
+      'PUT',
+      uri,
+      (client) => client.put(uri, headers: headers, body: encodedBody),
+    );
     return _processResponse<T>(response, fromJson);
   }
 
   Future<void> delete(String path) async {
-    final http.Response response;
-    try {
-      final uri = _buildUri(path);
-      final headers = await _getHeaders();
-      response = await _sendWithRetry(
-        (client) => client.delete(uri, headers: headers),
-      );
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw NetworkException(e.toString());
-    }
+    final uri = _buildUri(path);
+    final headers = await _getHeaders();
+    final response = await _execute(
+      'DELETE',
+      uri,
+      (client) => client.delete(uri, headers: headers),
+    );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return;
     }
