@@ -117,56 +117,43 @@ class _BookingsCalendarScreenState
                 itemCount: bookings.length,
                 itemBuilder: (context, index) {
                   final booking = bookings[index];
+                  final duration =
+                      booking.endTime.difference(booking.startTime);
+                  final durationText = AppDateUtils.formatDuration(duration);
+                  final userName = (booking.userDisplayName != null &&
+                          booking.userDisplayName!.trim().isNotEmpty)
+                      ? booking.userDisplayName!
+                      : 'User';
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Entrance(
                       delay: Duration(milliseconds: index * 60),
                       child: Card(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outlineVariant
+                                .withValues(alpha: 0.4),
+                          ),
+                        ),
                         child: Padding(
                           padding: kCardPadding,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.calendar_today_outlined,
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      AppDateUtils.formatDisplayDate(
-                                        booking.startTime,
-                                      ),
-                                    ).small().semiBold(),
-                                  ),
-                                  PrimaryBadge(child: Text(booking.status)),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.access_time_outlined,
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '${AppDateUtils.formatTime(booking.startTime)} - ${AppDateUtils.formatTime(booking.endTime)}',
-                                  ).mono().small(),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(Icons.person_outline, size: 14),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Booked by: ${booking.userDisplayName ?? 'User'}',
-                                  ).small().muted(),
-                                ],
-                              ),
+                              Text(
+                                AppDateUtils.formatBookingScheduleHeader(
+                                  booking.startTime,
+                                ),
+                              ).h4().semiBold(),
+                              const SizedBox(height: 6),
+                              Text(
+                                '$durationText · $userName',
+                              ).small().muted(),
                             ],
                           ),
                         ),

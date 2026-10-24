@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/resources_provider.dart';
 import '../providers/maintenance_provider.dart';
-import '../../bookings/data/models/booking.dart';
 import '../../bookings/providers/bookings_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
@@ -363,127 +362,59 @@ class ResourceDetailScreen extends ConsumerWidget {
                               (a, b) => a.startTime.compareTo(b.startTime),
                             );
 
-                          final grouped = <String, List<Booking>>{};
-                          for (final booking in sorted) {
-                            grouped
-                                .putIfAbsent(
-                                  AppDateUtils.formatDate(booking.startTime),
-                                  () => [],
-                                )
-                                .add(booking);
-                          }
-
                           return KeyedSubtree(
                             key: const ValueKey('data'),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: grouped.entries.map((entry) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 8,
-                                        bottom: 6,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: sorted.asMap().entries.map((item) {
+                                final index = item.key;
+                                final booking = item.value;
+                                final duration =
+                                    booking.endTime.difference(booking.startTime);
+                                final durationText =
+                                    AppDateUtils.formatDuration(duration);
+                                final userName =
+                                    (booking.userDisplayName != null &&
+                                            booking.userDisplayName!.trim().isNotEmpty)
+                                        ? booking.userDisplayName!
+                                        : 'User';
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Entrance(
+                                    delay: Duration(
+                                      milliseconds: 100 + (index * 25),
+                                    ),
+                                    child: Card(
+                                      elevation: 0,
+                                      color: colorScheme.surfaceContainerLow,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: BorderSide(
+                                          color: colorScheme.outlineVariant
+                                              .withValues(alpha: 0.4),
+                                        ),
                                       ),
-                                      child: Row(
-                                        children: [
-                                          Entrance(
-                                            delay: const Duration(
-                                              milliseconds: 120,
-                                            ),
-                                            child: Text(
-                                              AppDateUtils.formatDisplayDate(
-                                                entry.value.first.startTime,
+                                      child: Padding(
+                                        padding: kCardPadding,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              AppDateUtils.formatBookingScheduleHeader(
+                                                booking.startTime,
                                               ),
-                                            ).textLarge().semiBold(),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Divider(
-                                              color: colorScheme.outlineVariant,
-                                            ),
-                                          ),
-                                        ],
+                                            ).h4().semiBold(),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              '$durationText · $userName',
+                                            ).small().muted(),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    ...entry.value.map((booking) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 8,
-                                        ),
-                                        child: Entrance(
-                                          delay: const Duration(
-                                            milliseconds: 140,
-                                          ),
-                                          child: Card(
-                                            elevation: 0,
-                                            color: colorScheme
-                                                .surfaceContainerLow,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                              side: BorderSide(
-                                                color: colorScheme
-                                                    .outlineVariant
-                                                    .withValues(alpha: 0.4),
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding: kCardPadding,
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.schedule_outlined,
-                                                        size: 16,
-                                                        color:
-                                                            colorScheme.primary,
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Text(
-                                                        '${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}',
-                                                      ).mono().semiBold(),
-                                                      const Spacer(),
-                                                      PrimaryBadge(
-                                                        child: Text(
-                                                          booking.status,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 6),
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.person_outline,
-                                                        size: 16,
-                                                        color: colorScheme
-                                                            .onSurfaceVariant,
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Expanded(
-                                                        child: Text(
-                                                          booking.userDisplayName ??
-                                                              'User',
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
-                                                        ).small().muted(),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                                  ],
+                                  ),
                                 );
                               }).toList(),
                             ),

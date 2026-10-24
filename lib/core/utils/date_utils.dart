@@ -61,4 +61,61 @@ class AppDateUtils {
   static bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
+
+  static bool isInCurrentOrUpcomingWeek(
+    DateTime date, [
+    DateTime? referenceDate,
+  ]) {
+    final now = referenceDate ?? DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(date.year, date.month, date.day);
+
+    final mondayStart = today.subtract(Duration(days: now.weekday - 1));
+    final sundayStart = today.subtract(Duration(days: now.weekday % 7));
+    final earliestWeekStart =
+        mondayStart.isBefore(sundayStart) ? mondayStart : sundayStart;
+
+    if (target.isBefore(earliestWeekStart)) return false;
+
+    final mondayUpcomingEnd = mondayStart.add(const Duration(days: 13));
+    final sundayUpcomingEnd = sundayStart.add(const Duration(days: 14));
+    final latestUpcomingEnd =
+        mondayUpcomingEnd.isAfter(sundayUpcomingEnd)
+            ? mondayUpcomingEnd
+            : sundayUpcomingEnd;
+
+    return !target.isAfter(latestUpcomingEnd);
+  }
+
+  static String formatBookingScheduleHeader(
+    DateTime dateTime, [
+    DateTime? referenceDate,
+  ]) {
+    final timeStr = dateTime.minute == 0
+        ? DateFormat('h a').format(dateTime)
+        : DateFormat('h:mm a').format(dateTime);
+
+    if (isInCurrentOrUpcomingWeek(dateTime, referenceDate)) {
+      final dayName = DateFormat('EEEE').format(dateTime);
+      return '$dayName, $timeStr';
+    } else {
+      final now = referenceDate ?? DateTime.now();
+      final datePattern = dateTime.year == now.year ? 'MMM d' : 'MMM d, yyyy';
+      final dateStr = DateFormat(datePattern).format(dateTime);
+      return '$dateStr, $timeStr';
+    }
+  }
+
+  static String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    if (hours > 0 && minutes > 0) {
+      return '${hours}h ${minutes}m';
+    } else if (hours > 0) {
+      return '${hours}h';
+    } else {
+      return '${minutes}m';
+    }
+  }
 }
+
