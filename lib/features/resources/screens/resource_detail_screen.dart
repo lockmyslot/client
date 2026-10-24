@@ -105,22 +105,6 @@ class ResourceDetailScreen extends ConsumerWidget {
                 error: (_, __) => const Text('Resource Detail'),
               ),
               pinned: true,
-              actions: [
-                IconButton(
-                  tooltip: 'Maintenance',
-                  icon: const Icon(Icons.handyman_outlined),
-                  onPressed: () => context.push(
-                    '/groups/$groupId/resources/$resourceId/maintenance',
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Rules',
-                  icon: const Icon(Icons.settings_outlined),
-                  onPressed: () => context.push(
-                    '/groups/$groupId/resources/$resourceId/rules',
-                  ),
-                ),
-              ],
             ),
             resourceAsync.maybeWhen(
               data: (res) => SliverToBoxAdapter(
