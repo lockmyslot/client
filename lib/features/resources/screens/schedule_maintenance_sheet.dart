@@ -50,13 +50,26 @@ class _ScheduleMaintenanceSheetState
 
   String _recurrenceType = 'NONE'; // 'NONE' | 'WEEKLY' | 'DAILY'
   int _dayOfWeek = 1; // 1 = Monday
-  DateTime _startDate = DateTime.now().add(const Duration(hours: 1));
-  DateTime _endDate = DateTime.now().add(const Duration(hours: 3));
-  TimeOfDay _startTimeOfDay = const TimeOfDay(hour: 9, minute: 0);
-  TimeOfDay _endTimeOfDay = const TimeOfDay(hour: 11, minute: 0);
+  late DateTime _startDate;
+  late DateTime _endDate;
+  late TimeOfDay _startTimeOfDay;
+  late TimeOfDay _endTimeOfDay;
   String? _selectedAssigneeId;
   bool _cancelConflicting = false;
   bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    // Default start time: top of next hour
+    final nextHour = DateTime(now.year, now.month, now.day, now.hour + 1);
+    _startDate = nextHour;
+    _endDate = nextHour.add(const Duration(hours: 2));
+    _startTimeOfDay = TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
+    _endTimeOfDay = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
+  }
 
   @override
   void dispose() {
@@ -81,24 +94,29 @@ class _ScheduleMaintenanceSheetState
     );
     if (picked != null) {
       setState(() {
+        _errorMessage = null;
         if (isStart) {
           _startDate = DateTime(
             picked.year,
             picked.month,
             picked.day,
-            _startDate.hour,
-            _startDate.minute,
+            _startTimeOfDay.hour,
+            _startTimeOfDay.minute,
           );
-          if (_endDate.isBefore(_startDate)) {
+          if (_recurrenceType == 'NONE' && _endDate.isBefore(_startDate)) {
             _endDate = _startDate.add(const Duration(hours: 2));
+            _endTimeOfDay = TimeOfDay(
+              hour: _endDate.hour,
+              minute: _endDate.minute,
+            );
           }
         } else {
           _endDate = DateTime(
             picked.year,
             picked.month,
             picked.day,
-            _endDate.hour,
-            _endDate.minute,
+            _endTimeOfDay.hour,
+            _endTimeOfDay.minute,
           );
         }
       });
@@ -110,6 +128,7 @@ class _ScheduleMaintenanceSheetState
     final picked = await showTimePicker(context: context, initialTime: initial);
     if (picked != null) {
       setState(() {
+        _errorMessage = null;
         if (isStart) {
           _startTimeOfDay = picked;
           _startDate = DateTime(
@@ -119,6 +138,22 @@ class _ScheduleMaintenanceSheetState
             picked.hour,
             picked.minute,
           );
+          if (_recurrenceType == 'NONE') {
+            final currentEnd = DateTime(
+              _endDate.year,
+              _endDate.month,
+              _endDate.day,
+              _endTimeOfDay.hour,
+              _endTimeOfDay.minute,
+            );
+            if (!currentEnd.isAfter(_startDate)) {
+              _endDate = _startDate.add(const Duration(hours: 2));
+              _endTimeOfDay = TimeOfDay(
+                hour: _endDate.hour,
+                minute: _endDate.minute,
+              );
+            }
+          }
         } else {
           _endTimeOfDay = picked;
           _endDate = DateTime(
@@ -136,7 +171,49 @@ class _ScheduleMaintenanceSheetState
   Future<void> _submit({bool forceOverride = false}) async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    final startDateTime = DateTime(
+      _startDate.year,
+      _startDate.month,
+      _startDate.day,
+      _startTimeOfDay.hour,
+      _startTimeOfDay.minute,
+    );
+    final endDateTime = DateTime(
+      _endDate.year,
+      _endDate.month,
+      _endDate.day,
+      _endTimeOfDay.hour,
+      _endTimeOfDay.minute,
+    );
+
+    if (_recurrenceType == 'NONE') {
+      if (!endDateTime.isAfter(startDateTime)) {
+        setState(() {
+          _errorMessage = 'End date & time must be after start date & time';
+        });
+        return;
+      }
+    } else {
+      final startMinutes = _startTimeOfDay.hour * 60 + _startTimeOfDay.minute;
+      final endMinutes = _endTimeOfDay.hour * 60 + _endTimeOfDay.minute;
+      if (endMinutes <= startMinutes) {
+        setState(() {
+          _errorMessage = 'Time Until must be after Time From';
+        });
+        return;
+      }
+      if (endDateTime.isBefore(startDateTime)) {
+        setState(() {
+          _errorMessage = 'Valid Until date must be on or after Valid From date';
+        });
+        return;
+      }
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     final body = <String, dynamic>{
       'title': _titleController.text.trim(),
@@ -149,13 +226,13 @@ class _ScheduleMaintenanceSheetState
     };
 
     if (_recurrenceType == 'NONE') {
-      body['start_time'] = _startDate.toUtc().toIso8601String();
-      body['end_time'] = _endDate.toUtc().toIso8601String();
+      body['start_time'] = startDateTime.toUtc().toIso8601String();
+      body['end_time'] = endDateTime.toUtc().toIso8601String();
     } else {
       body['start_time_of_day'] = _formatTimeOfDay(_startTimeOfDay);
       body['end_time_of_day'] = _formatTimeOfDay(_endTimeOfDay);
-      body['start_time'] = _startDate.toUtc().toIso8601String();
-      body['end_time'] = _endDate.toUtc().toIso8601String();
+      body['start_time'] = startDateTime.toUtc().toIso8601String();
+      body['end_time'] = endDateTime.toUtc().toIso8601String();
 
       if (_recurrenceType == 'WEEKLY') {
         body['day_of_week'] = _dayOfWeek;
@@ -163,6 +240,7 @@ class _ScheduleMaintenanceSheetState
     }
 
     try {
+      debugPrint('[Maintenance] Submitting maintenance task: $body');
       final task = await ref
           .read(maintenanceActionsProvider.notifier)
           .createMaintenanceTask(
@@ -171,6 +249,7 @@ class _ScheduleMaintenanceSheetState
             body: body,
           );
 
+      debugPrint('[Maintenance] Maintenance task created: ${task.id}');
       if (!mounted) return;
       setState(() => _isLoading = false);
 
@@ -189,15 +268,38 @@ class _ScheduleMaintenanceSheetState
 
       Navigator.of(context).pop();
     } on ConflictException catch (e) {
+      debugPrint('[Maintenance] ConflictException during maintenance creation: $e');
       if (!mounted) return;
       setState(() => _isLoading = false);
       _showConflictDialog(e.message);
     } catch (e) {
+      debugPrint('[Maintenance] Exception during maintenance creation: $e');
       if (!mounted) return;
-      setState(() => _isLoading = false);
+
+      String displayMsg = e.toString();
+      if (e is ValidationException) {
+        if (e.violations.isNotEmpty) {
+          displayMsg = e.violations.join('\n');
+        } else {
+          displayMsg = e.message;
+        }
+      } else if (e is ApiException) {
+        displayMsg = e.message;
+      } else {
+        displayMsg = displayMsg.replaceFirst(
+          RegExp(r'^(Exception:\s*|Error:\s*)'),
+          '',
+        );
+      }
+
+      setState(() {
+        _isLoading = false;
+        _errorMessage = displayMsg;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to schedule maintenance: $e'),
+          content: Text('Failed to schedule maintenance: $displayMsg'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -249,419 +351,483 @@ class _ScheduleMaintenanceSheetState
     final isDark = theme.brightness == Brightness.dark;
     final membersAsync = ref.watch(groupMembersProvider(widget.groupId));
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E24) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Schedule Maintenance',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.resourceName,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-
-              // Title Field
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Task Title *',
-                  hintText: 'e.g., Deep Cleaning, AC Filter Replacement',
-                  prefixIcon: Icon(Icons.build_outlined),
-                ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'Title is required';
-                  }
-                  if (val.trim().length < 2) {
-                    return 'Title must be at least 2 characters';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 14),
-
-              // Description Field
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  hintText: 'Details, contractor instructions or notes',
-                  prefixIcon: Icon(Icons.notes_outlined),
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // Assignee Field (Optional)
-              membersAsync.when(
-                data: (members) {
-                  return DropdownButtonFormField<String?>(
-                    initialValue: _selectedAssigneeId,
-                    decoration: const InputDecoration(
-                      labelText: 'Assign To (Optional)',
-                      hintText: 'Select a group member',
-                      prefixIcon: Icon(Icons.person_outline),
-                    ),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('Unassigned'),
-                      ),
-                      ...members.map(
-                        (m) => DropdownMenuItem<String?>(
-                          value: m.userId,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(m.displayName),
-                              if (m.isAdmin) ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: cs.primaryContainer,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    'Admin',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: cs.onPrimaryContainer,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                    onChanged: (val) {
-                      setState(() => _selectedAssigneeId = val);
-                    },
-                  );
-                },
-                loading: () => const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: LinearProgressIndicator(),
-                ),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-              const SizedBox(height: 18),
-
-              // Recurrence Type Selector
-              Text(
-                'Schedule Type',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(
-                    value: 'NONE',
-                    label: Text('One-off'),
-                    icon: Icon(Icons.calendar_today_outlined, size: 16),
-                  ),
-                  ButtonSegment(
-                    value: 'WEEKLY',
-                    label: Text('Weekly'),
-                    icon: Icon(Icons.repeat_rounded, size: 16),
-                  ),
-                  ButtonSegment(
-                    value: 'DAILY',
-                    label: Text('Daily'),
-                    icon: Icon(Icons.today_outlined, size: 16),
-                  ),
-                ],
-                selected: {_recurrenceType},
-                onSelectionChanged: (val) {
-                  setState(() => _recurrenceType = val.first);
-                },
-              ),
-              const SizedBox(height: 18),
-
-              // Type specific inputs
-              if (_recurrenceType == 'NONE') ...[
-                // One-off Start & End Date Time
+    return Material(
+      color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _pickDate(isStart: true),
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Start Date',
-                            prefixIcon: Icon(Icons.calendar_month, size: 18),
-                          ),
-                          child: Text(
-                            AppDateUtils.formatDate(_startDate),
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _pickTime(isStart: true),
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Start Time',
-                            prefixIcon: Icon(Icons.access_time, size: 18),
-                          ),
-                          child: Text(
-                            _formatTimeOfDay(_startTimeOfDay),
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _pickDate(isStart: false),
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'End Date',
-                            prefixIcon: Icon(Icons.calendar_month, size: 18),
-                          ),
-                          child: Text(
-                            AppDateUtils.formatDate(_endDate),
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _pickTime(isStart: false),
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'End Time',
-                            prefixIcon: Icon(Icons.access_time, size: 18),
-                          ),
-                          child: Text(
-                            _formatTimeOfDay(_endTimeOfDay),
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ] else ...[
-                // Weekly day of week selector
-                if (_recurrenceType == 'WEEKLY') ...[
-                  Text(
-                    'Day of Week',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        for (int i = 0; i < 7; i++)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: ChoiceChip(
-                              label: Text([
-                                'Sun',
-                                'Mon',
-                                'Tue',
-                                'Wed',
-                                'Thu',
-                                'Fri',
-                                'Sat',
-                              ][i]),
-                              selected: _dayOfWeek == i,
-                              onSelected: (selected) {
-                                if (selected) setState(() => _dayOfWeek = i);
-                              },
+                        Text(
+                          'Schedule Maintenance',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.resourceName,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+
+                // Error Message Banner (if any)
+                if (_errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: cs.error.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.error_outline, color: cs.error, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: TextStyle(
+                              color: cs.onErrorContainer,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 14),
                 ],
 
-                // Recurring time of day
-                Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _pickTime(isStart: true),
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Time From',
-                            prefixIcon: Icon(Icons.access_time, size: 18),
-                          ),
-                          child: Text(
-                            _formatTimeOfDay(_startTimeOfDay),
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _pickTime(isStart: false),
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Time Until',
-                            prefixIcon: Icon(Icons.access_time, size: 18),
-                          ),
-                          child: Text(
-                            _formatTimeOfDay(_endTimeOfDay),
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                // Title Field
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Task Title *',
+                    hintText: 'e.g., Deep Cleaning, AC Filter Replacement',
+                    prefixIcon: Icon(Icons.build_outlined),
+                  ),
+                  onChanged: (_) {
+                    if (_errorMessage != null) {
+                      setState(() => _errorMessage = null);
+                    }
+                  },
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return 'Title is required';
+                    }
+                    if (val.trim().length < 2) {
+                      return 'Title must be at least 2 characters';
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
 
-                // Effective date range
-                Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _pickDate(isStart: true),
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Valid From',
-                            prefixIcon: Icon(Icons.date_range, size: 18),
-                          ),
-                          child: Text(
-                            AppDateUtils.formatDate(_startDate),
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _pickDate(isStart: false),
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Valid Until',
-                            prefixIcon: Icon(Icons.date_range, size: 18),
-                          ),
-                          child: Text(
-                            AppDateUtils.formatDate(_endDate),
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-
-              const SizedBox(height: 14),
-
-              // Conflict override checkbox
-              CheckboxListTile(
-                value: _cancelConflicting,
-                onChanged: (val) {
-                  setState(() => _cancelConflicting = val ?? false);
-                },
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text(
-                  'Cancel overlapping bookings automatically',
-                  style: theme.textTheme.bodyMedium,
-                ),
-                subtitle: Text(
-                  'If unchecked, the system will prompt you before overriding',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
+                // Description Field
+                TextFormField(
+                  controller: _descriptionController,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (Optional)',
+                    hintText: 'Details, contractor instructions or notes',
+                    prefixIcon: Icon(Icons.notes_outlined),
                   ),
                 ),
-              ),
+                const SizedBox(height: 14),
 
-              const SizedBox(height: 20),
-
-              // Action Buttons
-              PrimaryButton(
-                onPressed: _isLoading ? null : () => _submit(),
-                expand: true,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Schedule Maintenance',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                // Assignee Field (Optional)
+                membersAsync.when(
+                  data: (members) {
+                    return DropdownButtonFormField<String?>(
+                      initialValue: _selectedAssigneeId,
+                      decoration: const InputDecoration(
+                        labelText: 'Assign To (Optional)',
+                        hintText: 'Select a group member',
+                        prefixIcon: Icon(Icons.person_outline),
                       ),
-              ),
-            ],
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('Unassigned'),
+                        ),
+                        ...members.map(
+                          (m) => DropdownMenuItem<String?>(
+                            value: m.userId,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(m.displayName),
+                                if (m.isAdmin) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: cs.primaryContainer,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'Admin',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: cs.onPrimaryContainer,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedAssigneeId = val;
+                          _errorMessage = null;
+                        });
+                      },
+                    );
+                  },
+                  loading: () => const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: LinearProgressIndicator(),
+                  ),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+                const SizedBox(height: 18),
+
+                // Recurrence Type Selector
+                Text(
+                  'Schedule Type',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(
+                      value: 'NONE',
+                      label: Text('One-off'),
+                      icon: Icon(Icons.calendar_today_outlined, size: 16),
+                    ),
+                    ButtonSegment(
+                      value: 'WEEKLY',
+                      label: Text('Weekly'),
+                      icon: Icon(Icons.repeat_rounded, size: 16),
+                    ),
+                    ButtonSegment(
+                      value: 'DAILY',
+                      label: Text('Daily'),
+                      icon: Icon(Icons.today_outlined, size: 16),
+                    ),
+                  ],
+                  selected: {_recurrenceType},
+                  onSelectionChanged: (val) {
+                    setState(() {
+                      final newType = val.first;
+                      if (_recurrenceType == 'NONE' && newType != 'NONE') {
+                        // Switching to recurring: default validity window to 30 days
+                        if (_endDate.difference(_startDate).inDays < 7) {
+                          _endDate = _startDate.add(const Duration(days: 30));
+                        }
+                      } else if (_recurrenceType != 'NONE' &&
+                          newType == 'NONE') {
+                        // Switching to one-off: default to 2 hours
+                        _endDate = _startDate.add(const Duration(hours: 2));
+                        _endTimeOfDay = TimeOfDay(
+                          hour: _endDate.hour,
+                          minute: _endDate.minute,
+                        );
+                      }
+                      _recurrenceType = newType;
+                      _errorMessage = null;
+                    });
+                  },
+                ),
+                const SizedBox(height: 18),
+
+                // Type specific inputs
+                if (_recurrenceType == 'NONE') ...[
+                  // One-off Start & End Date Time
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickDate(isStart: true),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Start Date',
+                              prefixIcon: Icon(Icons.calendar_month, size: 18),
+                            ),
+                            child: Text(
+                              AppDateUtils.formatDate(_startDate),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickTime(isStart: true),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Start Time',
+                              prefixIcon: Icon(Icons.access_time, size: 18),
+                            ),
+                            child: Text(
+                              _formatTimeOfDay(_startTimeOfDay),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickDate(isStart: false),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'End Date',
+                              prefixIcon: Icon(Icons.calendar_month, size: 18),
+                            ),
+                            child: Text(
+                              AppDateUtils.formatDate(_endDate),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickTime(isStart: false),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'End Time',
+                              prefixIcon: Icon(Icons.access_time, size: 18),
+                            ),
+                            child: Text(
+                              _formatTimeOfDay(_endTimeOfDay),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  // Weekly day of week selector
+                  if (_recurrenceType == 'WEEKLY') ...[
+                    Text(
+                      'Day of Week',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          for (int i = 0; i < 7; i++)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: ChoiceChip(
+                                label: Text([
+                                  'Sun',
+                                  'Mon',
+                                  'Tue',
+                                  'Wed',
+                                  'Thu',
+                                  'Fri',
+                                  'Sat',
+                                ][i]),
+                                selected: _dayOfWeek == i,
+                                onSelected: (selected) {
+                                  if (selected) {
+                                    setState(() => _dayOfWeek = i);
+                                  }
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+
+                  // Recurring time of day
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickTime(isStart: true),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Time From',
+                              prefixIcon: Icon(Icons.access_time, size: 18),
+                            ),
+                            child: Text(
+                              _formatTimeOfDay(_startTimeOfDay),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickTime(isStart: false),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Time Until',
+                              prefixIcon: Icon(Icons.access_time, size: 18),
+                            ),
+                            child: Text(
+                              _formatTimeOfDay(_endTimeOfDay),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Effective date range
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickDate(isStart: true),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Valid From',
+                              prefixIcon: Icon(Icons.date_range, size: 18),
+                            ),
+                            child: Text(
+                              AppDateUtils.formatDate(_startDate),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickDate(isStart: false),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Valid Until',
+                              prefixIcon: Icon(Icons.date_range, size: 18),
+                            ),
+                            child: Text(
+                              AppDateUtils.formatDate(_endDate),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+
+                const SizedBox(height: 14),
+
+                // Conflict override checkbox
+                CheckboxListTile(
+                  value: _cancelConflicting,
+                  onChanged: (val) {
+                    setState(() => _cancelConflicting = val ?? false);
+                  },
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(
+                    'Cancel overlapping bookings automatically',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  subtitle: Text(
+                    'If unchecked, the system will prompt you before overriding',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Action Buttons
+                PrimaryButton(
+                  onPressed: _isLoading ? null : () => _submit(),
+                  expand: true,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Schedule Maintenance',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
