@@ -66,18 +66,6 @@ class GroupDetailScreen extends ConsumerWidget {
                 error: (_, __) => const Text('Group Details'),
               ),
               pinned: true,
-              actions: [
-                if (groupAsync.when(
-                  data: (group) => group.isAdmin,
-                  loading: () => false,
-                  error: (_, __) => false,
-                ))
-                  const IconButton(
-                    icon: Icon(Icons.verified_user_outlined),
-                    tooltip: 'Admin',
-                    onPressed: null,
-                  ),
-              ],
             ),
             groupAsync.maybeWhen(
               data: (group) {
