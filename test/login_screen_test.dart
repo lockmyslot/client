@@ -69,5 +69,30 @@ void main() {
 
       expect(find.text('Please enter your username'), findsOneWidget);
     });
+
+    testWidgets('shows error when password is empty', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: LoginScreen(),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+
+      final usernameField = find.byType(TextField).first;
+      await tester.enterText(usernameField, 'alice');
+      await tester.pump();
+
+      final signInButton = find.text('Sign In');
+      await tester.tap(signInButton);
+      await tester.pump();
+
+      expect(find.text('Please enter your password'), findsOneWidget);
+    });
   });
 }

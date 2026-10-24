@@ -55,11 +55,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             password: password,
           );
 
-      if (!success && mounted) {
+      if (!mounted) return;
+
+      if (!success) {
         setState(() {
           _isLoading = false;
           _errorMessage = ref.read(authProvider).error ?? 'Login failed';
         });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        final returnTo =
+            GoRouterState.of(context).uri.queryParameters['returnTo'];
+        if (returnTo != null && returnTo.isNotEmpty) {
+          final decoded = Uri.decodeComponent(returnTo);
+          if (decoded.startsWith('/') &&
+              !decoded.startsWith('/login') &&
+              !decoded.startsWith('/register')) {
+            context.go(decoded);
+            return;
+          }
+        }
+        context.go('/groups');
       }
     } catch (e) {
       if (mounted) {

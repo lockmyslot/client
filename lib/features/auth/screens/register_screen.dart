@@ -66,11 +66,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             password: password.isNotEmpty ? password : null,
           );
 
-      if (!success && mounted) {
+      if (!mounted) return;
+
+      if (!success) {
         setState(() {
           _isLoading = false;
           _errorMessage = ref.read(authProvider).error ?? 'Registration failed';
         });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        final returnTo =
+            GoRouterState.of(context).uri.queryParameters['returnTo'];
+        if (returnTo != null && returnTo.isNotEmpty) {
+          final decoded = Uri.decodeComponent(returnTo);
+          if (decoded.startsWith('/') &&
+              !decoded.startsWith('/login') &&
+              !decoded.startsWith('/register')) {
+            context.go(decoded);
+            return;
+          }
+        }
+        context.go('/groups');
       }
     } catch (e) {
       if (mounted) {
