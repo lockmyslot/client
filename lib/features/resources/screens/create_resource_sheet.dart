@@ -8,11 +8,15 @@ import '../../../core/ui/ui.dart';
 class CreateResourceSheet extends ConsumerStatefulWidget {
   final String groupId;
   final String? groupName;
+  final void Function(Resource resource)? onSuccess;
+  final VoidCallback? onClose;
 
   const CreateResourceSheet({
     super.key,
     required this.groupId,
     this.groupName,
+    this.onSuccess,
+    this.onClose,
   });
 
   static Future<Resource?> show(
@@ -82,7 +86,11 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
       ref.invalidate(groupResourcesProvider(widget.groupId));
 
       if (mounted) {
-        Navigator.of(context).pop(newResource);
+        if (widget.onSuccess != null) {
+          widget.onSuccess!(newResource);
+        } else {
+          Navigator.of(context).pop(newResource);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -143,7 +151,13 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () {
+                      if (widget.onClose != null) {
+                        widget.onClose!();
+                      } else {
+                        Navigator.of(context).maybePop();
+                      }
+                    },
                   ),
                 ],
               ),

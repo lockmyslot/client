@@ -7,7 +7,14 @@ import '../providers/groups_provider.dart';
 import '../../../core/ui/ui.dart';
 
 class CreateGroupSheet extends ConsumerStatefulWidget {
-  const CreateGroupSheet({super.key});
+  final void Function(Group group)? onSuccess;
+  final VoidCallback? onClose;
+
+  const CreateGroupSheet({
+    super.key,
+    this.onSuccess,
+    this.onClose,
+  });
 
   static Future<Group?> show(BuildContext context) async {
     final group = await showModalBottomSheet<Group>(
@@ -56,7 +63,11 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
       ref.invalidate(myGroupsProvider);
 
       if (mounted) {
-        Navigator.of(context).pop(newGroup);
+        if (widget.onSuccess != null) {
+          widget.onSuccess!(newGroup);
+        } else {
+          Navigator.of(context).pop(newGroup);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -115,7 +126,13 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () {
+                      if (widget.onClose != null) {
+                        widget.onClose!();
+                      } else {
+                        Navigator.of(context).maybePop();
+                      }
+                    },
                   ),
                 ],
               ),

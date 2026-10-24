@@ -12,7 +12,7 @@ void showGroupActionSheet(BuildContext context) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
-    builder: (context) {
+    builder: (sheetContext) {
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -27,7 +27,7 @@ void showGroupActionSheet(BuildContext context) {
                 ),
                 child: Text(
                   'Group Options',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
                   ),
@@ -53,8 +53,10 @@ void showGroupActionSheet(BuildContext context) {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 onTap: () {
-                  Navigator.pop(context);
-                  JoinGroupSheet.show(context);
+                  Navigator.pop(sheetContext);
+                  if (context.mounted) {
+                    JoinGroupSheet.show(context);
+                  }
                 },
               ),
               const SizedBox(height: 8),
@@ -77,8 +79,10 @@ void showGroupActionSheet(BuildContext context) {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 onTap: () {
-                  Navigator.pop(context);
-                  CreateGroupSheet.show(context);
+                  Navigator.pop(sheetContext);
+                  if (context.mounted) {
+                    CreateGroupSheet.show(context);
+                  }
                 },
               ),
             ],

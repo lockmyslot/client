@@ -29,24 +29,19 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
     );
 
     return Scaffold(
-      body: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverAppBar.large(
-            title: resourceAsync.when(
-              data: (res) => Text('Book ${res.name}'),
-              loading: () => const Text('Book Resource'),
-              error: (_, __) => const Text('Book Resource'),
-            ),
-            pinned: true,
-          ),
-          SliverToBoxAdapter(
-            child: BookingDetailsForm(
-              groupId: widget.groupId,
-              resourceId: widget.resourceId,
-            ),
-          ),
-        ],
+      appBar: AppBar(
+        title: resourceAsync.when(
+          data: (res) => Text('Book ${res.name}'),
+          loading: () => const Text('Book Resource'),
+          error: (_, __) => const Text('Book Resource'),
+        ),
+      ),
+      body: SafeArea(
+        top: false,
+        child: BookingDetailsForm(
+          groupId: widget.groupId,
+          resourceId: widget.resourceId,
+        ),
       ),
     );
   }

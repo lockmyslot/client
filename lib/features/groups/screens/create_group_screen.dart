@@ -4,33 +4,35 @@ import 'create_group_sheet.dart';
 
 export 'create_group_sheet.dart';
 
-class CreateGroupScreen extends StatefulWidget {
+class CreateGroupScreen extends StatelessWidget {
   const CreateGroupScreen({super.key});
 
   @override
-  State<CreateGroupScreen> createState() => _CreateGroupScreenState();
-}
-
-class _CreateGroupScreenState extends State<CreateGroupScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final group = await CreateGroupSheet.show(context);
-      if (mounted && group == null) {
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go('/groups');
-        }
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SizedBox.shrink(),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Scaffold(
+      backgroundColor: isDark ? Colors.black87 : Colors.black45,
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: CreateGroupSheet(
+            onSuccess: (group) {
+              if (context.canPop()) {
+                context.pop();
+              }
+              context.go('/groups/${group.id}');
+            },
+            onClose: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/groups');
+              }
+            },
+          ),
+        ),
+      ),
     );
   }
 }

@@ -125,8 +125,11 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
       );
 
       if (mounted) {
-        context
-            .pop(); // Directly return to the screen the booking was launched from
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/groups/${widget.groupId}/resources/${widget.resourceId}');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -153,11 +156,13 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
           ),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
             children: [
               const Icon(Icons.bookmark_added_outlined, size: 20),
               const SizedBox(width: 8),
@@ -189,8 +194,9 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
