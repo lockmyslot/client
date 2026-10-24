@@ -50,6 +50,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: LoadingOverlay(
         isLoading: _isLoading,
@@ -59,80 +60,90 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Container(
               constraints: const BoxConstraints(maxWidth: 400),
               child: Entrance(
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Entrance(
-                          delay: const Duration(milliseconds: 80),
-                          curve: Curves.elasticOut,
-                          child: const Icon(
-                            Icons.lock_clock_outlined,
-                            size: 48,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Entrance(
-                          delay: const Duration(milliseconds: 140),
-                          child: const Text(
-                            'Welcome to Lock My Slot',
-                            textAlign: TextAlign.center,
-                          ).h2(),
-                        ),
-                        const SizedBox(height: 8),
-                        Entrance(
-                          delay: const Duration(milliseconds: 200),
-                          child: const Text(
-                            'Multi-tenant resource booking simplified.',
-                            textAlign: TextAlign.center,
-                          ).muted().small(),
-                        ),
-                        const SizedBox(height: 32),
-                        Entrance(
-                          delay: const Duration(milliseconds: 260),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const Text(
-                                'What should we call you?',
-                              ).small().semiBold(),
-                              const SizedBox(height: 8),
-                              TextField(
-                                controller: _nameController,
-                                textCapitalization: TextCapitalization.words,
-                                decoration: const InputDecoration(
-                                  hintText: 'Enter your display name',
-                                ),
-                                onSubmitted: (_) => _handleRegister(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Entrance(
+                      delay: const Duration(milliseconds: 80),
+                      curve: Curves.elasticOut,
+                      child: Icon(
+                        Icons.lock_clock_outlined,
+                        size: 48,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Entrance(
+                      delay: const Duration(milliseconds: 140),
+                      child: Text.rich(
+                        TextSpan(
+                          text: 'Welcome to\n',
+                          children: [
+                            TextSpan(
+                              text: 'LockMySlot',
+                              style: TextStyle(
+                                color: theme.colorScheme.primary,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        if (_errorMessage != null) ...[
-                          const SizedBox(height: 12),
-                          SlideFadeSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            child: Text(
-                              _errorMessage!,
-                              key: const ValueKey('register-error'),
-                              style: const TextStyle(color: Colors.red),
-                            ).small(),
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Entrance(
+                      delay: const Duration(milliseconds: 200),
+                      child: const Text(
+                        'Multi-tenant resource booking simplified.',
+                        textAlign: TextAlign.center,
+                      ).muted().small(),
+                    ),
+                    const SizedBox(height: 32),
+                    Entrance(
+                      delay: const Duration(milliseconds: 260),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text(
+                            'What should we call you?',
+                          ).small().semiBold(),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _nameController,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter your display name',
+                            ),
+                            onSubmitted: (_) => _handleRegister(),
                           ),
                         ],
-                        const SizedBox(height: 24),
-                        Entrance(
-                          delay: const Duration(milliseconds: 340),
-                          child: PrimaryButton(
-                            onPressed: _handleRegister,
-                            child: const Text('Get Started'),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      SlideFadeSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: Text(
+                          _errorMessage!,
+                          key: const ValueKey('register-error'),
+                          style: const TextStyle(color: Colors.red),
+                        ).small(),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    Entrance(
+                      delay: const Duration(milliseconds: 340),
+                      child: PrimaryButton(
+                        onPressed: _handleRegister,
+                        child: const Text('Get Started'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
