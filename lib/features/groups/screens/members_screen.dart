@@ -147,10 +147,18 @@ class MembersScreen extends ConsumerWidget {
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text(member.displayName).p(),
+                                        Text(
+                                          member.displayName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ).semiBold(),
+                                        const SizedBox(height: 2),
                                         Text(
                                           'Joined ${AppDateUtils.formatDisplayDate(member.joinedAt)}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ).muted().small(),
                                       ],
                                     ),
