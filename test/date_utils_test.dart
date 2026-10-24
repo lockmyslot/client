@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lockmyslot_app/core/utils/date_utils.dart';
 
 void main() {
-  group('AppDateUtils - formatBookingScheduleHeader & schedule helpers', () {
+  group('AppDateUtils - formatBookingHeader & schedule helpers', () {
     // Reference date: Saturday, Oct 24, 2026 at 10:00 AM
     final refDate = DateTime(2026, 10, 24, 10, 0);
 
@@ -26,34 +26,41 @@ void main() {
       expect(AppDateUtils.isInCurrentOrUpcomingWeek(DateTime(2026, 11, 15, 15, 0), refDate), isFalse);
     });
 
-    test('formatBookingScheduleHeader shows day name and time for current/upcoming week', () {
-      // Sunday at 3:00 PM -> "Sunday, 3 PM"
-      final sunday3pm = DateTime(2026, 10, 25, 15, 0);
+    test('formatBookingHeader shows Today, Tomorrow, day name, and time for current/upcoming week', () {
+      // Sat Oct 24 at 3:00 PM (today) -> "Today, 3 PM"
+      final today3pm = DateTime(2026, 10, 24, 15, 0);
       expect(
-        AppDateUtils.formatBookingScheduleHeader(sunday3pm, refDate),
-        'Sunday, 3 PM',
+        AppDateUtils.formatBookingHeader(today3pm, refDate),
+        'Today, 3 PM',
+      );
+
+      // Sun Oct 25 at 3:00 PM (tomorrow) -> "Tomorrow, 3 PM"
+      final tomorrow3pm = DateTime(2026, 10, 25, 15, 0);
+      expect(
+        AppDateUtils.formatBookingHeader(tomorrow3pm, refDate),
+        'Tomorrow, 3 PM',
       );
 
       // Wednesday at 10:30 AM in upcoming week -> "Wednesday, 10:30 AM"
       final wed1030am = DateTime(2026, 10, 28, 10, 30);
       expect(
-        AppDateUtils.formatBookingScheduleHeader(wed1030am, refDate),
+        AppDateUtils.formatBookingHeader(wed1030am, refDate),
         'Wednesday, 10:30 AM',
       );
     });
 
-    test('formatBookingScheduleHeader shows date and time when outside current/upcoming week', () {
+    test('formatBookingHeader shows date and time when outside current/upcoming week', () {
       // Nov 15 at 3:00 PM (same year) -> "Nov 15, 3 PM"
       final nov153pm = DateTime(2026, 11, 15, 15, 0);
       expect(
-        AppDateUtils.formatBookingScheduleHeader(nov153pm, refDate),
+        AppDateUtils.formatBookingHeader(nov153pm, refDate),
         'Nov 15, 3 PM',
       );
 
       // Jan 10, 2027 at 3:00 PM (different year) -> "Jan 10, 2027, 3 PM"
       final jan10NextYear = DateTime(2027, 1, 10, 15, 0);
       expect(
-        AppDateUtils.formatBookingScheduleHeader(jan10NextYear, refDate),
+        AppDateUtils.formatBookingHeader(jan10NextYear, refDate),
         'Jan 10, 2027, 3 PM',
       );
     });

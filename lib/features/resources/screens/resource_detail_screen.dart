@@ -306,11 +306,11 @@ class ResourceDetailScreen extends ConsumerWidget {
                       error: (_, __) => const SizedBox.shrink(),
                     ),
 
-                    // Schedule Section
+                    // Bookings Section
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Schedule').h3(),
+                        const Text('Bookings').h3(),
                         IconButton(
                           icon: const Icon(Icons.refresh_outlined, size: 16),
                           onPressed: () => ref.invalidate(
@@ -402,14 +402,39 @@ class ResourceDetailScreen extends ConsumerWidget {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              AppDateUtils.formatBookingScheduleHeader(
+                                              AppDateUtils.formatBookingHeader(
                                                 booking.startTime,
                                               ),
                                             ).h4().semiBold(),
                                             const SizedBox(height: 6),
-                                            Text(
-                                              '$durationText · $userName',
-                                            ).small().muted(),
+                                            Row(
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 9,
+                                                  backgroundColor: colorScheme
+                                                      .primary
+                                                      .withValues(alpha: 0.12),
+                                                  child: Text(
+                                                    userName.isNotEmpty
+                                                        ? userName[0].toUpperCase()
+                                                        : 'U',
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: colorScheme.primary,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Expanded(
+                                                  child: Text(
+                                                    '$durationText · $userName',
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ).small().muted(),
+                                                ),
+                                              ],
+                                            ),
                                           ],
                                         ),
                                       ),

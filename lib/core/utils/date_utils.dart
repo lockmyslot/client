@@ -87,7 +87,7 @@ class AppDateUtils {
     return !target.isAfter(latestUpcomingEnd);
   }
 
-  static String formatBookingScheduleHeader(
+  static String formatBookingHeader(
     DateTime dateTime, [
     DateTime? referenceDate,
   ]) {
@@ -95,15 +95,23 @@ class AppDateUtils {
         ? DateFormat('h a').format(dateTime)
         : DateFormat('h:mm a').format(dateTime);
 
-    if (isInCurrentOrUpcomingWeek(dateTime, referenceDate)) {
-      final dayName = DateFormat('EEEE').format(dateTime);
-      return '$dayName, $timeStr';
+    final now = referenceDate ?? DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    String dayPrefix;
+    if (target.isAtSameMomentAs(today)) {
+      dayPrefix = 'Today';
+    } else if (target.isAtSameMomentAs(today.add(const Duration(days: 1)))) {
+      dayPrefix = 'Tomorrow';
+    } else if (isInCurrentOrUpcomingWeek(dateTime, referenceDate)) {
+      dayPrefix = DateFormat('EEEE').format(dateTime);
     } else {
-      final now = referenceDate ?? DateTime.now();
       final datePattern = dateTime.year == now.year ? 'MMM d' : 'MMM d, yyyy';
-      final dateStr = DateFormat(datePattern).format(dateTime);
-      return '$dateStr, $timeStr';
+      dayPrefix = DateFormat(datePattern).format(dateTime);
     }
+
+    return '$dayPrefix, $timeStr';
   }
 
   static String formatDuration(Duration duration) {

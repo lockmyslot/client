@@ -40,7 +40,7 @@ class _BookingsCalendarScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Resource Schedule'),
+        title: const Text('Resource Bookings'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
@@ -146,14 +146,41 @@ class _BookingsCalendarScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                AppDateUtils.formatBookingScheduleHeader(
+                                AppDateUtils.formatBookingHeader(
                                   booking.startTime,
                                 ),
                               ).h4().semiBold(),
                               const SizedBox(height: 6),
-                              Text(
-                                '$durationText · $userName',
-                              ).small().muted(),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 9,
+                                    backgroundColor: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withValues(alpha: 0.12),
+                                    child: Text(
+                                      userName.isNotEmpty
+                                          ? userName[0].toUpperCase()
+                                          : 'U',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      '$durationText · $userName',
+                                      overflow: TextOverflow.ellipsis,
+                                    ).small().muted(),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
