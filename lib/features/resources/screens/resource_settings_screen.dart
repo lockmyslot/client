@@ -615,32 +615,14 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Booking Rules').h4(),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Day-specific rules override broader rules.',
-                  ).muted().small(),
-                ],
-              ),
-              PrimaryButton(
-                onPressed: _isSavingRules ? null : _handleSaveRules,
-                child: _isSavingRules
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('Save Rules'),
-              ),
+              const Text('Booking Rules').h4(),
+              const SizedBox(height: 2),
+              const Text(
+                'Day-specific rules override broader rules.',
+              ).muted().small(),
             ],
           ),
           const SizedBox(height: 16),
@@ -759,6 +741,25 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
               ),
             ),
           ],
+          const SizedBox(height: 24),
+
+          PrimaryButton(
+            onPressed: _isSavingRules ? null : _handleSaveRules,
+            expand: true,
+            child: _isSavingRules
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text(
+                    'Save Rules',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+          ),
         ],
       ),
     );
