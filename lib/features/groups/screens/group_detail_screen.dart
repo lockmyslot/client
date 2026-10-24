@@ -21,36 +21,12 @@ class GroupDetailScreen extends ConsumerWidget {
     final resourcesAsync = ref.watch(groupResourcesProvider(groupId));
     final colorScheme = Theme.of(context).colorScheme;
 
-    final bottomBar = SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          border: Border(
-            top: BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant,
-              width: 1,
-            ),
-          ),
-        ),
-        child: PrimaryButton(
-          expand: true,
-          onPressed: () => context.push('/quick-book?group=$groupId'),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.bolt_outlined, size: 18),
-              SizedBox(width: 8),
-              Text('Quick Book'),
-            ],
-          ),
-        ),
-      ),
-    );
-
     return Scaffold(
-      bottomNavigationBar: bottomBar,
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.bolt_outlined),
+        label: const Text('Quick Book'),
+        onPressed: () => context.push('/quick-book?group=$groupId'),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(groupDetailProvider(groupId));
@@ -220,7 +196,7 @@ class GroupDetailScreen extends ConsumerWidget {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               sliver: resourcesAsync.when(
                 loading: () => const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),

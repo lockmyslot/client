@@ -44,38 +44,14 @@ class ResourceDetailScreen extends ConsumerWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
 
-    final bottomBar = SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          border: Border(
-            top: BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant,
-              width: 1,
-            ),
-          ),
-        ),
-        child: PrimaryButton(
-          expand: true,
-          onPressed: () => context.push(
-            '/groups/$groupId/resources/$resourceId/book',
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.calendar_today_outlined, size: 18),
-              SizedBox(width: 8),
-              Text('Book a Slot'),
-            ],
-          ),
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.calendar_today_outlined),
+        label: const Text('Book a Slot'),
+        onPressed: () => context.push(
+          '/groups/$groupId/resources/$resourceId/book',
         ),
       ),
-    );
-
-    return Scaffold(
-      bottomNavigationBar: bottomBar,
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(
@@ -187,7 +163,7 @@ class ResourceDetailScreen extends ConsumerWidget {
               orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
               sliver: resourceAsync.when(
                 loading: () => const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
