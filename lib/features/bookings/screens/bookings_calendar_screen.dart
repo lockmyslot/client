@@ -130,6 +130,7 @@ class _BookingsCalendarScreenState
                     child: Entrance(
                       delay: Duration(milliseconds: index * 60),
                       child: Card(
+                        margin: EdgeInsets.zero,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),

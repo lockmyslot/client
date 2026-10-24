@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/resources_provider.dart';
 import '../providers/maintenance_provider.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../bookings/data/models/booking.dart';
 import '../../bookings/providers/bookings_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
@@ -295,25 +297,6 @@ class ResourceDetailScreen extends ConsumerWidget {
                       error: (_, __) => const SizedBox.shrink(),
                     ),
 
-                    // Bookings Section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Bookings').h3(),
-                        IconButton(
-                          icon: const Icon(Icons.refresh_outlined, size: 16),
-                          onPressed: () => ref.invalidate(
-                            resourceBookingsProvider((
-                              groupId: groupId,
-                              resourceId: resourceId,
-                              date: null,
-                            )),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
                     SlideFadeSwitcher(
                       child: bookingsAsync.when(
                         loading: () => const KeyedSubtree(
@@ -351,86 +334,142 @@ class ResourceDetailScreen extends ConsumerWidget {
                               (a, b) => a.startTime.compareTo(b.startTime),
                             );
 
+                          final currentUserId =
+                              ref.watch(authProvider).user?.id;
+                          final myBookings = sorted
+                              .where((b) => b.userId == currentUserId)
+                              .toList();
+                          final othersBookings = sorted
+                              .where((b) => b.userId != currentUserId)
+                              .toList();
+
                           return KeyedSubtree(
                             key: const ValueKey('data'),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: sorted.asMap().entries.map((item) {
-                                final index = item.key;
-                                final booking = item.value;
-                                final duration =
-                                    booking.endTime.difference(booking.startTime);
-                                final durationText =
-                                    AppDateUtils.formatDuration(duration);
-                                final userName =
-                                    (booking.userDisplayName != null &&
-                                            booking.userDisplayName!.trim().isNotEmpty)
-                                        ? booking.userDisplayName!
-                                        : 'User';
-
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 8),
-                                  child: Entrance(
-                                    delay: Duration(
-                                      milliseconds: 100 + (index * 25),
-                                    ),
-                                    child: Card(
-                                      elevation: 0,
-                                      color: colorScheme.surfaceContainerLow,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        side: BorderSide(
-                                          color: colorScheme.outlineVariant
-                                              .withValues(alpha: 0.4),
+                              children: [
+                                // My Bookings Subsection
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 4,
+                                    bottom: 8,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Text('My Bookings')
+                                          .textLarge()
+                                          .semiBold(),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primaryContainer,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          '${myBookings.length}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                colorScheme.onPrimaryContainer,
+                                          ),
                                         ),
                                       ),
-                                      child: Padding(
-                                        padding: kCardPadding,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              AppDateUtils.formatBookingHeader(
-                                                booking.startTime,
-                                              ),
-                                            ).h4().semiBold(),
-                                            const SizedBox(height: 6),
-                                            Row(
-                                              children: [
-                                                CircleAvatar(
-                                                  radius: 9,
-                                                  backgroundColor: colorScheme
-                                                      .primary
-                                                      .withValues(alpha: 0.12),
-                                                  child: Text(
-                                                    userName.isNotEmpty
-                                                        ? userName[0].toUpperCase()
-                                                        : 'U',
-                                                    style: TextStyle(
-                                                      fontSize: 10,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: colorScheme.primary,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 6),
-                                                Expanded(
-                                                  child: Text(
-                                                    '$durationText · $userName',
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ).small().muted(),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
+                                      const Spacer(),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.refresh_outlined,
+                                          size: 16,
+                                        ),
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        onPressed: () => ref.invalidate(
+                                          resourceBookingsProvider((
+                                            groupId: groupId,
+                                            resourceId: resourceId,
+                                            date: null,
+                                          )),
                                         ),
                                       ),
+                                    ],
+                                  ),
+                                ),
+                                if (myBookings.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Text(
+                                      'You have no upcoming bookings for this resource.',
+                                    ).small().muted(),
+                                  )
+                                else
+                                  ...myBookings.asMap().entries.map(
+                                    (e) => _buildBookingCard(
+                                      e.value,
+                                      e.key,
+                                      colorScheme,
                                     ),
                                   ),
-                                );
-                              }).toList(),
+
+                                const SizedBox(height: 12),
+
+                                // Others' Bookings Subsection
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 4,
+                                    bottom: 8,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Text('Other Bookings')
+                                          .textLarge()
+                                          .semiBold(),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme
+                                              .surfaceContainerHighest,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          '${othersBookings.length}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (othersBookings.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Text(
+                                      'No bookings from other members.',
+                                    ).small().muted(),
+                                  )
+                                else
+                                  ...othersBookings.asMap().entries.map(
+                                    (e) => _buildBookingCard(
+                                      e.value,
+                                      e.key,
+                                      colorScheme,
+                                    ),
+                                  ),
+                              ],
                             ),
                           );
                         },
@@ -443,6 +482,75 @@ class ResourceDetailScreen extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBookingCard(
+    Booking booking,
+    int index,
+    ColorScheme colorScheme,
+  ) {
+    final duration = booking.endTime.difference(booking.startTime);
+    final durationText = AppDateUtils.formatDuration(duration);
+    final userName = (booking.userDisplayName != null &&
+            booking.userDisplayName!.trim().isNotEmpty)
+        ? booking.userDisplayName!
+        : 'User';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Entrance(
+        delay: Duration(milliseconds: 100 + (index * 25)),
+        child: Card(
+          margin: EdgeInsets.zero,
+          elevation: 0,
+          color: colorScheme.surfaceContainerLow,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Padding(
+            padding: kCardPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppDateUtils.formatBookingHeader(
+                    booking.startTime,
+                  ),
+                ).h4().semiBold(),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 9,
+                      backgroundColor:
+                          colorScheme.primary.withValues(alpha: 0.12),
+                      child: Text(
+                        userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '$durationText · $userName',
+                        overflow: TextOverflow.ellipsis,
+                      ).small().muted(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
