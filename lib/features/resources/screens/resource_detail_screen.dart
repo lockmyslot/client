@@ -130,17 +130,6 @@ class ResourceDetailScreen extends ConsumerWidget {
                               value: '${res.slotDurationMinutes}m',
                               label: 'Slots',
                             ),
-                            const SizedBox(width: 8),
-                            KpiStatChip(
-                              icon: res.isActive
-                                  ? Icons.check_circle_outline
-                                  : Icons.pause_circle_outline,
-                              iconColor: res.isActive
-                                  ? const Color(0xFF10B981)
-                                  : Colors.amber.shade700,
-                              value: res.isActive ? 'Active' : 'Inactive',
-                              label: 'Status',
-                            ),
                           ],
                         ),
                       ),
