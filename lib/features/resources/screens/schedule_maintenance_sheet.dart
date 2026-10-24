@@ -299,13 +299,10 @@ class _ScheduleMaintenanceSheetState
               // Title Field
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Task Title *',
                   hintText: 'e.g., Deep Cleaning, AC Filter Replacement',
-                  prefixIcon: const Icon(Icons.build_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  prefixIcon: Icon(Icons.build_outlined),
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
@@ -323,13 +320,10 @@ class _ScheduleMaintenanceSheetState
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 2,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Description (Optional)',
                   hintText: 'Details, contractor instructions or notes',
-                  prefixIcon: const Icon(Icons.notes_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  prefixIcon: Icon(Icons.notes_outlined),
                 ),
               ),
               const SizedBox(height: 14),
@@ -339,13 +333,10 @@ class _ScheduleMaintenanceSheetState
                 data: (members) {
                   return DropdownButtonFormField<String?>(
                     initialValue: _selectedAssigneeId,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Assign To (Optional)',
                       hintText: 'Select a group member',
-                      prefixIcon: const Icon(Icons.person_outline),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      prefixIcon: Icon(Icons.person_outline),
                     ),
                     items: [
                       const DropdownMenuItem<String?>(
@@ -439,14 +430,11 @@ class _ScheduleMaintenanceSheetState
                     Expanded(
                       child: InkWell(
                         onTap: () => _pickDate(isStart: true),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Start Date',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.calendar_month, size: 18),
+                            prefixIcon: Icon(Icons.calendar_month, size: 18),
                           ),
                           child: Text(
                             AppDateUtils.formatDate(_startDate),
@@ -459,14 +447,11 @@ class _ScheduleMaintenanceSheetState
                     Expanded(
                       child: InkWell(
                         onTap: () => _pickTime(isStart: true),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Start Time',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.access_time, size: 18),
+                            prefixIcon: Icon(Icons.access_time, size: 18),
                           ),
                           child: Text(
                             _formatTimeOfDay(_startTimeOfDay),
@@ -483,14 +468,11 @@ class _ScheduleMaintenanceSheetState
                     Expanded(
                       child: InkWell(
                         onTap: () => _pickDate(isStart: false),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'End Date',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.calendar_month, size: 18),
+                            prefixIcon: Icon(Icons.calendar_month, size: 18),
                           ),
                           child: Text(
                             AppDateUtils.formatDate(_endDate),
@@ -503,14 +485,11 @@ class _ScheduleMaintenanceSheetState
                     Expanded(
                       child: InkWell(
                         onTap: () => _pickTime(isStart: false),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'End Time',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.access_time, size: 18),
+                            prefixIcon: Icon(Icons.access_time, size: 18),
                           ),
                           child: Text(
                             _formatTimeOfDay(_endTimeOfDay),
@@ -566,14 +545,11 @@ class _ScheduleMaintenanceSheetState
                     Expanded(
                       child: InkWell(
                         onTap: () => _pickTime(isStart: true),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Time From',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.access_time, size: 18),
+                            prefixIcon: Icon(Icons.access_time, size: 18),
                           ),
                           child: Text(
                             _formatTimeOfDay(_startTimeOfDay),
@@ -586,14 +562,11 @@ class _ScheduleMaintenanceSheetState
                     Expanded(
                       child: InkWell(
                         onTap: () => _pickTime(isStart: false),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Time Until',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.access_time, size: 18),
+                            prefixIcon: Icon(Icons.access_time, size: 18),
                           ),
                           child: Text(
                             _formatTimeOfDay(_endTimeOfDay),
@@ -612,14 +585,11 @@ class _ScheduleMaintenanceSheetState
                     Expanded(
                       child: InkWell(
                         onTap: () => _pickDate(isStart: true),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Valid From',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.date_range, size: 18),
+                            prefixIcon: Icon(Icons.date_range, size: 18),
                           ),
                           child: Text(
                             AppDateUtils.formatDate(_startDate),
@@ -632,14 +602,11 @@ class _ScheduleMaintenanceSheetState
                     Expanded(
                       child: InkWell(
                         onTap: () => _pickDate(isStart: false),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: InputDecorator(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Valid Until',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            prefixIcon: const Icon(Icons.date_range, size: 18),
+                            prefixIcon: Icon(Icons.date_range, size: 18),
                           ),
                           child: Text(
                             AppDateUtils.formatDate(_endDate),
