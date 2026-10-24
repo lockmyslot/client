@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
+import '../../features/auth/screens/splash_screen.dart';
 import '../../features/home/screens/main_shell_screen.dart';
 import '../../features/groups/screens/groups_list_screen.dart';
 import '../../features/groups/screens/create_group_screen.dart';
@@ -76,7 +77,8 @@ class RouterRefreshNotifier extends ChangeNotifier {
       authProvider,
       (previous, next) {
         if (previous?.isAuthenticated != next.isAuthenticated ||
-            previous?.isLoading != next.isLoading) {
+            previous?.isLoading != next.isLoading ||
+            previous?.isInitialized != next.isInitialized) {
           notifyListeners();
         }
       },
@@ -92,20 +94,35 @@ final routerProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = ref.watch(routerRefreshNotifierProvider);
 
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/splash',
     refreshListenable: refreshNotifier,
     redirect: (context, state) {
       final authState = ref.read(authProvider);
-      if (authState.isLoading) return null;
+
+      if (!authState.isInitialized) {
+        if (state.matchedLocation == '/splash') return null;
+        final target = state.uri.toString();
+        if (target.isNotEmpty && target != '/' && target != '/splash') {
+          return '/splash?returnTo=${Uri.encodeComponent(target)}';
+        }
+        return '/splash';
+      }
 
       final isAuthRoute = state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
+      final isSplashRoute = state.matchedLocation == '/splash' ||
+          state.matchedLocation == '/';
 
       if (!authState.isAuthenticated) {
         if (isAuthRoute) return null;
+        final returnTo = state.uri.queryParameters['returnTo'];
+        if (returnTo != null && returnTo.isNotEmpty) {
+          return '/login?returnTo=${Uri.encodeComponent(returnTo)}';
+        }
         final target = state.uri.toString();
         if (target.isNotEmpty &&
             target != '/' &&
+            target != '/splash' &&
             target != '/groups' &&
             target != '/bookings' &&
             target != '/me') {
@@ -114,13 +131,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      if (isAuthRoute || state.matchedLocation == '/') {
+      if (isAuthRoute || isSplashRoute) {
         final returnTo = state.uri.queryParameters['returnTo'];
         if (returnTo != null && returnTo.isNotEmpty) {
           final decoded = Uri.decodeComponent(returnTo);
           if (decoded.startsWith('/') &&
               !decoded.startsWith('/login') &&
-              !decoded.startsWith('/register')) {
+              !decoded.startsWith('/register') &&
+              !decoded.startsWith('/splash')) {
             return decoded;
           }
         }
@@ -130,6 +148,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: SplashScreen()),
+      ),
+      GoRoute(
+        path: '/',
+        redirect: (context, state) => '/splash',
+      ),
       GoRoute(
         path: '/login',
         pageBuilder: (context, state) =>

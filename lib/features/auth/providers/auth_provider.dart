@@ -8,12 +8,14 @@ class AuthState {
   final User? user;
   final bool isAuthenticated;
   final bool isLoading;
+  final bool isInitialized;
   final String? error;
 
   const AuthState({
     this.user,
     this.isAuthenticated = false,
     this.isLoading = false,
+    this.isInitialized = false,
     this.error,
   });
 
@@ -21,12 +23,14 @@ class AuthState {
     User? user,
     bool? isAuthenticated,
     bool? isLoading,
+    bool? isInitialized,
     String? error,
   }) {
     return AuthState(
       user: user ?? this.user,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isLoading: isLoading ?? this.isLoading,
+      isInitialized: isInitialized ?? this.isInitialized,
       error: error,
     );
   }
@@ -37,7 +41,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SecureStorageService _storage;
 
   AuthNotifier(this._repository, this._storage)
-    : super(const AuthState(isLoading: true)) {
+    : super(const AuthState(isLoading: true, isInitialized: false)) {
     checkAuthStatus();
   }
 
@@ -46,17 +50,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final token = await _storage.getAuthToken();
       if (token == null || token.isEmpty) {
-        state = const AuthState(isAuthenticated: false, isLoading: false);
+        state = const AuthState(
+          isAuthenticated: false,
+          isLoading: false,
+          isInitialized: true,
+        );
         return;
       }
 
       final user = await _repository.getMe();
-      state = AuthState(user: user, isAuthenticated: true, isLoading: false);
+      state = AuthState(
+        user: user,
+        isAuthenticated: true,
+        isLoading: false,
+        isInitialized: true,
+      );
     } catch (e) {
       if (e is UnauthorizedException) {
         // If explicitly unauthorized (401), the token is invalid; clear it
         await _storage.deleteAuthToken();
-        state = const AuthState(isAuthenticated: false, isLoading: false);
+        state = const AuthState(
+          isAuthenticated: false,
+          isLoading: false,
+          isInitialized: true,
+        );
       } else {
         // If network/server error, fallback to cached user credentials if available
         final savedId = await _storage.getUserId();
@@ -73,9 +90,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
             ),
             isAuthenticated: true,
             isLoading: false,
+            isInitialized: true,
           );
         } else {
-          state = const AuthState(isAuthenticated: false, isLoading: false);
+          state = const AuthState(
+            isAuthenticated: false,
+            isLoading: false,
+            isInitialized: true,
+          );
         }
       }
     }
@@ -91,7 +113,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         username: username,
         password: password,
       );
-      state = AuthState(user: user, isAuthenticated: true, isLoading: false);
+      state = AuthState(
+        user: user,
+        isAuthenticated: true,
+        isLoading: false,
+        isInitialized: true,
+      );
       return true;
     } catch (e) {
       final message = e is ApiException
@@ -114,7 +141,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         username: username,
         password: password,
       );
-      state = AuthState(user: user, isAuthenticated: true, isLoading: false);
+      state = AuthState(
+        user: user,
+        isAuthenticated: true,
+        isLoading: false,
+        isInitialized: true,
+      );
       return true;
     } catch (e) {
       final message = e is ApiException
@@ -128,7 +160,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     state = state.copyWith(isLoading: true);
     await _repository.logout();
-    state = const AuthState(isAuthenticated: false, isLoading: false);
+    state = const AuthState(
+      isAuthenticated: false,
+      isLoading: false,
+      isInitialized: true,
+    );
   }
 }
 
