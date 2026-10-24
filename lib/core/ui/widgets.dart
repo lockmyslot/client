@@ -129,3 +129,99 @@ class PrimaryBadge extends StatelessWidget {
     );
   }
 }
+
+/// A modern pill chip displaying a KPI metric with an icon, value, optional label, and optional tap action.
+class KpiStatChip extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String? label;
+  final VoidCallback? onTap;
+  final Color? iconColor;
+  final Color? backgroundColor;
+  final bool isMonospace;
+  final Widget? trailing;
+
+  const KpiStatChip({
+    super.key,
+    required this.icon,
+    required this.value,
+    this.label,
+    this.onTap,
+    this.iconColor,
+    this.backgroundColor,
+    this.isMonospace = false,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final chipShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+      side: BorderSide(
+        color: cs.outlineVariant.withValues(alpha: 0.5),
+        width: 1,
+      ),
+    );
+
+    return Material(
+      color: backgroundColor ?? cs.surfaceContainerLow,
+      shape: chipShape,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: iconColor ?? cs.primary,
+              ),
+              const SizedBox(width: 8),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: value,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        fontFamily: isMonospace ? 'monospace' : null,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    if (label != null && label!.isNotEmpty) ...[
+                      const TextSpan(text: ' '),
+                      TextSpan(
+                        text: label,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (trailing != null) ...[
+                const SizedBox(width: 6),
+                trailing!,
+              ] else if (onTap != null) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.chevron_right,
+                  size: 14,
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -14,13 +14,6 @@ class GroupDetailScreen extends ConsumerWidget {
 
   const GroupDetailScreen({super.key, required this.groupId});
 
-  Widget _toolbarDivider(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 20,
-      color: Theme.of(context).colorScheme.outlineVariant,
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -87,84 +80,117 @@ class GroupDetailScreen extends ConsumerWidget {
               ],
             ),
             groupAsync.maybeWhen(
-              data: (group) => SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Card(
-                    elevation: 0,
-                    color: colorScheme.surfaceContainerLow,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: InkWell(
-                              onTap: () =>
-                                  context.push('/groups/$groupId/members'),
-                              borderRadius: BorderRadius.circular(8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.people_outline, size: 18),
-                                  const SizedBox(width: 6),
-                                  Text('${group.memberCount}'),
-                                ],
+              data: (group) {
+                final hasInviteCode =
+                    group.inviteCode != null && group.inviteCode!.isNotEmpty;
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // KPI Stat Chips
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            children: [
+                              KpiStatChip(
+                                icon: Icons.people_outline,
+                                value: '${group.memberCount}',
+                                label: group.memberCount == 1
+                                    ? 'Member'
+                                    : 'Members',
+                                onTap: () =>
+                                    context.push('/groups/$groupId/members'),
                               ),
-                            ),
-                          ),
-                          _toolbarDivider(context),
-                          if (group.inviteCode != null &&
-                              group.inviteCode!.isNotEmpty) ...[
-                            Expanded(
-                              child: InkWell(
-                                onTap: () {
-                                  DeepLinkUtils.showInviteSheet(
+                              const SizedBox(width: 8),
+                              KpiStatChip(
+                                icon: group.isAdmin
+                                    ? Icons.shield_outlined
+                                    : Icons.person_outline,
+                                value: group.isAdmin ? 'Admin' : 'Member',
+                                label: 'Role',
+                                iconColor: group.isAdmin
+                                    ? colorScheme.primary
+                                    : colorScheme.onSurfaceVariant,
+                              ),
+                              if (hasInviteCode) ...[
+                                const SizedBox(width: 8),
+                                KpiStatChip(
+                                  icon: Icons.vpn_key_outlined,
+                                  value: group.inviteCode!,
+                                  label: 'Code',
+                                  isMonospace: true,
+                                  onTap: () => DeepLinkUtils.showInviteSheet(
                                     context,
                                     groupName: group.name,
                                     inviteCode: group.inviteCode!,
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(8),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.vpn_key_outlined,
-                                      size: 18,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Quick Action Buttons
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            children: [
+                              if (hasInviteCode) ...[
+                                Expanded(
+                                  child: FilledButton.tonalIcon(
+                                    onPressed: () =>
+                                        DeepLinkUtils.showInviteSheet(
+                                      context,
+                                      groupName: group.name,
+                                      inviteCode: group.inviteCode!,
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(group.inviteCode!).mono(),
-                                  ],
+                                    icon: const Icon(
+                                      Icons.share_outlined,
+                                      size: 16,
+                                    ),
+                                    label: const Text('Invite'),
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 10,
+                                      ),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                              ],
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => context.push(
+                                    '/groups/$groupId/my_bookings',
+                                  ),
+                                  icon: const Icon(
+                                    Icons.bookmark_border_outlined,
+                                    size: 16,
+                                  ),
+                                  label: const Text('My Bookings'),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
                                 ),
                               ),
-                            ),
-                            _toolbarDivider(context),
-                          ],
-                          Expanded(
-                            child: InkWell(
-                              onTap: () => context.push(
-                                '/groups/$groupId/my_bookings',
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.bookmark_outline,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  const Text('Bookings'),
-                                ],
-                              ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ),
+                );
+              },
               orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
             ),
             SliverToBoxAdapter(

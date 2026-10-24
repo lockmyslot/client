@@ -20,13 +20,6 @@ class ResourceDetailScreen extends ConsumerWidget {
     required this.resourceId,
   });
 
-  Widget _toolbarDivider(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 20,
-      color: Theme.of(context).colorScheme.outlineVariant,
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -132,38 +125,88 @@ class ResourceDetailScreen extends ConsumerWidget {
             resourceAsync.maybeWhen(
               data: (res) => SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Card(
-                    elevation: 0,
-                    color: colorScheme.surfaceContainerLow,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.people_outline, size: 18),
-                                const SizedBox(width: 6),
-                                Text('${res.capacity}'),
-                              ],
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // KPI Stat Chips
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            KpiStatChip(
+                              icon: Icons.people_outline,
+                              value: '${res.capacity}',
+                              label: 'Capacity',
                             ),
-                          ),
-                          _toolbarDivider(context),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.timer_outlined, size: 18),
-                                const SizedBox(width: 6),
-                                Text('${res.slotDurationMinutes} min'),
-                              ],
+                            const SizedBox(width: 8),
+                            KpiStatChip(
+                              icon: Icons.timer_outlined,
+                              value: '${res.slotDurationMinutes}m',
+                              label: 'Slots',
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            KpiStatChip(
+                              icon: res.isActive
+                                  ? Icons.check_circle_outline
+                                  : Icons.pause_circle_outline,
+                              iconColor: res.isActive
+                                  ? const Color(0xFF10B981)
+                                  : Colors.amber.shade700,
+                              value: res.isActive ? 'Active' : 'Inactive',
+                              label: 'Status',
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      // Quick Action Buttons
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () => context.push(
+                                  '/groups/$groupId/resources/$resourceId/rules',
+                                ),
+                                icon: const Icon(Icons.tune_outlined, size: 16),
+                                label: const Text('Rules'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () => context.push(
+                                  '/groups/$groupId/resources/$resourceId/maintenance',
+                                ),
+                                icon: const Icon(
+                                  Icons.handyman_outlined,
+                                  size: 16,
+                                ),
+                                label: const Text('Maintenance'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
