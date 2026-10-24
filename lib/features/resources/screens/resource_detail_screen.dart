@@ -4,14 +4,17 @@ import 'package:go_router/go_router.dart';
 import '../providers/resources_provider.dart';
 import '../providers/maintenance_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../bookings/data/bookings_repository.dart';
 import '../../bookings/data/models/booking.dart';
 import '../../bookings/providers/bookings_provider.dart';
+import '../../groups/providers/groups_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 
-class ResourceDetailScreen extends ConsumerWidget {
+class ResourceDetailScreen extends ConsumerStatefulWidget {
   final String groupId;
   final String resourceId;
 
@@ -23,7 +26,54 @@ class ResourceDetailScreen extends ConsumerWidget {
 
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ResourceDetailScreen> createState() =>
+      _ResourceDetailScreenState();
+}
+
+class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
+  final Set<String> _cancellingIds = {};
+
+  String get groupId => widget.groupId;
+  String get resourceId => widget.resourceId;
+
+  Future<void> _cancelBooking(BuildContext context, String bookingId) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'Cancel Booking',
+      message: 'Are you sure you want to cancel this booking?',
+      confirmText: 'Cancel Booking',
+      isDestructive: true,
+    );
+    if (confirmed != true) return;
+
+    setState(() => _cancellingIds.add(bookingId));
+    try {
+      await ref
+          .read(bookingsRepositoryProvider)
+          .cancelBooking(groupId, bookingId);
+      ref.invalidate(
+        resourceBookingsProvider((
+          groupId: groupId,
+          resourceId: resourceId,
+          date: null,
+        )),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to cancel booking: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _cancellingIds.remove(bookingId));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final resourceAsync = ref.watch(
       resourceDetailProvider((groupId: groupId, resourceId: resourceId)),
     );
@@ -41,16 +91,27 @@ class ResourceDetailScreen extends ConsumerWidget {
         status: null,
       )),
     );
+    final groupAsync = ref.watch(groupDetailProvider(groupId));
+    final currentUserId = ref.watch(authProvider).user?.id;
+    final isAdmin = groupAsync.maybeWhen(
+      data: (group) => group.isAdmin,
+      orElse: () => false,
+    );
 
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.calendar_today_outlined),
-        label: const Text('Book a Slot'),
-        onPressed: () => context.push(
-          '/groups/$groupId/resources/$resourceId/book',
-        ),
+      floatingActionButton: resourceAsync.maybeWhen(
+        data: (res) => res.isActive
+            ? FloatingActionButton.extended(
+                icon: const Icon(Icons.calendar_today_outlined),
+                label: const Text('Book a Slot'),
+                onPressed: () => context.push(
+                  '/groups/$groupId/resources/$resourceId/book',
+                ),
+              )
+            : null,
+        orElse: () => null,
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -81,6 +142,16 @@ class ResourceDetailScreen extends ConsumerWidget {
                 loading: () => const Text('Loading Resource...'),
                 error: (_, __) => const Text('Resource Detail'),
               ),
+              actions: [
+                if (isAdmin)
+                  IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    tooltip: 'Settings',
+                    onPressed: () => context.push(
+                      '/groups/$groupId/resources/$resourceId/settings',
+                    ),
+                  ),
+              ],
               pinned: true,
             ),
             resourceAsync.maybeWhen(
@@ -90,6 +161,38 @@ class ResourceDetailScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (!res.isActive)
+                        Container(
+                          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.red.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.info_outline,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'This resource is currently inactive. New bookings are disabled.',
+                                  style: TextStyle(
+                                    color: Colors.red.shade800,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       // KPI Stat Chips
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -108,6 +211,14 @@ class ResourceDetailScreen extends ConsumerWidget {
                               value: '${res.slotDurationMinutes}m',
                               label: 'Slots',
                             ),
+                            const SizedBox(width: 8),
+                            KpiStatChip(
+                              icon: res.isActive
+                                  ? Icons.check_circle_outline
+                                  : Icons.cancel_outlined,
+                              value: res.isActive ? 'Active' : 'Inactive',
+                              label: 'Status',
+                            ),
                           ],
                         ),
                       ),
@@ -117,23 +228,28 @@ class ResourceDetailScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
                           children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () => context.push(
-                                  '/groups/$groupId/resources/$resourceId/rules',
-                                ),
-                                icon: const Icon(Icons.tune_outlined, size: 16),
-                                label: const Text('Rules'),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 10,
+                            if (isAdmin) ...[
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => context.push(
+                                    '/groups/$groupId/resources/$resourceId/settings',
                                   ),
-                                  visualDensity: VisualDensity.compact,
+                                  icon: const Icon(
+                                    Icons.settings_outlined,
+                                    size: 16,
+                                  ),
+                                  label: const Text('Settings'),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 10),
+                              const SizedBox(width: 10),
+                            ],
                             Expanded(
                               child: OutlinedButton.icon(
                                 onPressed: () => context.push(
@@ -310,8 +426,6 @@ class ResourceDetailScreen extends ConsumerWidget {
                               (a, b) => a.startTime.compareTo(b.startTime),
                             );
 
-                          final currentUserId =
-                              ref.watch(authProvider).user?.id;
                           final myBookings = sorted
                               .where((b) => b.userId == currentUserId)
                               .toList();
@@ -386,9 +500,11 @@ class ResourceDetailScreen extends ConsumerWidget {
                                 else
                                   ...myBookings.asMap().entries.map(
                                     (e) => _buildBookingCard(
+                                      context,
                                       e.value,
                                       e.key,
                                       colorScheme,
+                                      canCancel: true,
                                     ),
                                   ),
 
@@ -440,9 +556,11 @@ class ResourceDetailScreen extends ConsumerWidget {
                                 else
                                   ...othersBookings.asMap().entries.map(
                                     (e) => _buildBookingCard(
+                                      context,
                                       e.value,
                                       e.key,
                                       colorScheme,
+                                      canCancel: isAdmin,
                                     ),
                                   ),
                               ],
@@ -464,16 +582,22 @@ class ResourceDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildBookingCard(
+    BuildContext context,
     Booking booking,
     int index,
-    ColorScheme colorScheme,
-  ) {
+    ColorScheme colorScheme, {
+    bool canCancel = false,
+  }) {
     final duration = booking.endTime.difference(booking.startTime);
     final durationText = AppDateUtils.formatDuration(duration);
     final userName = (booking.userDisplayName != null &&
             booking.userDisplayName!.trim().isNotEmpty)
         ? booking.userDisplayName!
         : 'User';
+
+    final isUpcoming = booking.startTime.isAfter(DateTime.now());
+    final showCancel = canCancel && booking.isConfirmed && isUpcoming;
+    final isCancelling = _cancellingIds.contains(booking.id);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -522,6 +646,36 @@ class ResourceDetailScreen extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ).small().muted(),
                     ),
+                    if (showCancel)
+                      isCancelling
+                          ? Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: colorScheme.error,
+                                ),
+                              ),
+                            )
+                          : TextButton.icon(
+                              onPressed: () =>
+                                  _cancelBooking(context, booking.id),
+                              style: TextButton.styleFrom(
+                                foregroundColor: colorScheme.error,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              icon: const Icon(
+                                Icons.close_outlined,
+                                size: 16,
+                              ),
+                              label: const Text('Cancel'),
+                            ),
                   ],
                 ),
               ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/resources_provider.dart';
+import '../../groups/providers/groups_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -14,6 +15,11 @@ class ResourcesListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resourcesAsync = ref.watch(groupResourcesProvider(groupId));
+    final groupAsync = ref.watch(groupDetailProvider(groupId));
+    final isAdmin = groupAsync.maybeWhen(
+      data: (group) => group.isAdmin,
+      orElse: () => false,
+    );
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -79,6 +85,20 @@ class ResourcesListScreen extends ConsumerWidget {
                                   Row(
                                     children: [
                                       Expanded(child: Text(resource.name).h4()),
+                                      if (isAdmin)
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.settings_outlined,
+                                            size: 18,
+                                          ),
+                                          tooltip: 'Settings',
+                                          visualDensity: VisualDensity.compact,
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          onPressed: () => context.push(
+                                            '/groups/$groupId/resources/${resource.id}/settings',
+                                          ),
+                                        ),
                                     ],
                                   ),
                                   if (resource.description != null) ...[

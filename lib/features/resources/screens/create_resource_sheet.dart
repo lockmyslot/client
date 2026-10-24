@@ -214,6 +214,9 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
                         if (num == null || num <= 0) {
                           return 'Must be > 0';
                         }
+                        if (num > 100) {
+                          return 'Max 100';
+                        }
                         return null;
                       },
                     ),
@@ -235,6 +238,12 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
                         final num = int.tryParse(val.trim());
                         if (num == null || num <= 0) {
                           return 'Must be > 0';
+                        }
+                        if (num < 15 || num > 1080) {
+                          return '15 to 1080 mins';
+                        }
+                        if (num % 15 != 0) {
+                          return 'Multiple of 15';
                         }
                         return null;
                       },

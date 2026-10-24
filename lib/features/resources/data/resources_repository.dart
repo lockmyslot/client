@@ -94,9 +94,23 @@ class ResourcesRepository {
 
   Future<Resource> updateResource(
     String groupId,
-    String resourceId,
-    Map<String, dynamic> body,
-  ) async {
+    String resourceId, {
+    String? name,
+    String? description,
+    int? capacity,
+    int? slotDurationMinutes,
+    bool? isActive,
+    Map<String, dynamic>? data,
+  }) async {
+    final body = data ??
+        <String, dynamic>{
+          if (name != null) 'name': name,
+          if (description != null) 'description': description,
+          if (capacity != null) 'capacity': capacity,
+          if (slotDurationMinutes != null)
+            'slot_duration_minutes': slotDurationMinutes,
+          if (isActive != null) 'is_active': isActive,
+        };
     final response = await _apiClient.patch<Resource>(
       ApiConstants.resourceDetail(groupId, resourceId),
       body: body,

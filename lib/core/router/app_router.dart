@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,9 +13,11 @@ import '../../features/groups/screens/join_group_screen.dart';
 import '../../features/groups/screens/group_detail_screen.dart';
 import '../../features/groups/screens/members_screen.dart';
 import '../../features/resources/screens/create_resource_screen.dart';
+import '../../features/resources/screens/resource_settings_screen.dart';
 import '../../features/resources/screens/resource_detail_screen.dart';
-import '../../features/resources/screens/booking_rules_screen.dart';
 import '../../features/resources/screens/maintenance_tasks_screen.dart';
+import '../../features/bookings/data/models/booking.dart';
+import '../../features/bookings/widgets/booking_details_form.dart';
 import '../../features/bookings/screens/availability_screen.dart';
 import '../../features/bookings/screens/quick_booking_screen.dart';
 import '../../features/bookings/screens/bookings_calendar_screen.dart';
@@ -291,15 +293,47 @@ final routerProvider = Provider<GoRouter>((ref) {
             },
             routes: [
               GoRoute(
+                path: 'settings',
+                pageBuilder: (context, state) {
+                  final groupId = state.pathParameters['group_id']!;
+                  final resourceId = state.pathParameters['resource_id']!;
+                  final tab = int.tryParse(state.uri.queryParameters['tab'] ?? '0') ?? 0;
+                  return _buildSmoothTransition(
+                    state: state,
+                    child: ResourceSettingsScreen(
+                      groupId: groupId,
+                      resourceId: resourceId,
+                      initialTab: tab,
+                    ),
+                  );
+                },
+              ),
+              GoRoute(
+                path: 'edit',
+                pageBuilder: (context, state) {
+                  final groupId = state.pathParameters['group_id']!;
+                  final resourceId = state.pathParameters['resource_id']!;
+                  return _buildSmoothTransition(
+                    state: state,
+                    child: ResourceSettingsScreen(
+                      groupId: groupId,
+                      resourceId: resourceId,
+                      initialTab: 0,
+                    ),
+                  );
+                },
+              ),
+              GoRoute(
                 path: 'rules',
                 pageBuilder: (context, state) {
                   final groupId = state.pathParameters['group_id']!;
                   final resourceId = state.pathParameters['resource_id']!;
                   return _buildSmoothTransition(
                     state: state,
-                    child: BookingRulesScreen(
+                    child: ResourceSettingsScreen(
                       groupId: groupId,
                       resourceId: resourceId,
+                      initialTab: 1,
                     ),
                   );
                 },
@@ -314,6 +348,34 @@ final routerProvider = Provider<GoRouter>((ref) {
                     child: AvailabilityScreen(
                       groupId: groupId,
                       resourceId: resourceId,
+                    ),
+                  );
+                },
+              ),
+              GoRoute(
+                path: 'reschedule',
+                pageBuilder: (context, state) {
+                  final groupId = state.pathParameters['group_id']!;
+                  final resourceId = state.pathParameters['resource_id']!;
+                  final booking = state.extra as Booking?;
+                  return _buildSmoothTransition(
+                    state: state,
+                    child: Scaffold(
+                      appBar: AppBar(
+                        title: Text(
+                          booking?.resourceName != null
+                              ? 'Reschedule ${booking!.resourceName}'
+                              : 'Reschedule Booking',
+                        ),
+                      ),
+                      body: SafeArea(
+                        top: false,
+                        child: BookingDetailsForm(
+                          groupId: groupId,
+                          resourceId: resourceId,
+                          reschedulingBooking: booking,
+                        ),
+                      ),
                     ),
                   );
                 },
