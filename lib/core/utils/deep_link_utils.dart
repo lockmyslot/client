@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import '../ui/ui.dart';
 
 class DeepLinkUtils {
@@ -16,6 +17,33 @@ class DeepLinkUtils {
   static String buildCustomSchemeInviteLink(String inviteCode) {
     final cleanCode = inviteCode.trim().toUpperCase();
     return '$appScheme://join?code=$cleanCode';
+  }
+
+  /// Opens the system's native share sheet with the group invite code.
+  static Future<void> shareInviteCode(
+    BuildContext context,
+    String inviteCode, {
+    Rect? sharePositionOrigin,
+  }) async {
+    final cleanCode = inviteCode.trim().toUpperCase();
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          text: cleanCode,
+          sharePositionOrigin: sharePositionOrigin,
+        ),
+      );
+    } catch (_) {
+      if (context.mounted) {
+        Clipboard.setData(ClipboardData(text: cleanCode));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invite code copied to clipboard!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   /// Shows an invite bottom sheet with options to copy the code or share the deep link.
