@@ -75,7 +75,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
 
   return GoRouter(
-    initialLocation: '/groups',
+    initialLocation: '/login',
     refreshListenable: GoRouterRefreshStream(authNotifier.stream),
     redirect: (context, state) {
       if (authState.isLoading) return null;

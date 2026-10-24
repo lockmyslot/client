@@ -9,5 +9,7 @@ void main() {
         child: LockMySlotApp(),
       ),
     );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
   });
 }

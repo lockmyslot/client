@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../data/groups_repository.dart';
 import '../data/models/group.dart';
 import '../data/models/group_member.dart';
@@ -12,6 +13,10 @@ final myGroupsProvider = AsyncNotifierProvider<MyGroupsNotifier, List<Group>>(
 class MyGroupsNotifier extends AsyncNotifier<List<Group>> {
   @override
   Future<List<Group>> build() async {
+    final authState = ref.watch(authProvider);
+    if (!authState.isAuthenticated) {
+      return [];
+    }
     final repo = ref.watch(groupsRepositoryProvider);
     return await repo.getMyGroups();
   }

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../data/models/booking.dart';
 import '../data/bookings_repository.dart';
 import '../../groups/providers/groups_provider.dart';
@@ -8,6 +9,8 @@ final myBookingsProvider =
       ref,
       arg,
     ) async {
+      final authState = ref.watch(authProvider);
+      if (!authState.isAuthenticated) return [];
       final repo = ref.watch(bookingsRepositoryProvider);
       return await repo.getMyBookings(arg.groupId, status: arg.status);
     });
@@ -17,6 +20,9 @@ final allBookingsProvider =
       ref,
       arg,
     ) async {
+      final authState = ref.watch(authProvider);
+      if (!authState.isAuthenticated) return [];
+
       final repo = ref.watch(bookingsRepositoryProvider);
       if (arg.groupId != null && arg.groupId!.isNotEmpty) {
         return await repo.getMyBookings(arg.groupId!, status: arg.status);

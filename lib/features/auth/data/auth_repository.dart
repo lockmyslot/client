@@ -45,20 +45,19 @@ class AuthRepository {
   }
 
   Future<User> _parseAuthResponse(dynamic rawData) async {
-    User user;
-    String? token;
-
-    if (rawData is Map<String, dynamic>) {
-      if (rawData.containsKey('user')) {
-        user = User.fromJson(rawData['user'] as Map<String, dynamic>);
-        token = rawData['auth_token'] as String? ?? user.authToken;
-      } else {
-        user = User.fromJson(rawData);
-        token = user.authToken;
-      }
-    } else {
+    if (rawData is! Map) {
       throw Exception('Invalid auth response structure');
     }
+
+    final map = Map<String, dynamic>.from(rawData);
+    final userJson = map.containsKey('user') && map['user'] is Map
+        ? Map<String, dynamic>.from(map['user'] as Map)
+        : map;
+
+    final user = User.fromJson(userJson);
+    final token = map['auth_token'] as String? ??
+        map['authToken'] as String? ??
+        user.authToken;
 
     if (token != null && token.isNotEmpty) {
       await _storage.saveAuthToken(token);
