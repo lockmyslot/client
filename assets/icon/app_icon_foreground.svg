@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <!-- Padlock Shackle: Crisp Minimal White to Platinum -->
-    <linearGradient id="shackleWhite" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="70%" stop-color="#F4F4F5"/>
-      <stop offset="100%" stop-color="#D4D4D8"/>
+    <!-- Padlock Shackle: Sleek Metallic Slate to Deep Charcoal -->
+    <linearGradient id="shackleMetallic" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4B5563"/>
+      <stop offset="50%" stop-color="#374151"/>
+      <stop offset="100%" stop-color="#18181B"/>
     </linearGradient>
 
     <!-- Calendar Body Card: Dark Slate -->
@@ -23,7 +23,7 @@
   <!-- Shackle Arch -->
   <path d="M 374 380 V 240 A 138 138 0 0 1 650 240 V 380"
         fill="none"
-        stroke="url(#shackleWhite)"
+        stroke="url(#shackleMetallic)"
         stroke-width="70"
         stroke-linecap="round"/>
 
@@ -46,8 +46,8 @@
   <line x1="252" y1="456" x2="772" y2="456" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="2"/>
 
   <!-- Binder Clips -->
-  <rect x="360" y="324" width="24" height="42" rx="12" fill="#FFFFFF"/>
-  <rect x="640" y="324" width="24" height="42" rx="12" fill="#FFFFFF"/>
+  <rect x="360" y="324" width="24" height="42" rx="12" fill="#FFFFFF" stroke="#52525B" stroke-width="2.5"/>
+  <rect x="640" y="324" width="24" height="42" rx="12" fill="#FFFFFF" stroke="#52525B" stroke-width="2.5"/>
 
   <!-- Header Indicator -->
   <rect x="432" y="392" width="160" height="16" rx="8" fill="#FFFFFF" fill-opacity="0.9"/>
