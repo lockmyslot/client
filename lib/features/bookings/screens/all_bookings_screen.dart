@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/my_bookings_provider.dart';
 import '../../groups/providers/groups_provider.dart';
 import '../data/bookings_repository.dart';
+import 'reschedule_booking_sheet.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
@@ -342,55 +343,93 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                             'CONFIRMED' &&
                                         isUpcoming) ...[
                                       const SizedBox(height: 12),
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: OutlinedButton.icon(
-                                          onPressed: () async {
-                                            final confirmed =
-                                                await ConfirmDialog.show(
-                                              context,
-                                              title: 'Cancel Booking',
-                                              message:
-                                                  'Are you sure you want to cancel this booking?',
-                                              confirmText: 'Cancel Booking',
-                                              isDestructive: true,
-                                            );
-                                            if (confirmed == true) {
-                                              await ref
-                                                  .read(
-                                                    bookingsRepositoryProvider,
-                                                  )
-                                                  .cancelBooking(
-                                                    booking.groupId,
-                                                    booking.id,
-                                                  );
-                                              ref.invalidate(
-                                                allBookingsProvider((
-                                                  groupId:
-                                                      _selectedGroupFilter,
-                                                  status:
-                                                      _selectedStatusFilter,
-                                                )),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          OutlinedButton.icon(
+                                            onPressed: () async {
+                                              final res =
+                                                  await RescheduleBookingSheet
+                                                      .show(
+                                                context,
+                                                booking: booking,
                                               );
-                                            }
-                                          },
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: colorScheme.error,
-                                            side: BorderSide(
-                                              color: colorScheme.error
-                                                  .withValues(alpha: 0.5),
+                                              if (res == true) {
+                                                ref.invalidate(
+                                                  allBookingsProvider((
+                                                    groupId:
+                                                        _selectedGroupFilter,
+                                                    status:
+                                                        _selectedStatusFilter,
+                                                  )),
+                                                );
+                                              }
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 6,
+                                              ),
                                             ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                              vertical: 6,
+                                            icon: const Icon(
+                                              Icons.edit_calendar_outlined,
+                                              size: 16,
                                             ),
+                                            label: const Text('Reschedule'),
                                           ),
-                                          icon: const Icon(
-                                            Icons.close_outlined,
-                                            size: 16,
+                                          const SizedBox(width: 8),
+                                          OutlinedButton.icon(
+                                            onPressed: () async {
+                                              final confirmed =
+                                                  await ConfirmDialog.show(
+                                                context,
+                                                title: 'Cancel Booking',
+                                                message:
+                                                    'Are you sure you want to cancel this booking?',
+                                                confirmText: 'Cancel Booking',
+                                                isDestructive: true,
+                                              );
+                                              if (confirmed == true) {
+                                                await ref
+                                                    .read(
+                                                      bookingsRepositoryProvider,
+                                                    )
+                                                    .cancelBooking(
+                                                      booking.groupId,
+                                                      booking.id,
+                                                    );
+                                                ref.invalidate(
+                                                  allBookingsProvider((
+                                                    groupId:
+                                                        _selectedGroupFilter,
+                                                    status:
+                                                        _selectedStatusFilter,
+                                                  )),
+                                                );
+                                              }
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor:
+                                                  colorScheme.error,
+                                              side: BorderSide(
+                                                color: colorScheme.error
+                                                    .withValues(alpha: 0.5),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 6,
+                                              ),
+                                            ),
+                                            icon: const Icon(
+                                              Icons.close_outlined,
+                                              size: 16,
+                                            ),
+                                            label: const Text('Cancel'),
                                           ),
-                                          label: const Text('Cancel'),
-                                        ),
+                                        ],
                                       ),
                                     ],
                                   ],

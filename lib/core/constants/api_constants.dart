@@ -32,6 +32,8 @@ class ApiConstants {
       '/groups/$groupId/resources/$resourceId/bookings';
   static String cancelBooking(String groupId, String bookingId) =>
       '/groups/$groupId/bookings/$bookingId';
+  static String rescheduleBooking(String groupId, String bookingId) =>
+      '/groups/$groupId/bookings/$bookingId';
   static String myBookings(String groupId) => '/groups/$groupId/my_bookings';
 
   // Maintenance

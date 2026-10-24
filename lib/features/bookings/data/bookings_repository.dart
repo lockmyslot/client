@@ -15,11 +15,16 @@ class BookingsRepository {
   Future<Availability> getAvailability(
     String groupId,
     String resourceId,
-    String date,
-  ) async {
+    String date, {
+    String? excludeBookingId,
+  }) async {
+    final query = <String, dynamic>{'date': date};
+    if (excludeBookingId != null && excludeBookingId.isNotEmpty) {
+      query['exclude_booking_id'] = excludeBookingId;
+    }
     final response = await _apiClient.get<Availability>(
       ApiConstants.availability(groupId, resourceId),
-      query: {'date': date},
+      query: query,
       fromJson: (json) => Availability.fromJson(json as Map<String, dynamic>),
     );
     return response.data;
@@ -71,6 +76,23 @@ class BookingsRepository {
 
   Future<void> cancelBooking(String groupId, String bookingId) async {
     await _apiClient.delete(ApiConstants.cancelBooking(groupId, bookingId));
+  }
+
+  Future<Booking> rescheduleBooking(
+    String groupId,
+    String bookingId, {
+    required DateTime startTime,
+    required DateTime endTime,
+  }) async {
+    final response = await _apiClient.patch<Booking>(
+      ApiConstants.rescheduleBooking(groupId, bookingId),
+      body: {
+        'start_time': startTime.toUtc().toIso8601String(),
+        'end_time': endTime.toUtc().toIso8601String(),
+      },
+      fromJson: (json) => Booking.fromJson(json as Map<String, dynamic>),
+    );
+    return response.data;
   }
 
   Future<List<Booking>> getMyBookings(

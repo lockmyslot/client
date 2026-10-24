@@ -16,12 +16,14 @@ class BookingDetailsForm extends ConsumerStatefulWidget {
   final String groupId;
   final String resourceId;
   final void Function(Booking booking)? onBookingSuccess;
+  final Booking? reschedulingBooking;
 
   const BookingDetailsForm({
     super.key,
     required this.groupId,
     required this.resourceId,
     this.onBookingSuccess,
+    this.reschedulingBooking,
   });
 
   @override
@@ -38,7 +40,11 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = DateTime.now();
+    if (widget.reschedulingBooking != null) {
+      _selectedDate = widget.reschedulingBooking!.startTime.toLocal();
+    } else {
+      _selectedDate = DateTime.now();
+    }
   }
 
   String get _selectedDateString => AppDateUtils.formatDate(_selectedDate);
@@ -101,20 +107,33 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
 
     try {
       final repo = ref.read(bookingsRepositoryProvider);
-      final booking = await repo.createBooking(
-        widget.groupId,
-        widget.resourceId,
-        startTime: startTime,
-        endTime: endTime,
-      );
+      final Booking booking;
+      if (widget.reschedulingBooking != null) {
+        booking = await repo.rescheduleBooking(
+          widget.groupId,
+          widget.reschedulingBooking!.id,
+          startTime: startTime,
+          endTime: endTime,
+        );
+      } else {
+        booking = await repo.createBooking(
+          widget.groupId,
+          widget.resourceId,
+          startTime: startTime,
+          endTime: endTime,
+        );
+      }
 
       // Invalidate relevant providers to force auto-refetch of schedule and personal bookings
       ref.invalidate(
-        availabilityProvider((
-          groupId: widget.groupId,
-          resourceId: widget.resourceId,
-          date: _selectedDateString,
-        )),
+        availabilityProvider(
+          AvailabilityParams(
+            groupId: widget.groupId,
+            resourceId: widget.resourceId,
+            date: _selectedDateString,
+            excludeBookingId: widget.reschedulingBooking?.id,
+          ),
+        ),
       );
       ref.invalidate(
         myBookingsProvider((groupId: widget.groupId, status: null)),
@@ -134,11 +153,15 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Slot booked successfully!'),
-            backgroundColor: Color(0xFF10B981),
+          SnackBar(
+            content: Text(
+              widget.reschedulingBooking != null
+                  ? 'Booking rescheduled successfully!'
+                  : 'Slot booked successfully!',
+            ),
+            backgroundColor: const Color(0xFF10B981),
             behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
 
@@ -225,7 +248,11 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Confirm Booking'),
+                : Text(
+                    widget.reschedulingBooking != null
+                        ? 'Confirm Reschedule'
+                        : 'Confirm Booking',
+                  ),
           ),
         ],
       ),
@@ -236,11 +263,14 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
   @override
   Widget build(BuildContext context) {
     final availabilityAsync = ref.watch(
-      availabilityProvider((
-        groupId: widget.groupId,
-        resourceId: widget.resourceId,
-        date: _selectedDateString,
-      )),
+      availabilityProvider(
+        AvailabilityParams(
+          groupId: widget.groupId,
+          resourceId: widget.resourceId,
+          date: _selectedDateString,
+          excludeBookingId: widget.reschedulingBooking?.id,
+        ),
+      ),
     );
 
     return SlideFadeSwitcher(
@@ -254,11 +284,14 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
           child: ErrorDisplay(
             error: err.toString(),
             onRetry: () => ref.invalidate(
-              availabilityProvider((
-                groupId: widget.groupId,
-                resourceId: widget.resourceId,
-                date: _selectedDateString,
-              )),
+              availabilityProvider(
+                AvailabilityParams(
+                  groupId: widget.groupId,
+                  resourceId: widget.resourceId,
+                  date: _selectedDateString,
+                  excludeBookingId: widget.reschedulingBooking?.id,
+                ),
+              ),
             ),
           ),
         ),
@@ -281,6 +314,65 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (widget.reschedulingBooking != null) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.25),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.update_outlined,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 22,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Rescheduling ${widget.reschedulingBooking!.resourceName ?? "Booking"}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
+                                      ).small(),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Current: ${AppDateUtils.formatDisplayDate(widget.reschedulingBooking!.startTime)} · ${AppDateUtils.formatTime(widget.reschedulingBooking!.startTime)} – ${AppDateUtils.formatTime(widget.reschedulingBooking!.endTime)}',
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                      ).small(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
                         // 1. Date Strip & Calendar Picker Launcher
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
