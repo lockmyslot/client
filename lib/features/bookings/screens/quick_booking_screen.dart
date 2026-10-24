@@ -343,6 +343,13 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                   child: BookingDetailsForm(
                     groupId: _selectedGroupId!,
                     resourceId: _selectedResourceId!,
+                    onBookingSuccess: (_) {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/bookings');
+                      }
+                    },
                   ),
                 )
               else

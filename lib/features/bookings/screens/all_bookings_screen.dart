@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../providers/my_bookings_provider.dart';
 import '../../groups/providers/groups_provider.dart';
 import '../data/bookings_repository.dart';

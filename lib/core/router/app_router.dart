@@ -136,7 +136,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _buildSmoothTransition(
           state: state,
           child: QuickBookingScreen(
-            initialGroupId: state.uri.queryParameters['group'],
+            initialGroupId: state.uri.queryParameters['group'] ??
+                state.uri.queryParameters['groupId'],
           ),
         ),
       ),

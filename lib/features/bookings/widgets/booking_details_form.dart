@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/models/availability.dart';
+import '../data/models/booking.dart';
 import '../data/bookings_repository.dart';
 import '../providers/availability_provider.dart';
 import '../providers/bookings_provider.dart';
@@ -14,11 +15,13 @@ import '../../../shared/widgets/error_display.dart';
 class BookingDetailsForm extends ConsumerStatefulWidget {
   final String groupId;
   final String resourceId;
+  final void Function(Booking booking)? onBookingSuccess;
 
   const BookingDetailsForm({
     super.key,
     required this.groupId,
     required this.resourceId,
+    this.onBookingSuccess,
   });
 
   @override
@@ -98,7 +101,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
 
     try {
       final repo = ref.read(bookingsRepositoryProvider);
-      await repo.createBooking(
+      final booking = await repo.createBooking(
         widget.groupId,
         widget.resourceId,
         startTime: startTime,
@@ -116,6 +119,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
       ref.invalidate(
         myBookingsProvider((groupId: widget.groupId, status: null)),
       );
+      ref.invalidate(allBookingsProvider);
       ref.invalidate(
         resourceBookingsProvider((
           groupId: widget.groupId,
@@ -125,18 +129,42 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
       );
 
       if (mounted) {
-        if (context.canPop()) {
-          context.pop();
+        setState(() {
+          _isBooking = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Slot booked successfully!'),
+            backgroundColor: Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        if (widget.onBookingSuccess != null) {
+          widget.onBookingSuccess!(booking);
+        } else if (context.canPop()) {
+          context.pop(booking);
         } else {
           context.go('/groups/${widget.groupId}/resources/${widget.resourceId}');
         }
       }
     } catch (e) {
       if (mounted) {
+        final formattedError = e.toString().replaceFirst('Exception: ', '');
         setState(() {
           _isBooking = false;
-          _errorMessage = e.toString();
+          _errorMessage = formattedError;
         });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(formattedError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -189,7 +217,14 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                 ? () => _handleConfirmBooking(requestedSlots)
                 : null,
             child: _isBooking
-                ? const CircularProgressIndicator()
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
                 : const Text('Confirm Booking'),
           ),
         ],
