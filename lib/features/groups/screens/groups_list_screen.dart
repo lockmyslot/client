@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/groups_provider.dart';
+import 'create_group_sheet.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -82,7 +83,7 @@ class GroupsListScreen extends ConsumerWidget {
                         description:
                             'Create or join a group to start booking shared resources.',
                         action: PrimaryButton(
-                          onPressed: () => context.push('/groups/create'),
+                          onPressed: () => CreateGroupSheet.show(context),
                           child: const Text('Create Your First Group'),
                         ),
                       ),

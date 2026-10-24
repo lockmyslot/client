@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import '../screens/create_group_sheet.dart';
+import '../screens/join_group_sheet.dart';
 
 void showGroupActionSheet(BuildContext context) {
   final colorScheme = Theme.of(context).colorScheme;
@@ -53,7 +54,7 @@ void showGroupActionSheet(BuildContext context) {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  context.push('/groups/join');
+                  JoinGroupSheet.show(context);
                 },
               ),
               const SizedBox(height: 8),
@@ -77,7 +78,7 @@ void showGroupActionSheet(BuildContext context) {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  context.push('/groups/create');
+                  CreateGroupSheet.show(context);
                 },
               ),
             ],

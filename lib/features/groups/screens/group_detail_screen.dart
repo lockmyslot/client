@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/groups_provider.dart';
 import '../../resources/providers/resources_provider.dart';
+import '../../resources/screens/create_resource_sheet.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -183,9 +184,14 @@ class GroupDetailScreen extends ConsumerWidget {
                         ))
                           IconButton(
                             icon: const Icon(Icons.add_outlined),
-                            onPressed: () => context.push(
-                              '/groups/$groupId/resources/create',
-                            ),
+                            onPressed: () {
+                              final group = groupAsync.value;
+                              CreateResourceSheet.show(
+                                context,
+                                groupId: groupId,
+                                groupName: group?.name,
+                              );
+                            },
                           ),
                         IconButton(
                           icon: const Icon(Icons.refresh_outlined, size: 16),
@@ -226,9 +232,14 @@ class GroupDetailScreen extends ConsumerWidget {
                             : 'No resources have been added to this group yet.',
                         action: isAdmin
                             ? PrimaryButton(
-                                onPressed: () => context.push(
-                                  '/groups/$groupId/resources/create',
-                                ),
+                                onPressed: () {
+                                  final group = groupAsync.value;
+                                  CreateResourceSheet.show(
+                                    context,
+                                    groupId: groupId,
+                                    groupName: group?.name,
+                                  );
+                                },
                                 child: const Text('Add Resource'),
                               )
                             : null,

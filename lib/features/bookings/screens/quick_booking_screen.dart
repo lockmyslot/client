@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/booking_details_form.dart';
 import '../../groups/providers/groups_provider.dart';
+import '../../groups/screens/create_group_sheet.dart';
 import '../../groups/data/models/group.dart';
 import '../../resources/providers/resources_provider.dart';
 import '../../resources/data/models/resource.dart';
@@ -329,7 +330,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
               description:
                   'Create or join a group before you can book resources.',
               action: PrimaryButton(
-                onPressed: () => context.push('/groups/create'),
+                onPressed: () => CreateGroupSheet.show(context),
                 child: const Text('Create Your First Group'),
               ),
             );

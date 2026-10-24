@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../groups/providers/groups_provider.dart';
+import '../../groups/screens/create_group_sheet.dart';
+import '../../groups/screens/join_group_sheet.dart';
 import '../../bookings/providers/my_bookings_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
@@ -229,7 +230,7 @@ class MeProfileScreen extends ConsumerWidget {
                               top: Radius.circular(20),
                             ),
                           ),
-                          onTap: () => context.push('/groups/join'),
+                          onTap: () => JoinGroupSheet.show(context),
                         ),
                         Divider(
                           height: 1,
@@ -251,7 +252,7 @@ class MeProfileScreen extends ConsumerWidget {
                               bottom: Radius.circular(20),
                             ),
                           ),
-                          onTap: () => context.push('/groups/create'),
+                          onTap: () => CreateGroupSheet.show(context),
                         ),
                       ],
                     ),
