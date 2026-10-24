@@ -1,5 +1,5 @@
 class ApiConstants {
-  static String baseUrl = 'http://192.168.29.10:3000/api/v1';
+  static String baseUrl = 'http://127.0.0.1:3000/api/v1';
 
   // Auth
   static const String register = '/auth/register';
@@ -43,6 +43,5 @@ class ApiConstants {
     String groupId,
     String resourceId,
     String taskId,
-  ) =>
-      '/groups/$groupId/resources/$resourceId/maintenance/$taskId';
+  ) => '/groups/$groupId/resources/$resourceId/maintenance/$taskId';
 }
