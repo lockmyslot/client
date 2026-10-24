@@ -74,17 +74,18 @@ class ApiClient {
     Map<String, dynamic>? query,
     T Function(dynamic json)? fromJson,
   }) async {
+    final http.Response response;
     try {
       final uri = _buildUri(path, query);
       final headers = await _getHeaders();
-      final response = await _sendWithRetry(
+      response = await _sendWithRetry(
         (client) => client.get(uri, headers: headers),
       );
-      return _processResponse<T>(response, fromJson);
     } catch (e) {
       if (e is ApiException) rethrow;
       throw NetworkException(e.toString());
     }
+    return _processResponse<T>(response, fromJson);
   }
 
   Future<ApiResponse<T>> post<T>(
@@ -92,18 +93,19 @@ class ApiClient {
     dynamic body,
     T Function(dynamic json)? fromJson,
   }) async {
+    final http.Response response;
     try {
       final uri = _buildUri(path);
       final headers = await _getHeaders();
       final encodedBody = body != null ? jsonEncode(body) : null;
-      final response = await _sendWithRetry(
+      response = await _sendWithRetry(
         (client) => client.post(uri, headers: headers, body: encodedBody),
       );
-      return _processResponse<T>(response, fromJson);
     } catch (e) {
       if (e is ApiException) rethrow;
       throw NetworkException(e.toString());
     }
+    return _processResponse<T>(response, fromJson);
   }
 
   Future<ApiResponse<T>> patch<T>(
@@ -111,18 +113,19 @@ class ApiClient {
     dynamic body,
     T Function(dynamic json)? fromJson,
   }) async {
+    final http.Response response;
     try {
       final uri = _buildUri(path);
       final headers = await _getHeaders();
       final encodedBody = body != null ? jsonEncode(body) : null;
-      final response = await _sendWithRetry(
+      response = await _sendWithRetry(
         (client) => client.patch(uri, headers: headers, body: encodedBody),
       );
-      return _processResponse<T>(response, fromJson);
     } catch (e) {
       if (e is ApiException) rethrow;
       throw NetworkException(e.toString());
     }
+    return _processResponse<T>(response, fromJson);
   }
 
   Future<ApiResponse<T>> put<T>(
@@ -130,35 +133,37 @@ class ApiClient {
     dynamic body,
     T Function(dynamic json)? fromJson,
   }) async {
+    final http.Response response;
     try {
       final uri = _buildUri(path);
       final headers = await _getHeaders();
       final encodedBody = body != null ? jsonEncode(body) : null;
-      final response = await _sendWithRetry(
+      response = await _sendWithRetry(
         (client) => client.put(uri, headers: headers, body: encodedBody),
       );
-      return _processResponse<T>(response, fromJson);
     } catch (e) {
       if (e is ApiException) rethrow;
       throw NetworkException(e.toString());
     }
+    return _processResponse<T>(response, fromJson);
   }
 
   Future<void> delete(String path) async {
+    final http.Response response;
     try {
       final uri = _buildUri(path);
       final headers = await _getHeaders();
-      final response = await _sendWithRetry(
+      response = await _sendWithRetry(
         (client) => client.delete(uri, headers: headers),
       );
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return;
-      }
-      _handleError(response);
     } catch (e) {
       if (e is ApiException) rethrow;
       throw NetworkException(e.toString());
     }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return;
+    }
+    throw _handleError(response);
   }
 
   ApiResponse<T> _processResponse<T>(
@@ -192,14 +197,26 @@ class ApiClient {
   }
 
   ApiException _handleError(http.Response response) {
-    String message = 'An error occurred';
+    String? message;
     List<String> violations = [];
 
     try {
       if (response.body.isNotEmpty) {
         final json = jsonDecode(response.body);
         if (json is Map) {
-          message = json['message']?.toString() ?? message;
+          final errorObj = json['error'];
+          if (errorObj is Map) {
+            message = errorObj['message']?.toString();
+            if (errorObj['details'] is List) {
+              violations = (errorObj['details'] as List)
+                  .map((e) => e.toString())
+                  .toList();
+            }
+          } else if (errorObj is String) {
+            message = errorObj;
+          } else {
+            message = json['message']?.toString();
+          }
           if (json['violations'] is List) {
             violations = (json['violations'] as List)
                 .map((e) => e.toString())
@@ -215,17 +232,31 @@ class ApiClient {
 
     switch (response.statusCode) {
       case 400:
-        return ValidationException(message, violations: violations);
+        return ValidationException(
+          message ?? 'Validation failed.',
+          violations: violations,
+        );
       case 401:
-        return UnauthorizedException(message);
+        return message != null
+            ? UnauthorizedException(message)
+            : const UnauthorizedException();
       case 403:
-        return ForbiddenException(message);
+        return message != null
+            ? ForbiddenException(message)
+            : const ForbiddenException();
       case 404:
-        return NotFoundException(message);
+        return message != null
+            ? NotFoundException(message)
+            : const NotFoundException();
       case 409:
-        return ConflictException(message);
+        return message != null
+            ? ConflictException(message)
+            : const ConflictException();
       default:
-        return ServerException(message, response.statusCode);
+        return ServerException(
+          message ?? 'An unexpected server error occurred.',
+          response.statusCode,
+        );
     }
   }
 }

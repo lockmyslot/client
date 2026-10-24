@@ -9,6 +9,38 @@ import '../../../shared/widgets/error_display.dart';
 class GroupsListScreen extends ConsumerWidget {
   const GroupsListScreen({super.key});
 
+  String _getGroupInitials(String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return 'G';
+
+    final words = trimmed
+        .split(RegExp(r'[\s\-_]+'))
+        .where((w) => RegExp(r'[a-zA-Z0-9]').hasMatch(w))
+        .toList();
+
+    if (words.length >= 2) {
+      final first = words[0].characters.firstWhere(
+            (c) => RegExp(r'[a-zA-Z0-9]').hasMatch(c),
+            orElse: () => words[0].characters.first,
+          );
+      final second = words[1].characters.firstWhere(
+            (c) => RegExp(r'[a-zA-Z0-9]').hasMatch(c),
+            orElse: () => words[1].characters.first,
+          );
+      return '$first$second'.toUpperCase();
+    }
+
+    if (words.isNotEmpty) {
+      final word = words[0];
+      if (word.length <= 2) {
+        return word.toUpperCase();
+      }
+      return word.characters.first.toUpperCase();
+    }
+
+    return trimmed.characters.first.toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groupsAsync = ref.watch(myGroupsProvider);
@@ -86,18 +118,23 @@ class GroupsListScreen extends ConsumerWidget {
                                       Row(
                                         children: [
                                           Container(
-                                            padding: const EdgeInsets.all(12),
+                                            width: 48,
+                                            height: 48,
                                             decoration: BoxDecoration(
                                               color: colorScheme
                                                   .primaryContainer,
                                               borderRadius:
                                                   BorderRadius.circular(12),
                                             ),
-                                            child: Icon(
-                                              Icons.group_outlined,
-                                              size: 24,
-                                              color: colorScheme
-                                                  .onPrimaryContainer,
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              _getGroupInitials(group.name),
+                                              style: TextStyle(
+                                                color: colorScheme
+                                                    .onPrimaryContainer,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
                                             ),
                                           ),
                                           const SizedBox(width: 16),

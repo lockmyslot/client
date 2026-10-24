@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/auth_repository.dart';
 import '../data/models/user.dart';
+import '../../../core/api/api_exceptions.dart';
 import '../../../core/storage/secure_storage.dart';
 
 class AuthState {
@@ -52,20 +53,74 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final user = await _repository.getMe();
       state = AuthState(user: user, isAuthenticated: true, isLoading: false);
     } catch (e) {
-      // If fetching fails, we clear token so user can register/login again
-      await _storage.deleteAuthToken();
-      state = const AuthState(isAuthenticated: false, isLoading: false);
+      if (e is UnauthorizedException) {
+        // If explicitly unauthorized (401), the token is invalid; clear it
+        await _storage.deleteAuthToken();
+        state = const AuthState(isAuthenticated: false, isLoading: false);
+      } else {
+        // If network/server error, fallback to cached user credentials if available
+        final savedId = await _storage.getUserId();
+        final savedName = await _storage.getUserDisplayName();
+        final savedUsername = await _storage.getUsername();
+        if (savedId != null && savedName != null) {
+          state = AuthState(
+            user: User(
+              id: savedId,
+              username: savedUsername,
+              displayName: savedName,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+            isAuthenticated: true,
+            isLoading: false,
+          );
+        } else {
+          state = const AuthState(isAuthenticated: false, isLoading: false);
+        }
+      }
     }
   }
 
-  Future<bool> register(String displayName) async {
+  Future<bool> login({
+    required String username,
+    required String password,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await _repository.register(displayName);
+      final user = await _repository.login(
+        username: username,
+        password: password,
+      );
       state = AuthState(user: user, isAuthenticated: true, isLoading: false);
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      final message = e is ApiException
+          ? e.message
+          : e.toString().replaceAll('Exception: ', '');
+      state = state.copyWith(isLoading: false, error: message);
+      return false;
+    }
+  }
+
+  Future<bool> register({
+    required String displayName,
+    String? username,
+    String? password,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final user = await _repository.register(
+        displayName: displayName,
+        username: username,
+        password: password,
+      );
+      state = AuthState(user: user, isAuthenticated: true, isLoading: false);
+      return true;
+    } catch (e) {
+      final message = e is ApiException
+          ? e.message
+          : e.toString().replaceAll('Exception: ', '');
+      state = state.copyWith(isLoading: false, error: message);
       return false;
     }
   }

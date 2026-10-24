@@ -6,6 +6,7 @@ class SecureStorageService {
 
   static const String _authTokenKey = 'auth_token';
   static const String _userDisplayNameKey = 'user_display_name';
+  static const String _userUsernameKey = 'user_username';
   static const String _userIdKey = 'user_id';
 
   SecureStorageService([FlutterSecureStorage? storage])
@@ -26,9 +27,15 @@ class SecureStorageService {
   Future<void> saveUserInfo({
     required String id,
     required String displayName,
+    String? username,
   }) async {
     await _storage.write(key: _userIdKey, value: id);
     await _storage.write(key: _userDisplayNameKey, value: displayName);
+    if (username != null && username.isNotEmpty) {
+      await _storage.write(key: _userUsernameKey, value: username);
+    } else {
+      await _storage.delete(key: _userUsernameKey);
+    }
   }
 
   Future<String?> getUserId() async {
@@ -37,6 +44,10 @@ class SecureStorageService {
 
   Future<String?> getUserDisplayName() async {
     return await _storage.read(key: _userDisplayNameKey);
+  }
+
+  Future<String?> getUsername() async {
+    return await _storage.read(key: _userUsernameKey);
   }
 
   Future<void> clearAll() async {

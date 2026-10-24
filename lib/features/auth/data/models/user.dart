@@ -1,5 +1,6 @@
 class User {
   final String id;
+  final String? username;
   final String displayName;
   final String? authToken;
   final DateTime createdAt;
@@ -7,6 +8,7 @@ class User {
 
   const User({
     required this.id,
+    this.username,
     required this.displayName,
     this.authToken,
     required this.createdAt,
@@ -16,6 +18,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
+      username: json['username'] as String?,
       displayName:
           json['display_name'] as String? ??
           json['displayName'] as String? ??
@@ -33,6 +36,7 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      if (username != null) 'username': username,
       'display_name': displayName,
       if (authToken != null) 'auth_token': authToken,
       'created_at': createdAt.toIso8601String(),

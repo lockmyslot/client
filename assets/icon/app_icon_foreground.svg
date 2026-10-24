@@ -1,26 +1,99 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#5C6BC0"/>
-      <stop offset="1" stop-color="#3F51B5"/>
+    <!-- Padlock Shackle: Crisp Minimal White to Platinum -->
+    <linearGradient id="shackleWhite" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="70%" stop-color="#F4F4F5"/>
+      <stop offset="100%" stop-color="#D4D4D8"/>
     </linearGradient>
-    <linearGradient id="shackle" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#3949AB"/>
-      <stop offset="1" stop-color="#303F9F"/>
+
+    <!-- Calendar Body Card: Dark Slate -->
+    <linearGradient id="bodySlate" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#24242A"/>
+      <stop offset="100%" stop-color="#18181C"/>
+    </linearGradient>
+
+    <!-- Header Bar -->
+    <linearGradient id="headerSlate" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2C2C35"/>
+      <stop offset="100%" stop-color="#202026"/>
     </linearGradient>
   </defs>
 
-  <path d="M 402 486 v -108 a 128 128 0 0 1 256 0 v 108"
-        fill="none" stroke="url(#shackle)" stroke-width="94" stroke-linecap="round"/>
+  <!-- Shackle Arch -->
+  <path d="M 374 380 V 240 A 138 138 0 0 1 650 240 V 380"
+        fill="none"
+        stroke="url(#shackleWhite)"
+        stroke-width="70"
+        stroke-linecap="round"/>
 
-  <path d="M 421 486 v -108 a 108 108 0 0 1 216 0 v 108"
-        fill="none" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="94" stroke-linecap="round"
-        transform="translate(2 -3)"/>
+  <!-- Calendar Body Card -->
+  <rect x="252" y="344" width="520" height="476" rx="96"
+        fill="url(#bodySlate)"
+        stroke="#52525B"
+        stroke-width="4"/>
 
-  <rect x="312" y="470" width="430" height="398" rx="104" fill="url(#body)"/>
+  <!-- Top Glass Highlight Line -->
+  <path d="M 348 346 H 676"
+        stroke="#FFFFFF"
+        stroke-opacity="0.25"
+        stroke-width="2"
+        stroke-linecap="round"/>
 
-  <rect x="330" y="488" width="394" height="158" rx="79" fill="#FFFFFF" opacity="0.16"/>
+  <!-- Calendar Header Bar -->
+  <path d="M 252 444 V 444 A 96 96 0 0 1 348 344 H 676 A 96 96 0 0 1 772 444 V 456 H 252 Z"
+        fill="url(#headerSlate)"/>
+  <line x1="252" y1="456" x2="772" y2="456" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="2"/>
 
-  <circle cx="527" cy="616" r="68" fill="#FFFFFF"/>
-  <rect x="497" y="602" width="60" height="172" rx="30" fill="#FFFFFF"/>
+  <!-- Binder Clips -->
+  <rect x="360" y="324" width="24" height="42" rx="12" fill="#FFFFFF"/>
+  <rect x="640" y="324" width="24" height="42" rx="12" fill="#FFFFFF"/>
+
+  <!-- Header Indicator -->
+  <rect x="432" y="392" width="160" height="16" rx="8" fill="#FFFFFF" fill-opacity="0.9"/>
+
+  <!-- ================= TIME SLOTS / CALENDAR GRID ================= -->
+  <!-- ROW 1 -->
+  <rect x="304" y="494" width="128" height="78" rx="20" fill="#27272A" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="338" cy="522" r="7" fill="#A1A1AA"/>
+  <rect x="330" y="544" width="76" height="8" rx="4" fill="#71717A"/>
+
+  <rect x="448" y="494" width="128" height="78" rx="20" fill="#27272A" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="482" cy="522" r="7" fill="#A1A1AA"/>
+  <rect x="474" y="544" width="60" height="8" rx="4" fill="#71717A"/>
+
+  <rect x="592" y="494" width="128" height="78" rx="20" fill="#27272A" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="626" cy="522" r="7" fill="#A1A1AA"/>
+  <rect x="618" y="544" width="72" height="8" rx="4" fill="#71717A"/>
+
+  <!-- ROW 2: The LOCKED ACTIVE SLOT in center -->
+  <rect x="304" y="590" width="128" height="78" rx="20" fill="#27272A" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="338" cy="618" r="7" fill="#A1A1AA"/>
+  <rect x="330" y="640" width="64" height="8" rx="4" fill="#71717A"/>
+
+  <!-- CENTER ACTIVE LOCKED SLOT: Brilliant Crisp White Card -->
+  <rect x="448" y="590" width="128" height="78" rx="20"
+        fill="#FFFFFF"/>
+  <path d="M 504 620 V 615 A 8 8 0 0 1 520 615 V 620"
+        fill="none" stroke="#18181B" stroke-width="4.5" stroke-linecap="round"/>
+  <rect x="498" y="620" width="28" height="20" rx="5" fill="#18181B"/>
+  <circle cx="512" cy="628" r="3" fill="#FFFFFF"/>
+  <rect x="492" y="647" width="40" height="8" rx="4" fill="#18181B"/>
+
+  <rect x="592" y="590" width="128" height="78" rx="20" fill="#27272A" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="626" cy="618" r="7" fill="#A1A1AA"/>
+  <rect x="618" y="640" width="68" height="8" rx="4" fill="#71717A"/>
+
+  <!-- ROW 3 -->
+  <rect x="304" y="686" width="128" height="78" rx="20" fill="#27272A" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="338" cy="714" r="7" fill="#A1A1AA"/>
+  <rect x="330" y="736" width="70" height="8" rx="4" fill="#71717A"/>
+
+  <rect x="448" y="686" width="128" height="78" rx="20" fill="#27272A" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="482" cy="714" r="7" fill="#A1A1AA"/>
+  <rect x="474" y="736" width="58" height="8" rx="4" fill="#71717A"/>
+
+  <rect x="592" y="686" width="128" height="78" rx="20" fill="#27272A" stroke="#3F3F46" stroke-width="1.5"/>
+  <circle cx="626" cy="714" r="7" fill="#A1A1AA"/>
+  <rect x="618" y="736" width="52" height="8" rx="4" fill="#71717A"/>
 </svg>

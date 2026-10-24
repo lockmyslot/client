@@ -25,14 +25,15 @@ class Resource {
 
   factory Resource.fromJson(Map<String, dynamic> json) {
     return Resource(
-      id: json['id'] as String,
+      id: json['id'] as String? ?? '',
       groupId: json['group_id'] as String? ?? json['groupId'] as String? ?? '',
       name: json['name'] as String? ?? '',
       description: json['description'] as String?,
-      capacity: json['capacity'] as int? ?? 1,
+      capacity: (json['capacity'] as num?)?.toInt() ?? 1,
       slotDurationMinutes:
-          json['slot_duration_minutes'] as int? ??
-          json['slotDurationMinutes'] as int? ??
+          (json['slot_duration_minutes'] as num? ??
+                  json['slotDurationMinutes'] as num?)
+              ?.toInt() ??
           60,
       isActive: json['is_active'] as bool? ?? json['isActive'] as bool? ?? true,
       rulesConfigured:
@@ -41,10 +42,14 @@ class Resource {
           false,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
+          : (json['createdAt'] != null
+              ? DateTime.parse(json['createdAt'] as String)
+              : DateTime.now()),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
-          : DateTime.now(),
+          : (json['updatedAt'] != null
+              ? DateTime.parse(json['updatedAt'] as String)
+              : DateTime.now()),
     );
   }
 

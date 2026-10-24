@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/providers/auth_provider.dart';
+import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/home/screens/main_shell_screen.dart';
 import '../../features/groups/screens/groups_list_screen.dart';
@@ -79,26 +80,29 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       if (authState.isLoading) return null;
 
-      final isLoggingIn = state.matchedLocation == '/register';
+      final isAuthRoute = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/register';
 
       if (!authState.isAuthenticated) {
-        if (isLoggingIn) return null;
+        if (isAuthRoute) return null;
         final target = state.uri.toString();
         if (target.isNotEmpty &&
             target != '/' &&
             target != '/groups' &&
             target != '/bookings' &&
             target != '/me') {
-          return '/register?returnTo=${Uri.encodeComponent(target)}';
+          return '/login?returnTo=${Uri.encodeComponent(target)}';
         }
-        return '/register';
+        return '/login';
       }
 
-      if (isLoggingIn) {
+      if (isAuthRoute) {
         final returnTo = state.uri.queryParameters['returnTo'];
         if (returnTo != null && returnTo.isNotEmpty) {
           final decoded = Uri.decodeComponent(returnTo);
-          if (decoded.startsWith('/') && !decoded.startsWith('/register')) {
+          if (decoded.startsWith('/') &&
+              !decoded.startsWith('/login') &&
+              !decoded.startsWith('/register')) {
             return decoded;
           }
         }
@@ -108,6 +112,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) =>
+            _buildSmoothTransition(state: state, child: const LoginScreen()),
+      ),
       GoRoute(
         path: '/register',
         pageBuilder: (context, state) =>

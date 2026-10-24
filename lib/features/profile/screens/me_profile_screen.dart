@@ -67,6 +67,10 @@ class MeProfileScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 14),
                           Text(user?.displayName ?? 'User').h2(),
+                          if (user?.username != null && user!.username!.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text('@${user.username}').small().muted(),
+                          ],
                           const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
