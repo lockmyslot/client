@@ -272,5 +272,47 @@ void main() {
       expect(fakeRepo.lastConfigUpdate!['slotDurationMinutes'], 60);
       expect(fakeRepo.lastConfigUpdate!['isActive'], true);
     });
+
+    testWidgets('save button stays pinned at the bottom in bottomNavigationBar for both tabs', (
+      WidgetTester tester,
+    ) async {
+      final fakeRepo = FakeResourcesRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            resourcesRepositoryProvider.overrideWithValue(fakeRepo),
+            resourceDetailProvider((
+              groupId: 'grp-1',
+              resourceId: 'res-101',
+            )).overrideWith((ref) => sampleResource),
+            bookingRulesProvider((
+              groupId: 'grp-1',
+              resourceId: 'res-101',
+            )).overrideWith((ref) => sampleRules),
+          ],
+          child: const MaterialApp(
+            home: ResourceSettingsScreen(
+              groupId: 'grp-1',
+              resourceId: 'res-101',
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // On Configurations tab: Save Configurations is visible in bottom bar
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.bottomNavigationBar, isNotNull);
+      expect(find.text('Save Configurations'), findsOneWidget);
+
+      // Switch to Booking Rules tab: Save Rules is visible in bottom bar
+      await tester.tap(find.text('Booking Rules'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Save Rules'), findsOneWidget);
+      expect(find.text('Save Configurations'), findsNothing);
+    });
   });
 }

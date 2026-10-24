@@ -80,6 +80,9 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
       vsync: this,
       initialIndex: widget.initialTab.clamp(0, 1),
     );
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
 
     _nameController = TextEditingController();
     _descController = TextEditingController();
@@ -352,6 +355,74 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
           ),
         ],
       ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              ),
+            ],
+            border: Border(
+              top: BorderSide(
+                color: Theme.of(context)
+                    .colorScheme
+                    .outlineVariant
+                    .withValues(alpha: 0.4),
+              ),
+            ),
+          ),
+          child: AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, _) {
+              final isRulesTab =
+                  (_tabController.animation?.value ?? _tabController.index)
+                          .round() ==
+                      1;
+              if (isRulesTab) {
+                return PrimaryButton(
+                  onPressed: _isSavingRules ? null : _handleSaveRules,
+                  expand: true,
+                  child: _isSavingRules
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Save Rules',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                );
+              }
+              return PrimaryButton(
+                onPressed: _isSavingConfig ? null : _handleSaveConfig,
+                expand: true,
+                child: _isSavingConfig
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Save Configurations',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 
@@ -517,27 +588,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
               ).small(),
             ],
 
-            const SizedBox(height: 24),
-
-            PrimaryButton(
-              onPressed: _isSavingConfig ? null : _handleSaveConfig,
-              expand: true,
-              child: _isSavingConfig
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      'Save Configurations',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-            ),
-
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
             // Card pointing to Booking Rules
             InkWell(
@@ -741,25 +792,6 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
               ),
             ),
           ],
-          const SizedBox(height: 24),
-
-          PrimaryButton(
-            onPressed: _isSavingRules ? null : _handleSaveRules,
-            expand: true,
-            child: _isSavingRules
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text(
-                    'Save Rules',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-          ),
         ],
       ),
     );
