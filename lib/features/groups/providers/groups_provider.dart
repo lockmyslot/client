@@ -11,6 +11,16 @@ final myGroupsProvider = AsyncNotifierProvider<MyGroupsNotifier, List<Group>>(
 );
 
 class MyGroupsNotifier extends AsyncNotifier<List<Group>> {
+  List<Group> _sortGroups(List<Group> list) {
+    final sorted = [...list];
+    sorted.sort((a, b) {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return 0;
+    });
+    return sorted;
+  }
+
   @override
   Future<List<Group>> build() async {
     final authState = ref.watch(authProvider);
@@ -18,7 +28,43 @@ class MyGroupsNotifier extends AsyncNotifier<List<Group>> {
       return [];
     }
     final repo = ref.watch(groupsRepositoryProvider);
-    return await repo.getMyGroups();
+    final groups = await repo.getMyGroups();
+    return _sortGroups(groups);
+  }
+
+  Future<void> togglePin(String groupId, {bool? isPinned}) async {
+    final currentList = state.value ?? [];
+    final currentGroup =
+        currentList.where((g) => g.id == groupId).firstOrNull;
+    final nextPinned = isPinned ?? !(currentGroup?.isPinned ?? false);
+
+    // Optimistically update the list
+    final updatedList = currentList.map((g) {
+      if (g.id == groupId) {
+        return g.copyWith(isPinned: nextPinned);
+      }
+      return g;
+    }).toList();
+
+    state = AsyncValue.data(_sortGroups(updatedList));
+
+    final repo = ref.read(groupsRepositoryProvider);
+    try {
+      final actualPinned =
+          await repo.togglePinGroup(groupId, isPinned: nextPinned);
+      if (actualPinned != nextPinned) {
+        final reupdatedList = (state.value ?? updatedList).map((g) {
+          if (g.id == groupId) {
+            return g.copyWith(isPinned: actualPinned);
+          }
+          return g;
+        }).toList();
+        state = AsyncValue.data(_sortGroups(reupdatedList));
+      }
+    } catch (_) {
+      // Retain optimistic state if network fails
+    }
+    ref.invalidate(groupDetailProvider(groupId));
   }
 
   Future<Group> createGroup(String name) async {

@@ -14,6 +14,7 @@ class ApiConstants {
   static String removeMember(String groupId, String userId) =>
       '/groups/$groupId/members/$userId';
   static String leaveGroup(String id) => '/groups/$id/leave';
+  static String pinGroup(String id) => '/groups/$id/pin';
   static String regenerateInvite(String id) => '/groups/$id/regenerate_invite';
 
   // Resources

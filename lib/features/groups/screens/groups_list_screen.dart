@@ -90,120 +90,264 @@ class GroupsListScreen extends ConsumerWidget {
                     );
                   }
 
+                  final hasPinned = groups.any((g) => g.isPinned);
+
                   return SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final group = groups[index];
+                        final isFirstPinned =
+                            hasPinned && group.isPinned && index == 0;
+                        final isFirstUnpinned = hasPinned &&
+                            !group.isPinned &&
+                            (index == 0 || groups[index - 1].isPinned);
+
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
-                          child: Entrance(
-                            delay: Duration(milliseconds: index * 60),
-                            child: PressableScale(
-                              onTap: () => context.push('/groups/${group.id}'),
-                              child: Card(
-                                elevation: 0,
-                                color: colorScheme.surfaceContainerLow,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  side: BorderSide(
-                                    color: colorScheme.outlineVariant
-                                        .withValues(alpha: 0.4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (isFirstPinned)
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: 8.0,
+                                    left: 4,
                                   ),
-                                ),
-                                child: Padding(
-                                  padding: kCardPadding,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                  child: Row(
                                     children: [
-                                      Row(
-                                        children: [
-                                          Stack(
-                                            clipBehavior: Clip.none,
-                                            children: [
-                                              Container(
-                                                width: 48,
-                                                height: 48,
-                                                decoration: BoxDecoration(
-                                                  color: colorScheme
-                                                      .primaryContainer,
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  _getGroupInitials(group.name),
-                                                  style: TextStyle(
-                                                    color: colorScheme
-                                                        .onPrimaryContainer,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                              ),
-                                              if (group.isAdmin)
-                                                Positioned(
-                                                  right: -2,
-                                                  bottom: -2,
-                                                  child: Container(
-                                                    padding:
-                                                        const EdgeInsets.all(3),
-                                                    decoration: BoxDecoration(
-                                                      color:
-                                                          colorScheme.primary,
-                                                      shape: BoxShape.circle,
-                                                      border: Border.all(
-                                                        color: colorScheme
-                                                            .surfaceContainerLow,
-                                                        width: 1.5,
-                                                      ),
-                                                    ),
-                                                    child: Icon(
-                                                      Icons.shield,
-                                                      size: 10,
-                                                      color:
-                                                          colorScheme.onPrimary,
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(group.name).h4(),
-                                                const SizedBox(height: 4),
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.people_outline,
-                                                      size: 14,
-                                                      color: colorScheme
-                                                          .onSurfaceVariant,
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    Text(
-                                                      '${group.memberCount} members',
-                                                    ).small().muted(),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Icon(
-                                            Icons.chevron_right_outlined,
-                                            color: colorScheme.onSurfaceVariant,
-                                          ),
-                                        ],
+                                      Icon(
+                                        Icons.push_pin,
+                                        size: 14,
+                                        color: colorScheme.primary,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'PINNED',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.8,
+                                          color: colorScheme.primary,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
+                              if (isFirstUnpinned)
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: 8.0,
+                                    left: 4,
+                                    top: 4.0,
+                                  ),
+                                  child: Text(
+                                    'ALL GROUPS',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.8,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              Entrance(
+                                delay: Duration(milliseconds: index * 60),
+                                child: PressableScale(
+                                  onTap: () =>
+                                      context.push('/groups/${group.id}'),
+                                  onLongPress: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      showDragHandle: true,
+                                      builder: (ctx) => SafeArea(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 16.0,
+                                                vertical: 8.0,
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      group.name,
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            const Divider(height: 1),
+                                            ListTile(
+                                              leading: Icon(
+                                                group.isPinned
+                                                    ? Icons.push_pin_outlined
+                                                    : Icons.push_pin,
+                                                color: colorScheme.primary,
+                                              ),
+                                              title: Text(
+                                                group.isPinned
+                                                    ? 'Unpin from top'
+                                                    : 'Pin to top',
+                                              ),
+                                              onTap: () {
+                                                Navigator.pop(ctx);
+                                                ref
+                                                    .read(
+                                                      myGroupsProvider.notifier,
+                                                    )
+                                                    .togglePin(group.id);
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Card(
+                                    elevation: 0,
+                                    color: colorScheme.surfaceContainerLow,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      side: BorderSide(
+                                        color: group.isPinned
+                                            ? colorScheme.primary.withValues(
+                                                alpha: 0.4,
+                                              )
+                                            : colorScheme.outlineVariant
+                                                .withValues(alpha: 0.4),
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: kCardPadding,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Stack(
+                                                clipBehavior: Clip.none,
+                                                children: [
+                                                  Container(
+                                                    width: 48,
+                                                    height: 48,
+                                                    decoration: BoxDecoration(
+                                                      color: colorScheme
+                                                          .primaryContainer,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                    ),
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      _getGroupInitials(
+                                                        group.name,
+                                                      ),
+                                                      style: TextStyle(
+                                                        color: colorScheme
+                                                            .onPrimaryContainer,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  if (group.isAdmin)
+                                                    Positioned(
+                                                      right: -2,
+                                                      bottom: -2,
+                                                      child: Container(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              3,
+                                                            ),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                              color: colorScheme
+                                                                  .primary,
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              border: Border.all(
+                                                                color: colorScheme
+                                                                    .surfaceContainerLow,
+                                                                width: 1.5,
+                                                              ),
+                                                            ),
+                                                        child: Icon(
+                                                          Icons.shield,
+                                                          size: 10,
+                                                          color: colorScheme
+                                                              .onPrimary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                              const SizedBox(width: 16),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(group.name).h4(),
+                                                    const SizedBox(height: 4),
+                                                    Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.people_outline,
+                                                          size: 14,
+                                                          color: colorScheme
+                                                              .onSurfaceVariant,
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 4,
+                                                        ),
+                                                        Text(
+                                                          '${group.memberCount} members',
+                                                        ).small().muted(),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              if (group.isPinned)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                    right: 6.0,
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.push_pin,
+                                                    size: 16,
+                                                    color: colorScheme.primary,
+                                                  ),
+                                                ),
+                                              Icon(
+                                                Icons.chevron_right_outlined,
+                                                color: colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         );
                       },

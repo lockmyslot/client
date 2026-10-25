@@ -68,6 +68,7 @@ class _EntranceState extends State<Entrance>
 class PressableScale extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final double pressedScale;
   final Duration duration;
   final Curve curve;
@@ -76,6 +77,7 @@ class PressableScale extends StatefulWidget {
     super.key,
     required this.child,
     this.onTap,
+    this.onLongPress,
     this.pressedScale = 0.93,
     this.duration = const Duration(milliseconds: 260),
     this.curve = Curves.easeOutBack,
@@ -102,6 +104,7 @@ class _PressableScaleState extends State<PressableScale> {
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
       onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       child: AnimatedScale(
         scale: _pressed ? widget.pressedScale : 1.0,
         duration: widget.duration,

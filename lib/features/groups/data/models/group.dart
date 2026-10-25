@@ -5,6 +5,7 @@ class Group {
   final String role; // "ADMIN" | "MEMBER"
   final int memberCount;
   final DateTime createdAt;
+  final bool isPinned;
 
   const Group({
     required this.id,
@@ -13,9 +14,30 @@ class Group {
     required this.role,
     required this.memberCount,
     required this.createdAt,
+    this.isPinned = false,
   });
 
   bool get isAdmin => role.toUpperCase() == 'ADMIN';
+
+  Group copyWith({
+    String? id,
+    String? name,
+    String? inviteCode,
+    String? role,
+    int? memberCount,
+    DateTime? createdAt,
+    bool? isPinned,
+  }) {
+    return Group(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      inviteCode: inviteCode ?? this.inviteCode,
+      role: role ?? this.role,
+      memberCount: memberCount ?? this.memberCount,
+      createdAt: createdAt ?? this.createdAt,
+      isPinned: isPinned ?? this.isPinned,
+    );
+  }
 
   factory Group.fromJson(Map<String, dynamic> json) {
     return Group(
@@ -29,6 +51,8 @@ class Group {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
+      isPinned:
+          json['is_pinned'] as bool? ?? json['isPinned'] as bool? ?? false,
     );
   }
 
@@ -40,6 +64,7 @@ class Group {
       'role': role,
       'member_count': memberCount,
       'created_at': createdAt.toIso8601String(),
+      'is_pinned': isPinned,
     };
   }
 }

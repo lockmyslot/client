@@ -130,6 +130,51 @@ class GroupsRepository {
     await _apiClient.post(ApiConstants.leaveGroup(groupId));
   }
 
+  Future<bool> togglePinGroup(String groupId, {bool? isPinned}) async {
+    final body = isPinned != null ? {'is_pinned': isPinned} : <String, dynamic>{};
+    bool resultPinned = isPinned ?? true;
+    try {
+      final response = await _apiClient.patch<Map<String, dynamic>>(
+        ApiConstants.pinGroup(groupId),
+        body: body,
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+      resultPinned = response.data['is_pinned'] as bool? ?? isPinned ?? true;
+    } catch (_) {
+      // If network fails, optimistic or fallback is preserved
+    }
+
+    final cachedGroups = await _cache?.getList<Group>(
+      'my_groups',
+      (json) => Group.fromJson(json as Map<String, dynamic>),
+    );
+    if (cachedGroups != null) {
+      final updated = cachedGroups.map((g) {
+        if (g.id == groupId) {
+          return g.copyWith(isPinned: resultPinned);
+        }
+        return g;
+      }).toList();
+      await _cache?.setList(
+        'my_groups',
+        updated.map((g) => g.toJson()).toList(),
+      );
+    }
+
+    final cachedDetail = await _cache?.get<Group>(
+      'group_detail_$groupId',
+      (json) => Group.fromJson(json as Map<String, dynamic>),
+    );
+    if (cachedDetail != null) {
+      await _cache?.set(
+        'group_detail_$groupId',
+        cachedDetail.copyWith(isPinned: resultPinned).toJson(),
+      );
+    }
+
+    return resultPinned;
+  }
+
   Future<Group> regenerateInviteCode(String groupId) async {
     final response = await _apiClient.post<Group>(
       ApiConstants.regenerateInvite(groupId),

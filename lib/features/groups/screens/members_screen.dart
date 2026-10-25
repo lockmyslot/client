@@ -125,7 +125,7 @@ class MembersScreen extends ConsumerWidget {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .outlineVariant
-                                    .withOpacity(0.4),
+                                    .withValues(alpha: 0.4),
                               ),
                             ),
                             child: Padding(
