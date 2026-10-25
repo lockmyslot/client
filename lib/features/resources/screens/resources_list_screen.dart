@@ -74,56 +74,62 @@ class ResourcesListScreen extends ConsumerWidget {
                             ),
                             child: Padding(
                               padding: kCardPadding,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
                                 children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      ResourceAvatar(
-                                        iconKey: resource.icon,
-                                        name: resource.name,
-                                        size: 42,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                  ResourceAvatar(
+                                    iconKey: resource.icon,
+                                    name: resource.name,
+                                    size: 44,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(resource.name).h4(),
+                                        const SizedBox(height: 2),
+                                        Row(
                                           children: [
-                                            Text(resource.name).h4(),
-                                            if (resource.description != null &&
-                                                resource.description!
-                                                    .isNotEmpty) ...[
-                                              const SizedBox(height: 4),
-                                              Text(resource.description!)
-                                                  .muted()
-                                                  .small(),
-                                            ],
+                                            Icon(
+                                              Icons.people_outline,
+                                              size: 14,
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text('Capacity: ${resource.capacity}')
+                                                .small()
+                                                .muted(),
+                                            const SizedBox(width: 12),
+                                            Icon(
+                                              Icons.timer_outlined,
+                                              size: 14,
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text('${resource.slotDurationMinutes}m slot')
+                                                .small()
+                                                .muted(),
                                           ],
                                         ),
-                                      ),
-                                    ],
+                                        if (resource.description != null &&
+                                            resource.description!
+                                                .isNotEmpty) ...[
+                                          const SizedBox(height: 4),
+                                          Text(resource.description!)
+                                              .muted()
+                                              .small(),
+                                        ],
+                                      ],
+                                    ),
                                   ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Capacity: ${resource.capacity}',
-                                      ).small(),
-                                      const SizedBox(width: 16),
-                                      Text(
-                                        'Slot: ${resource.slotDurationMinutes} mins',
-                                      ).small(),
-                                      const Spacer(),
-                                      PrimaryButton(
-                                        onPressed: () => context.push(
-                                          '/groups/$groupId/resources/${resource.id}/book',
-                                        ),
-                                        child: const Text('Book'),
-                                      ),
-                                    ],
+                                  Icon(
+                                    Icons.chevron_right,
+                                    size: 20,
+                                    color: colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.6),
                                   ),
                                 ],
                               ),

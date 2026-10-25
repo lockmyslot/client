@@ -100,6 +100,7 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
       ref.invalidate(groupResourcesProvider(widget.groupId));
 
       if (mounted) {
+        setState(() => _isLoading = false);
         if (widget.onSuccess != null) {
           widget.onSuccess!(newResource);
         } else {

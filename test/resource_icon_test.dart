@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lockmyslot_app/features/groups/data/models/group.dart';
+import 'package:lockmyslot_app/features/groups/providers/groups_provider.dart';
+import 'package:lockmyslot_app/features/groups/screens/group_detail_screen.dart';
+import 'package:lockmyslot_app/features/bookings/providers/bookings_provider.dart';
+import 'package:lockmyslot_app/features/resources/providers/maintenance_provider.dart';
+import 'package:lockmyslot_app/features/resources/data/models/resource.dart';
+import 'package:lockmyslot_app/features/resources/providers/resources_provider.dart';
+import 'package:lockmyslot_app/features/resources/screens/resource_detail_screen.dart';
 import 'package:lockmyslot_app/features/resources/widgets/resource_avatar.dart';
 import 'package:lockmyslot_app/features/resources/widgets/resource_icon_picker.dart';
 
@@ -188,6 +197,132 @@ void main() {
       await tester.tap(find.text('Initials'));
       await tester.pumpAndSettle();
       expect(currentIcon, isNull);
+    });
+
+    testWidgets(
+        'GroupDetailScreen displays resource icon in the list and initials when left alone',
+        (tester) async {
+      const testGroupId = 'grp-123';
+      final mockGroup = Group(
+        id: testGroupId,
+        name: 'Shared Flat',
+        inviteCode: 'FLAT12',
+        role: 'ADMIN',
+        memberCount: 3,
+        createdAt: DateTime.now(),
+      );
+
+      final mockResources = [
+        Resource(
+          id: 'res-wm',
+          groupId: testGroupId,
+          name: 'Washing Machine',
+          icon: 'washing_machine',
+          capacity: 1,
+          slotDurationMinutes: 60,
+          isActive: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+        Resource(
+          id: 'res-none',
+          groupId: testGroupId,
+          name: 'Tennis Court',
+          icon: null, // Left alone: uses initials "TC"
+          capacity: 4,
+          slotDurationMinutes: 60,
+          isActive: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            groupDetailProvider(testGroupId)
+                .overrideWith((ref) async => mockGroup),
+            groupResourcesProvider(testGroupId)
+                .overrideWith((ref) async => mockResources),
+          ],
+          child: const MaterialApp(
+            home: GroupDetailScreen(groupId: testGroupId),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Washing machine icon should be rendered in the list
+      expect(find.byIcon(Icons.local_laundry_service), findsOneWidget);
+
+      // Left alone item: initials "TC" rendered in avatar in the list
+      expect(find.text('TC'), findsOneWidget);
+
+      // Capacity and slot duration shown below the name
+      expect(find.text('Capacity: 1'), findsOneWidget);
+      expect(find.text('60m slot'), findsWidgets);
+
+      // Book button removed from list item
+      expect(find.text('Book'), findsNothing);
+    });
+
+    testWidgets('ResourceDetailScreen does NOT display resource icon or avatar',
+        (tester) async {
+      const testGroupId = 'grp-123';
+      const testResourceId = 'res-wm';
+      final mockResource = Resource(
+        id: testResourceId,
+        groupId: testGroupId,
+        name: 'Washing Machine',
+        icon: 'washing_machine',
+        capacity: 1,
+        slotDurationMinutes: 60,
+        isActive: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            resourceDetailProvider((
+              groupId: testGroupId,
+              resourceId: testResourceId,
+            )).overrideWith((ref) async => mockResource),
+            resourceBookingsProvider((
+              groupId: testGroupId,
+              resourceId: testResourceId,
+              date: null,
+            )).overrideWith((ref) async => []),
+            resourceMaintenanceProvider((
+              groupId: testGroupId,
+              resourceId: testResourceId,
+              status: null,
+            )).overrideWith((ref) async => []),
+            groupDetailProvider(testGroupId)
+                .overrideWith((ref) async => Group(
+                      id: testGroupId,
+                      name: 'Shared Flat',
+                      inviteCode: 'FLAT12',
+                      role: 'ADMIN',
+                      memberCount: 3,
+                      createdAt: DateTime.now(),
+                    )),
+          ],
+          child: const MaterialApp(
+            home: ResourceDetailScreen(
+              groupId: testGroupId,
+              resourceId: testResourceId,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Detail page should NOT display ResourceAvatar
+      expect(find.byType(ResourceAvatar), findsNothing);
     });
   });
 }

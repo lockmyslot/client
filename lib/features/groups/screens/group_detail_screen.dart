@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/groups_provider.dart';
 import '../../resources/providers/resources_provider.dart';
 import '../../resources/screens/create_resource_sheet.dart';
+import '../../resources/widgets/resource_avatar.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -301,57 +302,62 @@ class GroupDetailScreen extends ConsumerWidget {
                             ),
                             child: Padding(
                               padding: kCardPadding,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(resource.name).h4(),
-                                      ),
-                                    ],
+                                  ResourceAvatar(
+                                    iconKey: resource.icon,
+                                    name: resource.name,
+                                    size: 44,
                                   ),
-                                  if (resource.description != null &&
-                                      resource.description!.isNotEmpty) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      resource.description!,
-                                    ).muted().small(),
-                                  ],
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.people_outline,
-                                        size: 14,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text('${resource.capacity}')
-                                          .small()
-                                          .muted(),
-                                      const SizedBox(width: 12),
-                                      const Icon(
-                                        Icons.timer_outlined,
-                                        size: 14,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text('${resource.slotDurationMinutes}m')
-                                          .small()
-                                          .muted(),
-                                      const Spacer(),
-                                      OutlineButton(
-                                        onPressed: () => context.push(
-                                          '/groups/$groupId/resources/${resource.id}/book',
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(resource.name).h4(),
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.people_outline,
+                                              size: 14,
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text('Capacity: ${resource.capacity}')
+                                                .small()
+                                                .muted(),
+                                            const SizedBox(width: 12),
+                                            Icon(
+                                              Icons.timer_outlined,
+                                              size: 14,
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text('${resource.slotDurationMinutes}m slot')
+                                                .small()
+                                                .muted(),
+                                          ],
                                         ),
-                                        style: TextButton.styleFrom(
-                                          minimumSize: const Size(0, 32),
-                                          tapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                          visualDensity: VisualDensity.compact,
-                                        ),
-                                        child: const Text('Book'),
-                                      ),
-                                    ],
+                                        if (resource.description != null &&
+                                            resource.description!
+                                                .isNotEmpty) ...[
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            resource.description!,
+                                          ).muted().small(),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    size: 20,
+                                    color: colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.6),
                                   ),
                                 ],
                               ),
