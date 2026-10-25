@@ -118,25 +118,55 @@ class GroupsListScreen extends ConsumerWidget {
                                     children: [
                                       Row(
                                         children: [
-                                          Container(
-                                            width: 48,
-                                            height: 48,
-                                            decoration: BoxDecoration(
-                                              color: colorScheme
-                                                  .primaryContainer,
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              _getGroupInitials(group.name),
-                                              style: TextStyle(
-                                                color: colorScheme
-                                                    .onPrimaryContainer,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
+                                          Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              Container(
+                                                width: 48,
+                                                height: 48,
+                                                decoration: BoxDecoration(
+                                                  color: colorScheme
+                                                      .primaryContainer,
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  _getGroupInitials(group.name),
+                                                  style: TextStyle(
+                                                    color: colorScheme
+                                                        .onPrimaryContainer,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
+                                              if (group.isAdmin)
+                                                Positioned(
+                                                  right: -2,
+                                                  bottom: -2,
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(3),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          colorScheme.primary,
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(
+                                                        color: colorScheme
+                                                            .surfaceContainerLow,
+                                                        width: 1.5,
+                                                      ),
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.shield,
+                                                      size: 10,
+                                                      color:
+                                                          colorScheme.onPrimary,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
                                           ),
                                           const SizedBox(width: 16),
                                           Expanded(
@@ -144,41 +174,7 @@ class GroupsListScreen extends ConsumerWidget {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child:
-                                                          Text(group.name).h4(),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Container(
-                                                      padding:
-                                                          const EdgeInsets.symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 4,
-                                                      ),
-                                                      decoration:
-                                                          BoxDecoration(
-                                                        color: colorScheme
-                                                            .secondaryContainer,
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                          12,
-                                                        ),
-                                                      ),
-                                                      child: Text(
-                                                        group.role,
-                                                        style: TextStyle(
-                                                          color: colorScheme
-                                                              .onSecondaryContainer,
-                                                          fontSize: 11,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
+                                                Text(group.name).h4(),
                                                 const SizedBox(height: 4),
                                                 Row(
                                                   children: [

@@ -56,7 +56,7 @@ class AppTheme {
         foregroundColor: cs.onSurface,
         titleTextStyle: TextStyle(
           fontFamily: _fontFamily,
-          fontSize: 26,
+          fontSize: 32,
           fontWeight: FontWeight.bold,
           color: cs.onSurface,
         ),
@@ -98,7 +98,7 @@ class AppTheme {
         foregroundColor: cs.onSurface,
         titleTextStyle: TextStyle(
           fontFamily: _fontFamily,
-          fontSize: 26,
+          fontSize: 32,
           fontWeight: FontWeight.bold,
           color: cs.onSurface,
         ),
