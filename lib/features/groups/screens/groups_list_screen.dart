@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../data/groups_repository.dart';
 import '../providers/groups_provider.dart';
 import 'create_group_sheet.dart';
 import '../../../core/ui/ui.dart';
+import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 
@@ -162,29 +164,28 @@ class GroupsListScreen extends ConsumerWidget {
                                       builder: (ctx) => SafeArea(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
                                           children: [
                                             Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 16.0,
+                                                horizontal: 20.0,
                                                 vertical: 8.0,
                                               ),
-                                              child: Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      group.name,
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 16,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
+                                              child: Text(
+                                                group.name,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleLarge
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 22,
                                                     ),
-                                                  ),
-                                                ],
+                                                maxLines: 2,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
                                               ),
                                             ),
                                             const Divider(height: 1),
@@ -207,6 +208,73 @@ class GroupsListScreen extends ConsumerWidget {
                                                       myGroupsProvider.notifier,
                                                     )
                                                     .togglePin(group.id);
+                                              },
+                                            ),
+                                            ListTile(
+                                              leading: Icon(
+                                                Icons.person_add_outlined,
+                                                color: colorScheme.primary,
+                                              ),
+                                              title: const Text('Invite'),
+                                              onTap: () async {
+                                                Navigator.pop(ctx);
+                                                if (group.inviteCode != null &&
+                                                    group.inviteCode!.isNotEmpty) {
+                                                  DeepLinkUtils.showInviteSheet(
+                                                    context,
+                                                    groupName: group.name,
+                                                    inviteCode:
+                                                        group.inviteCode!,
+                                                  );
+                                                } else if (group.isAdmin) {
+                                                  try {
+                                                    final detail = await ref
+                                                        .read(
+                                                          groupsRepositoryProvider,
+                                                        )
+                                                        .getGroupDetail(
+                                                          group.id,
+                                                        );
+                                                    if (context.mounted &&
+                                                        detail.inviteCode !=
+                                                            null &&
+                                                        detail.inviteCode!
+                                                            .isNotEmpty) {
+                                                      DeepLinkUtils
+                                                          .showInviteSheet(
+                                                        context,
+                                                        groupName:
+                                                            detail.name,
+                                                        inviteCode:
+                                                            detail.inviteCode!,
+                                                      );
+                                                    }
+                                                  } catch (_) {
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        const SnackBar(
+                                                          content: Text(
+                                                            'Failed to load invite code',
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                  }
+                                                } else {
+                                                  if (context.mounted) {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                          'Only group admins can invite members',
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                }
                                               },
                                             ),
                                           ],

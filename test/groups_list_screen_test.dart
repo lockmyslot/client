@@ -223,5 +223,64 @@ void main() {
         expect(find.text('PINNED'), findsNothing);
       },
     );
+
+    testWidgets(
+      'long press menu displays larger group name and invite option which opens invite sheet',
+      (WidgetTester tester) async {
+        final testGroups = [
+          Group(
+            id: 'g1',
+            name: 'Robotics Club',
+            role: 'ADMIN',
+            inviteCode: 'ROBO99',
+            memberCount: 8,
+            createdAt: DateTime.now(),
+            isPinned: false,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              myGroupsProvider.overrideWith(
+                () => FakeMyGroupsNotifier(testGroups),
+              ),
+            ],
+            child: const MaterialApp(
+              home: GroupsListScreen(),
+            ),
+          ),
+        );
+
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+
+        // Long press to open menu
+        await tester.longPress(find.text('Robotics Club'));
+        await tester.pumpAndSettle();
+
+        // Group name is rendered in the bottom sheet with larger typography
+        final titleTextWidgets = tester
+            .widgetList<Text>(find.text('Robotics Club'))
+            .toList();
+        expect(titleTextWidgets.length, 2); // 1 on card, 1 in bottom sheet
+        final sheetTitle = titleTextWidgets.firstWhere(
+          (t) => t.style?.fontSize == 22,
+        );
+        expect(sheetTitle.style?.fontWeight, FontWeight.bold);
+
+        // Invite option is present
+        expect(find.text('Invite'), findsOneWidget);
+        expect(find.byIcon(Icons.person_add_outlined), findsOneWidget);
+
+        // Tap Invite
+        await tester.tap(find.text('Invite'));
+        await tester.pumpAndSettle();
+
+        // Invite sheet should appear
+        expect(find.text('Invite to Robotics Club'), findsOneWidget);
+        expect(find.text('ROBO99'), findsOneWidget);
+      },
+    );
   });
 }
