@@ -18,6 +18,11 @@ class ApiConstants {
   static String regenerateInvite(String id) => '/groups/$id/regenerate_invite';
   static String inviteMember(String id) => '/groups/$id/invite';
 
+  // Invites
+  static const String invites = '/invites';
+  static String acceptInvite(String id) => '/invites/$id/accept';
+  static String declineInvite(String id) => '/invites/$id/decline';
+
   // Resources
   static String resources(String groupId) => '/groups/$groupId/resources';
   static String resourceDetail(String groupId, String resourceId) =>

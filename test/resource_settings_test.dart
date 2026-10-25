@@ -317,5 +317,116 @@ void main() {
       expect(find.text('Save Rules'), findsOneWidget);
       expect(find.text('Save Configurations'), findsNothing);
     });
+
+    testWidgets('displays working hours section in Booking Rules tab and toggles custom hours', (
+      WidgetTester tester,
+    ) async {
+      final fakeRepo = FakeResourcesRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            resourcesRepositoryProvider.overrideWithValue(fakeRepo),
+            resourceDetailProvider((
+              groupId: 'grp-1',
+              resourceId: 'res-101',
+            )).overrideWith((ref) => sampleResource),
+            bookingRulesProvider((
+              groupId: 'grp-1',
+              resourceId: 'res-101',
+            )).overrideWith((ref) => sampleRules),
+          ],
+          child: const MaterialApp(
+            home: ResourceSettingsScreen(
+              groupId: 'grp-1',
+              resourceId: 'res-101',
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Switch to Booking Rules tab
+      await tester.tap(find.text('Booking Rules'));
+      await tester.pumpAndSettle();
+
+      // Verify Working Hours card is displayed
+      expect(find.text('Working Hours'), findsOneWidget);
+      expect(find.text('Restrict Working Hours'), findsOneWidget);
+
+      // Toggle Restrict Working Hours on
+      await tester.tap(find.text('Restrict Working Hours'));
+      await tester.pumpAndSettle();
+
+      // Now opening and closing times and preset chips should be visible
+      expect(find.text('Opening Time'), findsOneWidget);
+      expect(find.text('Closing Time'), findsOneWidget);
+      expect(find.text('9 AM – 5 PM'), findsOneWidget);
+      expect(find.text('8 AM – 10 PM'), findsOneWidget);
+
+      // Scroll preset into view and tap it
+      await tester.ensureVisible(find.text('9 AM – 5 PM'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('9 AM – 5 PM'));
+      await tester.pumpAndSettle();
+
+      // Tap Save Rules
+      await tester.tap(find.text('Save Rules'));
+      await tester.pumpAndSettle();
+
+      expect(fakeRepo.lastSavedRules, isNotNull);
+      final savedRule = fakeRepo.lastSavedRules!.firstWhere((r) => r.dayScope == 'WEEKDAY');
+      expect(savedRule.availableFrom, '09:00');
+      expect(savedRule.availableUntil, '17:00');
+    });
+
+    testWidgets('shows validation snackbar when closing time is before or equal to opening time', (
+      WidgetTester tester,
+    ) async {
+      final fakeRepo = FakeResourcesRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            resourcesRepositoryProvider.overrideWithValue(fakeRepo),
+            resourceDetailProvider((
+              groupId: 'grp-1',
+              resourceId: 'res-101',
+            )).overrideWith((ref) => sampleResource),
+            bookingRulesProvider((
+              groupId: 'grp-1',
+              resourceId: 'res-101',
+            )).overrideWith((ref) => [
+              const BookingRule(
+                dayScope: 'WEEKDAY',
+                availableFrom: '20:00',
+                availableUntil: '08:00',
+              ),
+            ]),
+          ],
+          child: const MaterialApp(
+            home: ResourceSettingsScreen(
+              groupId: 'grp-1',
+              resourceId: 'res-101',
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Switch to Booking Rules tab
+      await tester.tap(find.text('Booking Rules'));
+      await tester.pumpAndSettle();
+
+      // Try to save
+      await tester.tap(find.text('Save Rules'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.textContaining('Closing time must be after opening time'), findsOneWidget);
+      expect(fakeRepo.lastSavedRules, isNull);
+    });
   });
 }

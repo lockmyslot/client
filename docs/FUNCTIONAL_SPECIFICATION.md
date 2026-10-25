@@ -227,7 +227,8 @@ The Flutter application provides a responsive, accessible client experience:
   - **Auth**: Login and Registration screens.
   - **Shell / Home**: Group switcher, global quick booking, member bookings list, profile settings.
   - **Group Management**: Group details, member roster, role administration, invite code sharing.
-  - **Resource Detail & Calendar**: Visual time slot selector, slot status indicators (available, limited, full, maintenance).
+  - **Resource Detail & Calendar**: Visual time slot selector with operating hours banner (highlighting active open/closed operational windows), slot status indicators (available, limited, full, maintenance), and informative empty states when no bookable hours exist.
+  - **Resource Settings & Booking Rules**: Dedicated admin controls for configuring operational working hours (`available_from` and `available_until` with 24:00 support), interactive time pickers, common quick presets (e.g., 9 AM – 5 PM, 8 AM – 10 PM), and quota/cooldown constraints.
   - **Maintenance Portal**: Task creation, assignment picker, status filter, and conflict resolution modal.
 - **Resilience**: Client includes offline caching strategies for cached viewing of bookings and group resources when disconnected.
 

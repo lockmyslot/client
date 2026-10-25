@@ -19,6 +19,7 @@ class MeProfileScreen extends ConsumerWidget {
     final bookingsAsync = ref.watch(
       allBookingsProvider((groupId: null, status: 'CONFIRMED')),
     );
+    final pendingInvitesAsync = ref.watch(pendingInvitesProvider);
     final themeMode = ref.watch(themeModeProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -203,6 +204,259 @@ class MeProfileScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
+                  ),
+
+                  // Pending Invitations Section
+                  pendingInvitesAsync.when(
+                    data: (invites) {
+                      if (invites.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 24),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4, bottom: 8),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Pending Invites',
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurfaceVariant,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '${invites.length}',
+                                    style: TextStyle(
+                                      color: colorScheme.onPrimary,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ...invites.map((invite) {
+                            final initial = invite.groupName.isNotEmpty
+                                ? invite.groupName[0].toUpperCase()
+                                : 'G';
+                            final inviter = invite.invitedByName ??
+                                invite.invitedByUsername ??
+                                'Admin';
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Card(
+                                elevation: 0,
+                                color: colorScheme.surfaceContainerLow,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: colorScheme.outlineVariant
+                                        .withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  colorScheme.primaryContainer,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                initial,
+                                                style: TextStyle(
+                                                  color: colorScheme
+                                                      .onPrimaryContainer,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  invite.groupName,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  'Invited by $inviter${invite.invitedByUsername != null ? ' (@${invite.invitedByUsername})' : ''}',
+                                                  style: theme
+                                                      .textTheme.bodySmall
+                                                      ?.copyWith(
+                                                    color: colorScheme
+                                                        .onSurfaceVariant,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: colorScheme.primary
+                                                  .withValues(alpha: 0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              'PENDING',
+                                              style: TextStyle(
+                                                color: colorScheme.primary,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.access_time_outlined,
+                                            size: 14,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            AppDateUtils.formatDisplayDate(
+                                              invite.createdAt,
+                                            ),
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          OutlinedButton(
+                                            onPressed: () async {
+                                              final confirmed =
+                                                  await ConfirmDialog.show(
+                                                context,
+                                                title: 'Decline Invite',
+                                                message:
+                                                    'Are you sure you want to decline the invitation to "${invite.groupName}"?',
+                                                confirmText: 'Decline',
+                                                isDestructive: true,
+                                              );
+                                              if (confirmed == true) {
+                                                await ref
+                                                    .read(
+                                                      pendingInvitesProvider
+                                                          .notifier,
+                                                    )
+                                                    .decline(invite.id);
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        'Declined invite to ${invite.groupName}',
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 8,
+                                              ),
+                                            ),
+                                            child: const Text('Decline'),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          FilledButton(
+                                            onPressed: () async {
+                                              await ref
+                                                  .read(
+                                                    pendingInvitesProvider
+                                                        .notifier,
+                                                  )
+                                                  .accept(invite.id);
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Joined ${invite.groupName}!',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            style: FilledButton.styleFrom(
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 8,
+                                              ),
+                                            ),
+                                            child: const Text('Accept'),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
                   ),
 
                   const SizedBox(height: 24),

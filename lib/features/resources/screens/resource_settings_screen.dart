@@ -6,7 +6,9 @@ import '../data/resources_repository.dart';
 import '../widgets/resource_icon_picker.dart';
 import '../providers/booking_rules_provider.dart';
 import '../providers/resources_provider.dart';
+import '../../bookings/providers/availability_provider.dart';
 import '../../../core/ui/ui.dart';
+import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/error_display.dart';
 
 class ResourceSettingsScreen extends ConsumerStatefulWidget {
@@ -28,6 +30,9 @@ class ResourceSettingsScreen extends ConsumerStatefulWidget {
 
 class _RuleFormData {
   bool isEnabled = false;
+  bool hasCustomHours = false;
+  String? availableFrom;
+  String? availableUntil;
   final maxBookingsController = TextEditingController();
   final maxHoursController = TextEditingController();
   final cooldownController = TextEditingController();
@@ -133,6 +138,11 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
       if (_rulesFormData.containsKey(scope)) {
         final form = _rulesFormData[scope]!;
         form.isEnabled = true;
+        if (rule.availableFrom != null || rule.availableUntil != null) {
+          form.hasCustomHours = true;
+          form.availableFrom = rule.availableFrom;
+          form.availableUntil = rule.availableUntil;
+        }
         if (rule.maxBookingsPerDay != null) {
           form.maxBookingsController.text = rule.maxBookingsPerDay.toString();
         }
@@ -219,6 +229,37 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
       for (final scope in _dayScopes) {
         final form = _rulesFormData[scope]!;
         if (form.isEnabled) {
+          String? from;
+          String? until;
+
+          if (form.hasCustomHours) {
+            from = form.availableFrom ?? '08:00';
+            until = form.availableUntil ?? '22:00';
+
+            final fromH = int.tryParse(from.split(':')[0]) ?? 0;
+            final fromM = int.tryParse(from.split(':')[1]) ?? 0;
+            final untilH = until == '24:00'
+                ? 24
+                : (int.tryParse(until.split(':')[0]) ?? 0);
+            final untilM = int.tryParse(until.split(':')[1]) ?? 0;
+
+            if (fromH * 60 + fromM >= untilH * 60 + untilM) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Invalid working hours for $scope: Closing time must be after opening time.',
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+              setState(() => _isSavingRules = false);
+              return;
+            }
+          }
+
           final maxBookings = int.tryParse(form.maxBookingsController.text);
           final maxHours = int.tryParse(form.maxHoursController.text);
           final cooldown = int.tryParse(form.cooldownController.text);
@@ -232,6 +273,8 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
               maxHoursPerDay: maxHours,
               cooldownMinutes: cooldown,
               maxAdvanceBookingDays: maxAdv,
+              availableFrom: from,
+              availableUntil: until,
             ),
           );
         }
@@ -255,6 +298,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
           resourceId: widget.resourceId,
         )),
       );
+      ref.invalidate(availabilityProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -652,7 +696,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Configure daily limits, maximum hours, cooldowns, and advance windows',
+                            'Configure working hours, daily limits, maximum hours, cooldowns, and advance windows',
                             style: TextStyle(
                               fontSize: 12,
                               color: cs.onSurfaceVariant,
@@ -755,6 +799,134 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
           const SizedBox(height: 16),
 
           if (currentForm.isEnabled) ...[
+            // Working Hours Card
+            Card(
+              elevation: 0,
+              color: cs.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: cs.outlineVariant.withValues(alpha: 0.4),
+                ),
+              ),
+              child: Padding(
+                padding: kCardPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule_outlined,
+                          size: 20,
+                          color: cs.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Working Hours').h4(),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Control operating hours when members are allowed to book this resource.',
+                    ).small().muted(),
+                    const SizedBox(height: 12),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Restrict Working Hours').semiBold(),
+                      subtitle: Text(
+                        currentForm.hasCustomHours
+                            ? 'Bookings restricted to operating window (${AppDateUtils.formatTimeString(currentForm.availableFrom ?? '08:00')} – ${AppDateUtils.formatTimeString(currentForm.availableUntil ?? '22:00')})'
+                            : 'Open 24 hours (all-day availability)',
+                      ).small().muted(),
+                      value: currentForm.hasCustomHours,
+                      onChanged: (val) {
+                        setState(() {
+                          currentForm.hasCustomHours = val;
+                          if (val) {
+                            currentForm.availableFrom ??= '08:00';
+                            currentForm.availableUntil ??= '22:00';
+                          }
+                        });
+                      },
+                    ),
+                    if (currentForm.hasCustomHours) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTimePickerTile(
+                              context: context,
+                              label: 'Opening Time',
+                              timeStr: currentForm.availableFrom ?? '08:00',
+                              onPickTime: () async {
+                                final newTime = await _pickTime(
+                                  context,
+                                  currentForm.availableFrom ?? '08:00',
+                                );
+                                if (newTime != null) {
+                                  setState(
+                                    () => currentForm.availableFrom = newTime,
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildTimePickerTile(
+                              context: context,
+                              label: 'Closing Time',
+                              timeStr: currentForm.availableUntil ?? '22:00',
+                              onPickTime: () async {
+                                final newTime = await _pickTime(
+                                  context,
+                                  currentForm.availableUntil ?? '22:00',
+                                );
+                                if (newTime != null) {
+                                  setState(
+                                    () => currentForm.availableUntil = newTime,
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          _buildPresetChip(
+                            context: context,
+                            label: '9 AM – 5 PM',
+                            from: '09:00',
+                            until: '17:00',
+                            currentForm: currentForm,
+                          ),
+                          _buildPresetChip(
+                            context: context,
+                            label: '8 AM – 10 PM',
+                            from: '08:00',
+                            until: '22:00',
+                            currentForm: currentForm,
+                          ),
+                          _buildPresetChip(
+                            context: context,
+                            label: '7 AM – 11 PM',
+                            from: '07:00',
+                            until: '23:00',
+                            currentForm: currentForm,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             Card(
               elevation: 0,
               color: cs.surfaceContainerLow,
@@ -812,6 +984,106 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Future<String?> _pickTime(BuildContext context, String currentTimeStr) async {
+    final parts = currentTimeStr.split(':');
+    int hour = int.tryParse(parts[0]) ?? 8;
+    int minute = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
+    if (hour >= 24) hour = 0;
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: hour, minute: minute),
+    );
+    if (picked == null) return null;
+
+    final h = picked.hour.toString().padLeft(2, '0');
+    final m = picked.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
+  Widget _buildTimePickerTile({
+    required BuildContext context,
+    required String label,
+    required String timeStr,
+    required VoidCallback onPickTime,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onPickTime,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: cs.outlineVariant),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label).small().muted(),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.access_time_outlined, size: 16, color: cs.primary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    AppDateUtils.formatTimeString(timeStr),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPresetChip({
+    required BuildContext context,
+    required String label,
+    required String from,
+    required String until,
+    required _RuleFormData currentForm,
+  }) {
+    final isSelected =
+        currentForm.availableFrom == from && currentForm.availableUntil == until;
+    final cs = Theme.of(context).colorScheme;
+    return ActionChip(
+      avatar: isSelected
+          ? Icon(Icons.check, size: 14, color: cs.primary)
+          : null,
+      label: Text(label),
+      onPressed: () {
+        setState(() {
+          currentForm.availableFrom = from;
+          currentForm.availableUntil = until;
+        });
+      },
+      backgroundColor: isSelected
+          ? cs.primaryContainer.withValues(alpha: 0.6)
+          : cs.surfaceContainerHighest.withValues(alpha: 0.35),
+      labelStyle: TextStyle(
+        fontSize: 11,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        color: isSelected ? cs.primary : cs.onSurfaceVariant,
+      ),
+      visualDensity: VisualDensity.compact,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isSelected ? cs.primary : cs.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
     );
   }

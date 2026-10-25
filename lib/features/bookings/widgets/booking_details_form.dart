@@ -192,6 +192,59 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     }
   }
 
+  Widget _buildOperatingHoursBanner(Availability availability) {
+    final from = availability.availableFrom ?? '00:00';
+    final until = availability.availableUntil ?? '24:00';
+    final is24Hours = (from == '00:00' && until == '24:00');
+    final cs = Theme.of(context).colorScheme;
+
+    if (is24Hours) {
+      return Row(
+        children: [
+          Icon(Icons.schedule_outlined, size: 14, color: cs.onSurfaceVariant),
+          const SizedBox(width: 5),
+          Text(
+            'Operating hours: Open 24 hours (All day)',
+            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+          ),
+        ],
+      );
+    }
+
+    final formattedFrom = AppDateUtils.formatTimeString(from);
+    final formattedUntil = AppDateUtils.formatTimeString(until);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: cs.primaryContainer.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: cs.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.schedule_outlined,
+            size: 14,
+            color: cs.primary,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            'Operating hours: $formattedFrom – $formattedUntil',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: cs.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBottomBar({
     required bool isValid,
     required List<TimeSlot> requestedSlots,
@@ -537,21 +590,43 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
 
                         // 3. Time Picker Section
                         const Text('Select Start Time').h3(),
-                        if (availability.availableFrom != null ||
-                            availability.availableUntil != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            'Available hours: ${AppDateUtils.formatTimeString(availability.availableFrom ?? '00:00')} - ${AppDateUtils.formatTimeString(availability.availableUntil ?? '24:00')}',
-                          ).small().muted(),
-                        ],
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
+                        _buildOperatingHoursBanner(availability),
+                        const SizedBox(height: 8),
 
                         if (allSlots.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 24),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
                             child: Center(
-                              child: Text(
-                                'No bookable slots available for this date.',
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.event_busy_outlined,
+                                    size: 36,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'No bookable slots available for this date.',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    (availability.availableFrom != null &&
+                                            availability.availableUntil != null &&
+                                            (availability.availableFrom != '00:00' ||
+                                                availability.availableUntil != '24:00'))
+                                        ? 'Slots are only generated within operating hours (${AppDateUtils.formatTimeString(availability.availableFrom)} – ${AppDateUtils.formatTimeString(availability.availableUntil)}).'
+                                        : 'The resource may be fully booked or currently unavailable.',
+                                  ).small().muted(),
+                                ],
                               ),
                             ),
                           )

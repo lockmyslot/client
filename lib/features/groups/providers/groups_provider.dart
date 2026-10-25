@@ -3,6 +3,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../data/groups_repository.dart';
 import '../data/models/group.dart';
 import '../data/models/group_member.dart';
+import '../data/models/group_invite.dart';
 
 final myGroupsProvider = AsyncNotifierProvider<MyGroupsNotifier, List<Group>>(
   () {
@@ -102,3 +103,38 @@ final groupMembersProvider = FutureProvider.family<List<GroupMember>, String>((
   final repo = ref.watch(groupsRepositoryProvider);
   return await repo.getGroupMembers(groupId);
 });
+
+final pendingInvitesProvider =
+    AsyncNotifierProvider<PendingInvitesNotifier, List<GroupInvite>>(() {
+  return PendingInvitesNotifier();
+});
+
+class PendingInvitesNotifier extends AsyncNotifier<List<GroupInvite>> {
+  @override
+  Future<List<GroupInvite>> build() async {
+    final authState = ref.watch(authProvider);
+    if (!authState.isAuthenticated) {
+      return [];
+    }
+    final repo = ref.watch(groupsRepositoryProvider);
+    return await repo.getPendingInvites();
+  }
+
+  Future<void> accept(String inviteId) async {
+    final repo = ref.read(groupsRepositoryProvider);
+    await repo.acceptInvite(inviteId);
+    ref.invalidate(myGroupsProvider);
+    ref.invalidateSelf();
+  }
+
+  Future<void> decline(String inviteId) async {
+    final repo = ref.read(groupsRepositoryProvider);
+    await repo.declineInvite(inviteId);
+    ref.invalidateSelf();
+  }
+
+  Future<void> refresh() async {
+    ref.invalidateSelf();
+    await future;
+  }
+}

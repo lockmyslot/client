@@ -5,6 +5,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/storage/local_cache_service.dart';
 import 'models/group.dart';
 import 'models/group_member.dart';
+import 'models/group_invite.dart';
 
 class GroupsRepository {
   final ApiClient _apiClient;
@@ -129,6 +130,29 @@ class GroupsRepository {
       fromJson: (json) => GroupMember.fromJson(json as Map<String, dynamic>),
     );
     return response.data;
+  }
+
+  Future<List<GroupInvite>> getPendingInvites() async {
+    final response = await _apiClient.get<List<GroupInvite>>(
+      ApiConstants.invites,
+      fromJson: (json) {
+        if (json is List) {
+          return json
+              .map((e) => GroupInvite.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+        return [];
+      },
+    );
+    return response.data;
+  }
+
+  Future<void> acceptInvite(String inviteId) async {
+    await _apiClient.post(ApiConstants.acceptInvite(inviteId));
+  }
+
+  Future<void> declineInvite(String inviteId) async {
+    await _apiClient.post(ApiConstants.declineInvite(inviteId));
   }
 
   Future<void> removeMember(String groupId, String userId) async {
