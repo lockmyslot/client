@@ -21,6 +21,7 @@ class FakeResourcesRepository extends ResourcesRepository {
     String resourceId, {
     String? name,
     String? description,
+    String? icon,
     int? capacity,
     int? slotDurationMinutes,
     bool? isActive,
@@ -31,6 +32,7 @@ class FakeResourcesRepository extends ResourcesRepository {
       'resourceId': resourceId,
       'name': name,
       'description': description,
+      'icon': icon,
       'capacity': capacity,
       'slotDurationMinutes': slotDurationMinutes,
       'isActive': isActive,
@@ -41,6 +43,7 @@ class FakeResourcesRepository extends ResourcesRepository {
       groupId: groupId,
       name: name ?? 'Updated Resource',
       description: description,
+      icon: icon,
       capacity: capacity ?? 1,
       slotDurationMinutes: slotDurationMinutes ?? 60,
       isActive: isActive ?? true,
@@ -145,6 +148,7 @@ void main() {
       final capacityField = find.widgetWithText(TextFormField, '12');
       await tester.enterText(capacityField, '0');
 
+      await tester.ensureVisible(find.text('Save Changes'));
       await tester.tap(find.text('Save Changes'));
       await tester.pumpAndSettle();
 
@@ -207,6 +211,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Submit
+      await tester.ensureVisible(find.text('Save Changes'));
       await tester.tap(find.text('Save Changes'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
@@ -228,6 +233,53 @@ void main() {
       expect(savedResource!.capacity, 20);
       expect(savedResource!.slotDurationMinutes, 60);
       expect(savedResource!.isActive, false);
+    });
+
+    testWidgets('allows choosing an icon and updating resource icon', (
+      WidgetTester tester,
+    ) async {
+      final fakeRepo = FakeResourcesRepository();
+      Resource? savedResource;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            resourcesRepositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: EditResourceSheet(
+                  groupId: 'grp-1',
+                  resource: sampleResource,
+                  onSuccess: (res) {
+                    savedResource = res;
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Tap on the Room quick chip
+      final roomChip = find.text('Room');
+      await tester.ensureVisible(roomChip);
+      await tester.tap(roomChip);
+      await tester.pumpAndSettle();
+
+      // Submit
+      await tester.ensureVisible(find.text('Save Changes'));
+      await tester.tap(find.text('Save Changes'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(fakeRepo.lastUpdateArgs, isNotNull);
+      expect(fakeRepo.lastUpdateArgs!['icon'], 'room');
+      expect(savedResource, isNotNull);
+      expect(savedResource!.icon, 'room');
     });
   });
 }

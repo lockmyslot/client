@@ -75,6 +75,7 @@ class ResourcesRepository {
     String groupId, {
     required String name,
     String? description,
+    String? icon,
     required int capacity,
     required int slotDurationMinutes,
   }) async {
@@ -84,6 +85,7 @@ class ResourcesRepository {
         'name': name,
         if (description != null && description.isNotEmpty)
           'description': description,
+        if (icon != null && icon.isNotEmpty) 'icon': icon,
         'capacity': capacity,
         'slot_duration_minutes': slotDurationMinutes,
       },
@@ -97,6 +99,7 @@ class ResourcesRepository {
     String resourceId, {
     String? name,
     String? description,
+    String? icon,
     int? capacity,
     int? slotDurationMinutes,
     bool? isActive,
@@ -106,6 +109,7 @@ class ResourcesRepository {
         <String, dynamic>{
           if (name != null) 'name': name,
           if (description != null) 'description': description,
+          if (icon != null) 'icon': icon.isEmpty ? null : icon,
           if (capacity != null) 'capacity': capacity,
           if (slotDurationMinutes != null)
             'slot_duration_minutes': slotDurationMinutes,

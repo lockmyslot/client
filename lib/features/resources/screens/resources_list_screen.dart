@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/resources_provider.dart';
+import '../widgets/resource_avatar.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -77,14 +78,34 @@ class ResourcesListScreen extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(child: Text(resource.name).h4()),
+                                      ResourceAvatar(
+                                        iconKey: resource.icon,
+                                        name: resource.name,
+                                        size: 42,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(resource.name).h4(),
+                                            if (resource.description != null &&
+                                                resource.description!
+                                                    .isNotEmpty) ...[
+                                              const SizedBox(height: 4),
+                                              Text(resource.description!)
+                                                  .muted()
+                                                  .small(),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                  if (resource.description != null) ...[
-                                    const SizedBox(height: 4),
-                                    Text(resource.description!).muted().small(),
-                                  ],
                                   const SizedBox(height: 12),
                                   Row(
                                     children: [

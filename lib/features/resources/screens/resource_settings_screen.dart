@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/booking_rule.dart';
 import '../data/models/resource.dart';
 import '../data/resources_repository.dart';
+import '../widgets/resource_icon_picker.dart';
 import '../providers/booking_rules_provider.dart';
 import '../providers/resources_provider.dart';
 import '../../../core/ui/ui.dart';
@@ -51,6 +52,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
   late final TextEditingController _capacityController;
   late final TextEditingController _durationController;
   bool _isActive = true;
+  String? _selectedIcon;
   bool _isConfigInitialized = false;
   bool _isSavingConfig = false;
   String? _configError;
@@ -85,6 +87,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
     });
 
     _nameController = TextEditingController();
+    _nameController.addListener(_onNameChanged);
     _descController = TextEditingController();
     _capacityController = TextEditingController();
     _durationController = TextEditingController();
@@ -94,9 +97,14 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
     }
   }
 
+  void _onNameChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     _descController.dispose();
     _capacityController.dispose();
@@ -114,6 +122,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
     _capacityController.text = resource.capacity.toString();
     _durationController.text = resource.slotDurationMinutes.toString();
     _isActive = resource.isActive;
+    _selectedIcon = resource.icon;
     _isConfigInitialized = true;
   }
 
@@ -164,6 +173,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
         widget.resourceId,
         name: name,
         description: description,
+        icon: _selectedIcon ?? '',
         capacity: capacity,
         slotDurationMinutes: duration,
         isActive: _isActive,
@@ -470,6 +480,15 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
                   return 'Resource name must be at most 100 characters';
                 }
                 return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
+            ResourceIconSelector(
+              selectedIconKey: _selectedIcon,
+              resourceName: _nameController.text.trim(),
+              onChanged: (newIcon) {
+                setState(() => _selectedIcon = newIcon);
               },
             ),
             const SizedBox(height: 16),

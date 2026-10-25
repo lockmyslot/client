@@ -4,6 +4,7 @@ import '../providers/my_bookings_provider.dart';
 import '../../groups/providers/groups_provider.dart';
 import '../data/bookings_repository.dart';
 import 'reschedule_booking_sheet.dart';
+import '../../resources/widgets/resource_avatar.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
@@ -279,6 +280,13 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
+                                        ResourceAvatar(
+                                          iconKey: booking.resourceIcon,
+                                          name: booking.resourceName ??
+                                              'Resource',
+                                          size: 34,
+                                        ),
+                                        const SizedBox(width: 10),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:

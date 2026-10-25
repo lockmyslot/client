@@ -24,6 +24,7 @@ class FakeResourcesRepository extends ResourcesRepository {
     String resourceId, {
     String? name,
     String? description,
+    String? icon,
     int? capacity,
     int? slotDurationMinutes,
     bool? isActive,
@@ -34,6 +35,7 @@ class FakeResourcesRepository extends ResourcesRepository {
       'resourceId': resourceId,
       'name': name,
       'description': description,
+      'icon': icon,
       'capacity': capacity,
       'slotDurationMinutes': slotDurationMinutes,
       'isActive': isActive,
@@ -44,6 +46,7 @@ class FakeResourcesRepository extends ResourcesRepository {
       groupId: groupId,
       name: name ?? 'Updated',
       description: description,
+      icon: icon,
       capacity: capacity ?? 1,
       slotDurationMinutes: slotDurationMinutes ?? 60,
       isActive: isActive ?? true,

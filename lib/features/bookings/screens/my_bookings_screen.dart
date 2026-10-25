@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/my_bookings_provider.dart';
 import '../data/bookings_repository.dart';
 import 'reschedule_booking_sheet.dart';
+import '../../resources/widgets/resource_avatar.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
@@ -125,6 +126,13 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                                   children: [
                                     Row(
                                       children: [
+                                        ResourceAvatar(
+                                          iconKey: booking.resourceIcon,
+                                          name: booking.resourceName ??
+                                              'Resource',
+                                          size: 34,
+                                        ),
+                                        const SizedBox(width: 10),
                                         Expanded(
                                           child: Text(
                                             booking.resourceName ??

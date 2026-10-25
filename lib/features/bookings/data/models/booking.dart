@@ -2,6 +2,7 @@ class Booking {
   final String id;
   final String resourceId;
   final String? resourceName;
+  final String? resourceIcon;
   final String userId;
   final String? userDisplayName;
   final String groupId;
@@ -14,6 +15,7 @@ class Booking {
     required this.id,
     required this.resourceId,
     this.resourceName,
+    this.resourceIcon,
     required this.userId,
     this.userDisplayName,
     required this.groupId,
@@ -36,6 +38,10 @@ class Booking {
           json['resource_id'] as String? ?? json['resourceId'] as String? ?? '',
       resourceName:
           json['resource_name'] as String? ?? resourceMap?['name'] as String?,
+      resourceIcon:
+          json['resource_icon'] as String? ??
+          json['resourceIcon'] as String? ??
+          resourceMap?['icon'] as String?,
       userId:
           json['user_id'] as String? ??
           json['userId'] as String? ??
@@ -64,6 +70,7 @@ class Booking {
       'id': id,
       'resource_id': resourceId,
       if (resourceName != null) 'resource_name': resourceName,
+      if (resourceIcon != null) 'resource_icon': resourceIcon,
       'user_id': userId,
       if (userDisplayName != null) 'user_display_name': userDisplayName,
       'group_id': groupId,

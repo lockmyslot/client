@@ -3,6 +3,7 @@ class Resource {
   final String groupId;
   final String name;
   final String? description;
+  final String? icon;
   final int capacity;
   final int slotDurationMinutes;
   final bool isActive;
@@ -15,6 +16,7 @@ class Resource {
     required this.groupId,
     required this.name,
     this.description,
+    this.icon,
     required this.capacity,
     required this.slotDurationMinutes,
     required this.isActive,
@@ -29,6 +31,7 @@ class Resource {
       groupId: json['group_id'] as String? ?? json['groupId'] as String? ?? '',
       name: json['name'] as String? ?? '',
       description: json['description'] as String?,
+      icon: json['icon'] as String?,
       capacity: (json['capacity'] as num?)?.toInt() ?? 1,
       slotDurationMinutes:
           (json['slot_duration_minutes'] as num? ??
@@ -59,6 +62,7 @@ class Resource {
       'group_id': groupId,
       'name': name,
       if (description != null) 'description': description,
+      if (icon != null) 'icon': icon,
       'capacity': capacity,
       'slot_duration_minutes': slotDurationMinutes,
       'is_active': isActive,
@@ -66,5 +70,33 @@ class Resource {
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
+  }
+
+  Resource copyWith({
+    String? id,
+    String? groupId,
+    String? name,
+    String? description,
+    String? icon,
+    int? capacity,
+    int? slotDurationMinutes,
+    bool? isActive,
+    bool? rulesConfigured,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Resource(
+      id: id ?? this.id,
+      groupId: groupId ?? this.groupId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      icon: icon ?? this.icon,
+      capacity: capacity ?? this.capacity,
+      slotDurationMinutes: slotDurationMinutes ?? this.slotDurationMinutes,
+      isActive: isActive ?? this.isActive,
+      rulesConfigured: rulesConfigured ?? this.rulesConfigured,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
   }
 }

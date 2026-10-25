@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/resources_repository.dart';
 import '../data/models/resource.dart';
 import '../providers/resources_provider.dart';
+import '../widgets/resource_icon_picker.dart';
 import '../../../core/ui/ui.dart';
 
 class EditResourceSheet extends ConsumerStatefulWidget {
@@ -47,6 +48,7 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
   late final TextEditingController _capacityController;
   late final TextEditingController _durationController;
   late bool _isActive;
+  String? _selectedIcon;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -55,6 +57,7 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.resource.name);
+    _nameController.addListener(_onNameChanged);
     _descController =
         TextEditingController(text: widget.resource.description ?? '');
     _capacityController =
@@ -63,10 +66,16 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
       text: widget.resource.slotDurationMinutes.toString(),
     );
     _isActive = widget.resource.isActive;
+    _selectedIcon = widget.resource.icon;
+  }
+
+  void _onNameChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     _descController.dispose();
     _capacityController.dispose();
@@ -99,6 +108,7 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
         widget.resource.id,
         name: name,
         description: description,
+        icon: _selectedIcon ?? '',
         capacity: capacity,
         slotDurationMinutes: duration,
         isActive: _isActive,
@@ -218,6 +228,15 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
                     return 'Resource name must be at most 100 characters';
                   }
                   return null;
+                },
+              ),
+              const SizedBox(height: 14),
+
+              ResourceIconSelector(
+                selectedIconKey: _selectedIcon,
+                resourceName: _nameController.text.trim(),
+                onChanged: (newIcon) {
+                  setState(() => _selectedIcon = newIcon);
                 },
               ),
               const SizedBox(height: 14),

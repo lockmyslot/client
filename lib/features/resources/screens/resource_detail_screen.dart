@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/resources_provider.dart';
 import '../providers/maintenance_provider.dart';
+import '../widgets/resource_avatar.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../bookings/data/bookings_repository.dart';
 import '../../bookings/data/models/booking.dart';
@@ -151,6 +152,32 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
+                        child: Row(
+                          children: [
+                            ResourceAvatar(
+                              iconKey: res.icon,
+                              name: res.name,
+                              size: 52,
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(res.name).h3(),
+                                  if (res.description != null &&
+                                      res.description!.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(res.description!).muted().small(),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       if (!res.isActive)
                         Container(
                           margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),

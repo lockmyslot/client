@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/resources_repository.dart';
 import '../data/models/resource.dart';
 import '../providers/resources_provider.dart';
+import '../widgets/resource_icon_picker.dart';
 import '../../../core/ui/ui.dart';
 
 class CreateResourceSheet extends ConsumerStatefulWidget {
@@ -47,12 +48,24 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
   final _descController = TextEditingController();
   final _capacityController = TextEditingController(text: '1');
   final _durationController = TextEditingController(text: '60');
+  String? _selectedIcon;
 
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_onNameChanged);
+  }
+
+  void _onNameChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     _descController.dispose();
     _capacityController.dispose();
@@ -80,6 +93,7 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
         widget.groupId,
         name: name,
         description: _descController.text.trim(),
+        icon: _selectedIcon,
         capacity: capacity,
         slotDurationMinutes: duration,
       );
@@ -180,6 +194,15 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
                     return 'Resource name must be at least 2 characters';
                   }
                   return null;
+                },
+              ),
+              const SizedBox(height: 14),
+
+              ResourceIconSelector(
+                selectedIconKey: _selectedIcon,
+                resourceName: _nameController.text.trim(),
+                onChanged: (newIcon) {
+                  setState(() => _selectedIcon = newIcon);
                 },
               ),
               const SizedBox(height: 14),
