@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 
 class LockMySlotApp extends ConsumerWidget {
   const LockMySlotApp({super.key});
@@ -10,6 +11,7 @@ class LockMySlotApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
@@ -18,7 +20,7 @@ class LockMySlotApp extends ConsumerWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme(lightDynamic),
           darkTheme: AppTheme.darkTheme(darkDynamic),
-          themeMode: ThemeMode.system,
+          themeMode: themeMode,
           routerConfig: router,
           builder: (context, child) {
             if (child == null) return const SizedBox.shrink();

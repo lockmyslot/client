@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../groups/providers/groups_provider.dart';
-import '../../groups/screens/create_group_sheet.dart';
-import '../../groups/screens/join_group_sheet.dart';
 import '../../bookings/providers/my_bookings_provider.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
+import 'theme_selection_sheet.dart';
 
 class MeProfileScreen extends ConsumerWidget {
   const MeProfileScreen({super.key});
@@ -19,6 +19,7 @@ class MeProfileScreen extends ConsumerWidget {
     final bookingsAsync = ref.watch(
       allBookingsProvider((groupId: null, status: 'CONFIRMED')),
     );
+    final themeMode = ref.watch(themeModeProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -47,7 +48,7 @@ class MeProfileScreen extends ConsumerWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: colorScheme.outlineVariant.withOpacity(0.4),
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.4),
                       ),
                     ),
                     child: Padding(
@@ -68,7 +69,8 @@ class MeProfileScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 14),
                           Text(user?.displayName ?? 'User').h2(),
-                          if (user?.username != null && user!.username!.isNotEmpty) ...[
+                          if (user?.username != null &&
+                              user!.username!.isNotEmpty) ...[
                             const SizedBox(height: 2),
                             Text('@${user.username}').small().muted(),
                           ],
@@ -114,8 +116,9 @@ class MeProfileScreen extends ConsumerWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: BorderSide(
-                              color: colorScheme.outlineVariant
-                                  .withOpacity(0.4),
+                              color: colorScheme.outlineVariant.withValues(
+                                alpha: 0.4,
+                              ),
                             ),
                           ),
                           child: Padding(
@@ -160,8 +163,9 @@ class MeProfileScreen extends ConsumerWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: BorderSide(
-                              color: colorScheme.outlineVariant
-                                  .withOpacity(0.4),
+                              color: colorScheme.outlineVariant.withValues(
+                                alpha: 0.4,
+                              ),
                             ),
                           ),
                           child: Padding(
@@ -201,58 +205,78 @@ class MeProfileScreen extends ConsumerWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
-                  // Quick Actions
+                  // App Settings
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 8),
+                    child: Text(
+                      'App Settings',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurfaceVariant,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   Card(
                     elevation: 0,
                     color: colorScheme.surfaceContainerLow,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: colorScheme.outlineVariant.withOpacity(0.4),
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.4),
                       ),
                     ),
                     child: Column(
                       children: [
                         ListTile(
-                          leading: Icon(
-                            Icons.vpn_key_outlined,
-                            color: colorScheme.primary,
-                          ),
-                          title: const Text('Join a Group'),
-                          subtitle: const Text(
-                            'Enter code to join an existing group',
-                          ),
-                          trailing: const Icon(Icons.chevron_right),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(20),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primaryContainer.withValues(
+                                alpha: 0.5,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              themeMode.icon,
+                              size: 20,
+                              color: colorScheme.primary,
                             ),
                           ),
-                          onTap: () => JoinGroupSheet.show(context),
-                        ),
-                        Divider(
-                          height: 1,
-                          indent: 56,
-                          color: colorScheme.outlineVariant.withOpacity(0.4),
-                        ),
-                        ListTile(
-                          leading: Icon(
-                            Icons.add_circle_outline,
-                            color: colorScheme.primary,
+                          title: const Text('Theme'),
+                          subtitle: Text(themeMode.title),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surfaceContainerHighest
+                                      .withValues(alpha: 0.6),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  themeMode.title,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.chevron_right, size: 20),
+                            ],
                           ),
-                          title: const Text('Create a Group'),
-                          subtitle: const Text(
-                            'Set up a new group for sharing slots',
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          trailing: const Icon(Icons.chevron_right),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              bottom: Radius.circular(20),
-                            ),
-                          ),
-                          onTap: () => CreateGroupSheet.show(context),
+                          onTap: () => ThemeSelectionSheet.show(context),
                         ),
                       ],
                     ),
@@ -267,7 +291,7 @@ class MeProfileScreen extends ConsumerWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: colorScheme.outlineVariant.withOpacity(0.4),
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.4),
                       ),
                     ),
                     child: ListTile(
@@ -302,7 +326,7 @@ class MeProfileScreen extends ConsumerWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: colorScheme.error,
                       side: BorderSide(
-                        color: colorScheme.error.withOpacity(0.5),
+                        color: colorScheme.error.withValues(alpha: 0.5),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
