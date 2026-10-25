@@ -532,6 +532,71 @@ class MeProfileScreen extends ConsumerWidget {
                           ),
                           onTap: () => ThemeSelectionSheet.show(context),
                         ),
+                        const Divider(height: 1, indent: 56),
+                        ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primaryContainer.withValues(
+                                alpha: 0.5,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.mail_outline,
+                              size: 20,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          title: const Text('Pending Invites'),
+                          subtitle: pendingInvitesAsync.maybeWhen(
+                            data: (invites) => Text(
+                              invites.isEmpty
+                                  ? 'No pending invitations'
+                                  : '${invites.length} pending',
+                            ),
+                            orElse: () => const Text('Check invitations'),
+                          ),
+                          trailing: pendingInvitesAsync.maybeWhen(
+                            data: (invites) => invites.isNotEmpty
+                                ? Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '${invites.length}',
+                                      style: TextStyle(
+                                        color: colorScheme.onPrimary,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  )
+                                : null,
+                            orElse: () => null,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          onTap: () {
+                            final count =
+                                pendingInvitesAsync.value?.length ?? 0;
+                            if (count == 0) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'You have no pending group invitations.',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       ],
                     ),
                   ),
