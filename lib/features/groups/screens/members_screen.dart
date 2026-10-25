@@ -7,6 +7,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/error_display.dart';
+import 'invite_member_sheet.dart';
 
 class MembersScreen extends ConsumerWidget {
   final String groupId;
@@ -66,6 +67,7 @@ class MembersScreen extends ConsumerWidget {
                           context,
                           groupName: group.name,
                           inviteCode: inviteCode,
+                          groupId: group.id,
                         );
                       },
                       icon: const Icon(Icons.share_outlined, size: 16),
@@ -86,9 +88,24 @@ class MembersScreen extends ConsumerWidget {
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          const SliverAppBar.large(
-            title: Text('Group Members'),
+          SliverAppBar.large(
+            title: const Text('Group Members'),
             pinned: true,
+            actions: [
+              if (groupAsync.value?.isAdmin ?? false)
+                IconButton(
+                  icon: const Icon(Icons.person_add_outlined),
+                  tooltip: 'Invite by Username',
+                  onPressed: () {
+                    final group = groupAsync.value;
+                    InviteMemberSheet.show(
+                      context,
+                      groupId: groupId,
+                      groupName: group?.name,
+                    );
+                  },
+                ),
+            ],
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -168,6 +185,15 @@ class MembersScreen extends ConsumerWidget {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ).semiBold(),
+                                        if (member.username != null &&
+                                            member.username!.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '@${member.username}',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ).muted().small(),
+                                        ],
                                         const SizedBox(height: 2),
                                         Text(
                                           'Joined ${AppDateUtils.formatDisplayDate(member.joinedAt)}',

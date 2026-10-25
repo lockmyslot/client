@@ -225,6 +225,7 @@ class GroupsListScreen extends ConsumerWidget {
                                                     groupName: group.name,
                                                     inviteCode:
                                                         group.inviteCode!,
+                                                    groupId: group.id,
                                                   );
                                                 } else if (group.isAdmin) {
                                                   try {
@@ -247,6 +248,7 @@ class GroupsListScreen extends ConsumerWidget {
                                                             detail.name,
                                                         inviteCode:
                                                             detail.inviteCode!,
+                                                        groupId: detail.id,
                                                       );
                                                     }
                                                   } catch (_) {

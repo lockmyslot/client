@@ -3,6 +3,7 @@ class GroupMember {
   final String groupId;
   final String userId;
   final String displayName;
+  final String? username;
   final String role;
   final DateTime joinedAt;
 
@@ -11,6 +12,7 @@ class GroupMember {
     required this.groupId,
     required this.userId,
     required this.displayName,
+    this.username,
     required this.role,
     required this.joinedAt,
   });
@@ -28,6 +30,9 @@ class GroupMember {
           userMap?['display_name'] as String? ??
           json['displayName'] as String? ??
           'User',
+      username:
+          json['username'] as String? ??
+          userMap?['username'] as String?,
       role: json['role'] as String? ?? 'MEMBER',
       joinedAt: json['joined_at'] != null
           ? DateTime.parse(json['joined_at'] as String)
@@ -41,6 +46,7 @@ class GroupMember {
       'group_id': groupId,
       'user_id': userId,
       'display_name': displayName,
+      if (username != null) 'username': username,
       'role': role,
       'joined_at': joinedAt.toIso8601String(),
     };

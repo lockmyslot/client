@@ -122,6 +122,15 @@ class GroupsRepository {
     }
   }
 
+  Future<GroupMember> inviteMember(String groupId, String username) async {
+    final response = await _apiClient.post<GroupMember>(
+      ApiConstants.inviteMember(groupId),
+      body: {'username': username},
+      fromJson: (json) => GroupMember.fromJson(json as Map<String, dynamic>),
+    );
+    return response.data;
+  }
+
   Future<void> removeMember(String groupId, String userId) async {
     await _apiClient.delete(ApiConstants.removeMember(groupId, userId));
   }

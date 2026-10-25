@@ -124,6 +124,7 @@ class GroupDetailScreen extends ConsumerWidget {
                                     context,
                                     groupName: group.name,
                                     inviteCode: group.inviteCode!,
+                                    groupId: group.id,
                                   ),
                                 ),
                               ],
@@ -209,33 +210,22 @@ class GroupDetailScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Resources').h3(),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (groupAsync.when(
-                          data: (group) => group.isAdmin,
-                          loading: () => false,
-                          error: (_, __) => false,
-                        ))
-                          IconButton(
-                            icon: const Icon(Icons.add_outlined),
-                            onPressed: () {
-                              final group = groupAsync.value;
-                              CreateResourceSheet.show(
-                                context,
-                                groupId: groupId,
-                                groupName: group?.name,
-                              );
-                            },
-                          ),
-                        IconButton(
-                          icon: const Icon(Icons.refresh_outlined, size: 16),
-                          onPressed: () => ref.invalidate(
-                            groupResourcesProvider(groupId),
-                          ),
-                        ),
-                      ],
-                    ),
+                    if (groupAsync.when(
+                      data: (group) => group.isAdmin,
+                      loading: () => false,
+                      error: (_, __) => false,
+                    ))
+                      IconButton(
+                        icon: const Icon(Icons.add_outlined),
+                        onPressed: () {
+                          final group = groupAsync.value;
+                          CreateResourceSheet.show(
+                            context,
+                            groupId: groupId,
+                            groupName: group?.name,
+                          );
+                        },
+                      ),
                   ],
                 ),
               ),

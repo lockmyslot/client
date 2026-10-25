@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import '../ui/ui.dart';
+import '../../features/groups/screens/invite_member_sheet.dart';
 
 class DeepLinkUtils {
   static const String appScheme = 'lockmyslot';
@@ -51,6 +52,7 @@ class DeepLinkUtils {
     BuildContext context, {
     required String groupName,
     required String inviteCode,
+    String? groupId,
   }) {
     final cleanCode = inviteCode.trim().toUpperCase();
     final inviteLink = buildWebInviteLink(cleanCode);
@@ -158,6 +160,21 @@ class DeepLinkUtils {
                     ],
                   ),
                 ),
+                if (groupId != null) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(modalContext).pop();
+                      InviteMemberSheet.show(
+                        context,
+                        groupId: groupId,
+                        groupName: groupName,
+                      );
+                    },
+                    icon: const Icon(Icons.alternate_email, size: 18),
+                    label: const Text('Invite by Username'),
+                  ),
+                ],
               ],
             ),
           ),
