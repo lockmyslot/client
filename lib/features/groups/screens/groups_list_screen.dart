@@ -362,6 +362,35 @@ class GroupsListScreen extends ConsumerWidget {
                                                               .onPrimary,
                                                         ),
                                                       ),
+                                                    )
+                                                  else if (group.isGuest)
+                                                    Positioned(
+                                                      right: -2,
+                                                      bottom: -2,
+                                                      child: Container(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              3,
+                                                            ),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                              color: colorScheme
+                                                                  .secondary,
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              border: Border.all(
+                                                                color: colorScheme
+                                                                    .surfaceContainerLow,
+                                                                width: 1.5,
+                                                              ),
+                                                            ),
+                                                        child: Icon(
+                                                          Icons.badge,
+                                                          size: 10,
+                                                          color: colorScheme
+                                                              .onSecondary,
+                                                        ),
+                                                      ),
                                                     ),
                                                 ],
                                               ),

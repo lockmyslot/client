@@ -149,29 +149,88 @@ class MembersScreen extends ConsumerWidget {
                               padding: kCardPadding,
                               child: Row(
                                 children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primaryContainer,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        member.displayName.isNotEmpty
-                                            ? member.displayName[0]
-                                                  .toUpperCase()
-                                            : 'U',
-                                        style: TextStyle(
+                                  Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
                                           color: Theme.of(context)
                                               .colorScheme
-                                              .onPrimaryContainer,
-                                          fontWeight: FontWeight.bold,
+                                              .primaryContainer,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            member.displayName.isNotEmpty
+                                                ? member.displayName[0]
+                                                      .toUpperCase()
+                                                : 'U',
+                                            style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimaryContainer,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                      if (member.isAdmin)
+                                        Positioned(
+                                          right: -2,
+                                          bottom: -2,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(2.5),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .surfaceContainerLow,
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              Icons.shield,
+                                              size: 9,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimary,
+                                            ),
+                                          ),
+                                        )
+                                      else if (member.isGuest)
+                                        Positioned(
+                                          right: -2,
+                                          bottom: -2,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(2.5),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .surfaceContainerLow,
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              Icons.badge,
+                                              size: 9,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondary,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -203,7 +262,6 @@ class MembersScreen extends ConsumerWidget {
                                       ],
                                     ),
                                   ),
-                                  PrimaryBadge(child: Text(member.role)),
                                   if (isAdmin && !member.isAdmin) ...[
                                     const SizedBox(width: 8),
                                     IconButton(

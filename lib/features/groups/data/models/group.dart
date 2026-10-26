@@ -18,6 +18,10 @@ class Group {
   });
 
   bool get isAdmin => role.toUpperCase() == 'ADMIN';
+  bool get isGuest => role.toUpperCase() == 'GUEST';
+  bool get isMod =>
+      role.toUpperCase() == 'MOD' || role.toUpperCase() == 'MODERATOR';
+  bool get isMember => role.toUpperCase() == 'MEMBER';
 
   Group copyWith({
     String? id,

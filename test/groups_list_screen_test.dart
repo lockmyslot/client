@@ -39,7 +39,7 @@ class FakeMyGroupsNotifier extends MyGroupsNotifier {
 void main() {
   group('GroupsListScreen Widget Tests', () {
     testWidgets(
-      'renders admin shield badge on initial box and no role pill for admin group, and no badge for member group',
+      'renders admin shield badge for admin, guest badge for guest, and no badge or pill for member/mod',
       (WidgetTester tester) async {
         final testGroups = [
           Group(
@@ -54,6 +54,20 @@ void main() {
             name: 'Study Room',
             role: 'MEMBER',
             memberCount: 3,
+            createdAt: DateTime.now(),
+          ),
+          Group(
+            id: 'g3',
+            name: 'Gaming Lounge',
+            role: 'MOD',
+            memberCount: 8,
+            createdAt: DateTime.now(),
+          ),
+          Group(
+            id: 'g4',
+            name: 'Open Coworking',
+            role: 'GUEST',
+            memberCount: 12,
             createdAt: DateTime.now(),
           ),
         ];
@@ -77,19 +91,30 @@ void main() {
         // Group names are displayed
         expect(find.text('Gym Bros'), findsOneWidget);
         expect(find.text('Study Room'), findsOneWidget);
+        expect(find.text('Gaming Lounge'), findsOneWidget);
+        expect(find.text('Open Coworking'), findsOneWidget);
 
-        // No "ADMIN", "Admin", "MEMBER", or "Member" role pills are displayed
+        // No role pills are displayed
         expect(find.text('ADMIN'), findsNothing);
         expect(find.text('Admin'), findsNothing);
         expect(find.text('MEMBER'), findsNothing);
         expect(find.text('Member'), findsNothing);
+        expect(find.text('MOD'), findsNothing);
+        expect(find.text('Mod'), findsNothing);
+        expect(find.text('GUEST'), findsNothing);
+        expect(find.text('Guest'), findsNothing);
 
-        // Admin shield icon is displayed exactly once (only on the Admin group)
+        // Admin shield icon is displayed exactly once (only on Admin group)
         expect(find.byIcon(Icons.shield), findsOneWidget);
+
+        // Guest badge icon is displayed exactly once (only on Guest group)
+        expect(find.byIcon(Icons.badge), findsOneWidget);
 
         // Member counts are rendered
         expect(find.text('5 members'), findsOneWidget);
         expect(find.text('3 members'), findsOneWidget);
+        expect(find.text('8 members'), findsOneWidget);
+        expect(find.text('12 members'), findsOneWidget);
       },
     );
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../groups/providers/groups_provider.dart';
-import '../../bookings/providers/my_bookings_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
@@ -15,10 +14,6 @@ class MeProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider).user;
-    final groupsAsync = ref.watch(myGroupsProvider);
-    final bookingsAsync = ref.watch(
-      allBookingsProvider((groupId: null, status: 'CONFIRMED')),
-    );
     final pendingInvitesAsync = ref.watch(pendingInvitesProvider);
     final themeMode = ref.watch(themeModeProvider);
     final theme = Theme.of(context);
@@ -107,115 +102,69 @@ class MeProfileScreen extends ConsumerWidget {
 
                   const SizedBox(height: 16),
 
-                  // Overview Stats
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Card(
-                          elevation: 0,
-                          color: colorScheme.surfaceContainerLow,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(
-                              color: colorScheme.outlineVariant.withValues(
-                                alpha: 0.4,
-                              ),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.group_outlined,
-                                      size: 20,
-                                      color: colorScheme.primary,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text('My Groups').small().muted(),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                groupsAsync.when(
-                                  data: (groups) =>
-                                      Text('${groups.length}').h2(),
-                                  loading: () => const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                  error: (_, __) => const Text('0').h2(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Card(
-                          elevation: 0,
-                          color: colorScheme.surfaceContainerLow,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(
-                              color: colorScheme.outlineVariant.withValues(
-                                alpha: 0.4,
-                              ),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.bookmark_added_outlined,
-                                      size: 20,
-                                      color: colorScheme.primary,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text('Confirmed').small().muted(),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                bookingsAsync.when(
-                                  data: (bookings) =>
-                                      Text('${bookings.length}').h2(),
-                                  loading: () => const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                  error: (_, __) => const Text('0').h2(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Pending Invitations Section
+                  // Pending Invitations Section (replaces Overview Stats)
                   pendingInvitesAsync.when(
                     data: (invites) {
                       if (invites.isEmpty) {
-                        return const SizedBox.shrink();
+                        return Card(
+                          elevation: 0,
+                          color: colorScheme.surfaceContainerLow,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: colorScheme.outlineVariant
+                                  .withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primaryContainer
+                                        .withValues(alpha: 0.5),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.mail_outline,
+                                    size: 22,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Pending Invites',
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'No pending invitations',
+                                        style:
+                                            theme.textTheme.bodySmall?.copyWith(
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
                       }
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const SizedBox(height: 24),
                           Padding(
                             padding: const EdgeInsets.only(left: 4, bottom: 8),
                             child: Row(
@@ -531,71 +480,6 @@ class MeProfileScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           onTap: () => ThemeSelectionSheet.show(context),
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer.withValues(
-                                alpha: 0.5,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(
-                              Icons.mail_outline,
-                              size: 20,
-                              color: colorScheme.primary,
-                            ),
-                          ),
-                          title: const Text('Pending Invites'),
-                          subtitle: pendingInvitesAsync.maybeWhen(
-                            data: (invites) => Text(
-                              invites.isEmpty
-                                  ? 'No pending invitations'
-                                  : '${invites.length} pending',
-                            ),
-                            orElse: () => const Text('Check invitations'),
-                          ),
-                          trailing: pendingInvitesAsync.maybeWhen(
-                            data: (invites) => invites.isNotEmpty
-                                ? Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primary,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      '${invites.length}',
-                                      style: TextStyle(
-                                        color: colorScheme.onPrimary,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  )
-                                : null,
-                            orElse: () => null,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          onTap: () {
-                            final count =
-                                pendingInvitesAsync.value?.length ?? 0;
-                            if (count == 0) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'You have no pending group invitations.',
-                                  ),
-                                ),
-                              );
-                            }
-                          },
                         ),
                       ],
                     ),
