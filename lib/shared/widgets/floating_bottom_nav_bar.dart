@@ -21,8 +21,10 @@ class FloatingBottomNavBar extends StatelessWidget {
 
   double _getTabWidth(BuildContext context, String label) {
     final textTheme = Theme.of(context).textTheme;
-    final style = (textTheme.labelMedium ?? const TextStyle()).copyWith(
+    final style = (textTheme.labelSmall ?? const TextStyle()).copyWith(
       fontWeight: FontWeight.w600,
+      fontSize: 11,
+      letterSpacing: 0.1,
     );
 
     final textPainter = TextPainter(
@@ -31,8 +33,10 @@ class FloatingBottomNavBar extends StatelessWidget {
       textDirection: TextDirection.ltr,
     )..layout();
 
-    // 14.0 horizontal padding * 2 + 20.0 icon + 6.0 gap + textPainter width
-    return 28.0 + 20.0 + 6.0 + textPainter.size.width;
+    // Horizontal padding + textPainter width (minimum width 64.0)
+    const minWidth = 64.0;
+    final widthWithPadding = textPainter.size.width + 24.0;
+    return widthWithPadding < minWidth ? minWidth : widthWithPadding;
   }
 
   @override
@@ -78,9 +82,10 @@ class FloatingBottomNavBar extends StatelessWidget {
 
     // Dynamic width and left offset calculations for each tab
     const double itemMargin = 4.0;
-    final List<double> tabWidths = items.map((item) {
-      return _getTabWidth(context, item.label);
-    }).toList();
+    final double maxTabWidth = items
+        .map((item) => _getTabWidth(context, item.label))
+        .reduce((a, b) => a > b ? a : b);
+    final List<double> tabWidths = List.filled(items.length, maxTabWidth);
 
     final List<double> tabLefts = [];
     double currentLeftOffset = 0.0;
@@ -121,23 +126,23 @@ class FloatingBottomNavBar extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 1. Navigation Tabs Floating Pill with Dynamic Width & Sliding Highlight
+                  // 1. Navigation Tabs Floating Pill with Sliding Highlight
                   Material(
                     elevation: 3,
                     shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(32),
+                    borderRadius: BorderRadius.circular(26),
                     color: Colors.transparent,
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(32),
+                      borderRadius: BorderRadius.circular(26),
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 6,
+                            horizontal: 5,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(32),
+                            borderRadius: BorderRadius.circular(26),
                             gradient: blurGradient,
                             border: Border.all(
                               color: colorScheme.outlineVariant
@@ -147,24 +152,24 @@ class FloatingBottomNavBar extends StatelessWidget {
                           ),
                           child: SizedBox(
                             width: totalTabsWidth,
-                            height: 36,
+                            height: 44,
                             child: Stack(
                               children: [
-                                // Sliding & Morphing Width Highlight Pill Background
+                                // Sliding Highlight Pill Background
                                 Positioned(
                                   left: slidingLeft,
                                   top: 0,
                                   width: slidingWidth,
-                                  height: 36,
+                                  height: 44,
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: colorScheme.secondaryContainer,
-                                      borderRadius: BorderRadius.circular(24),
+                                      borderRadius: BorderRadius.circular(22),
                                     ),
                                   ),
                                 ),
 
-                                // Tab Items Row (Natural Content Widths)
+                                // Tab Items Row (Vertical Icon + Label)
                                 Row(
                                   children: List.generate(items.length, (index) {
                                     final item = items[index];
@@ -188,24 +193,24 @@ class FloatingBottomNavBar extends StatelessWidget {
                                       ),
                                       child: SizedBox(
                                         width: itemWidth,
-                                        height: 36,
+                                        height: 44,
                                         child: Tooltip(
                                           message: item.label,
                                           child: Material(
                                             color: Colors.transparent,
                                             borderRadius:
-                                                BorderRadius.circular(24),
+                                                BorderRadius.circular(22),
                                             clipBehavior: Clip.antiAlias,
                                             child: InkWell(
                                               onTap: () => onTap(index),
                                               borderRadius:
-                                                  BorderRadius.circular(24),
+                                                  BorderRadius.circular(22),
                                               splashColor: colorScheme.primary
                                                   .withValues(alpha: 0.12),
                                               highlightColor:
                                                   Colors.transparent,
                                               child: Center(
-                                                child: Row(
+                                                child: Column(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   mainAxisSize:
@@ -215,14 +220,17 @@ class FloatingBottomNavBar extends StatelessWidget {
                                                       selectionAmount > 0.5
                                                           ? item.activeIcon
                                                           : item.icon,
-                                                      size: 19,
+                                                      size: 20,
                                                       color: contentColor,
                                                     ),
-                                                    const SizedBox(width: 6),
+                                                    const SizedBox(height: 2),
                                                     Text(
                                                       item.label,
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                       style: (textTheme
-                                                                  .labelMedium ??
+                                                                  .labelSmall ??
                                                               const TextStyle())
                                                           .copyWith(
                                                         color: contentColor,
@@ -233,6 +241,8 @@ class FloatingBottomNavBar extends StatelessWidget {
                                                                     .w600
                                                                 : FontWeight
                                                                     .w500,
+                                                        fontSize: 11,
+                                                        letterSpacing: 0.1,
                                                       ),
                                                     ),
                                                   ],
