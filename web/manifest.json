@@ -4,7 +4,7 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
-    "theme_color": "#3F51B5",
+    "theme_color": "#18181B",
     "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,

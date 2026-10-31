@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color _seedColor = Color(0xFF3F51B5);
+  static const Color _seedColor = Color(0xFF18181B);
   static const String _fontFamily = 'GoogleSansFlexRounded';
 
   static InputDecorationTheme _inputDecorationTheme(ColorScheme cs) {
@@ -54,17 +54,17 @@ class AppTheme {
         scrolledUnderElevation: 0,
         backgroundColor: cs.surface,
         foregroundColor: cs.onSurface,
-        titleTextStyle: TextStyle(
+      ),
+      textTheme: TextTheme(
+        titleLarge: TextStyle(
           fontFamily: _fontFamily,
-          fontSize: 32,
+          fontSize: 24,
           fontWeight: FontWeight.bold,
           color: cs.onSurface,
         ),
-      ),
-      textTheme: TextTheme(
         headlineMedium: TextStyle(
           fontFamily: _fontFamily,
-          fontSize: 36,
+          fontSize: 32,
           fontWeight: FontWeight.bold,
           color: cs.onSurface,
         ),
@@ -96,17 +96,17 @@ class AppTheme {
         scrolledUnderElevation: 0,
         backgroundColor: cs.surface,
         foregroundColor: cs.onSurface,
-        titleTextStyle: TextStyle(
+      ),
+      textTheme: TextTheme(
+        titleLarge: TextStyle(
           fontFamily: _fontFamily,
-          fontSize: 32,
+          fontSize: 24,
           fontWeight: FontWeight.bold,
           color: cs.onSurface,
         ),
-      ),
-      textTheme: TextTheme(
         headlineMedium: TextStyle(
           fontFamily: _fontFamily,
-          fontSize: 36,
+          fontSize: 32,
           fontWeight: FontWeight.bold,
           color: cs.onSurface,
         ),
