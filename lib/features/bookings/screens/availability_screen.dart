@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/booking_details_form.dart';
 import '../../resources/providers/resources_provider.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class AvailabilityScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -29,18 +30,23 @@ class _AvailabilityScreenState extends ConsumerState<AvailabilityScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: resourceAsync.when(
-          data: (res) => Text('Book ${res.name}'),
-          loading: () => const Text('Book Resource'),
-          error: (_, __) => const Text('Book Resource'),
-        ),
-      ),
-      body: SafeArea(
-        top: false,
-        child: BookingDetailsForm(
-          groupId: widget.groupId,
-          resourceId: widget.resourceId,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          M3CollapsingAppBar(
+            title: resourceAsync.when(
+              data: (res) => Text('Book ${res.name}'),
+              loading: () => const Text('Book Resource'),
+              error: (_, __) => const Text('Book Resource'),
+            ),
+            pinned: true,
+          ),
+        ],
+        body: SafeArea(
+          top: false,
+          child: BookingDetailsForm(
+            groupId: widget.groupId,
+            resourceId: widget.resourceId,
+          ),
         ),
       ),
     );

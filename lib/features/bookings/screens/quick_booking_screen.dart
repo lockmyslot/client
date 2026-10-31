@@ -10,6 +10,7 @@ import '../../resources/data/models/resource.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class QuickBookingScreen extends ConsumerStatefulWidget {
   final String? initialGroupId;
@@ -293,11 +294,15 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quick Book'),
-        bottom: AppBarToolbar(child: pickerToolbar),
-      ),
-      body: groupsAsync.when(
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          M3CollapsingAppBar(
+            title: const Text('Quick Book'),
+            pinned: true,
+            bottom: AppBarToolbar(child: pickerToolbar),
+          ),
+        ],
+        body: groupsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => ErrorDisplay(
           error: err.toString(),
@@ -354,6 +359,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 }

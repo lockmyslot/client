@@ -24,6 +24,7 @@ import '../../features/bookings/screens/bookings_calendar_screen.dart';
 import '../../features/bookings/screens/my_bookings_screen.dart';
 import '../../features/bookings/screens/all_bookings_screen.dart';
 import '../../features/profile/screens/me_profile_screen.dart';
+import '../../shared/widgets/m3_collapsing_app_bar.dart';
 
 CustomTransitionPage<void> _buildSmoothTransition({
   required GoRouterState state,
@@ -361,19 +362,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                   return _buildSmoothTransition(
                     state: state,
                     child: Scaffold(
-                      appBar: AppBar(
-                        title: Text(
-                          booking?.resourceName != null
-                              ? 'Reschedule ${booking!.resourceName}'
-                              : 'Reschedule Booking',
-                        ),
-                      ),
-                      body: SafeArea(
-                        top: false,
-                        child: BookingDetailsForm(
-                          groupId: groupId,
-                          resourceId: resourceId,
-                          reschedulingBooking: booking,
+                      body: NestedScrollView(
+                        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                          M3CollapsingAppBar(
+                            title: Text(
+                              booking?.resourceName != null
+                                  ? 'Reschedule ${booking!.resourceName}'
+                                  : 'Reschedule Booking',
+                            ),
+                            pinned: true,
+                          ),
+                        ],
+                        body: SafeArea(
+                          top: false,
+                          child: BookingDetailsForm(
+                            groupId: groupId,
+                            resourceId: resourceId,
+                            reschedulingBooking: booking,
+                          ),
                         ),
                       ),
                     ),
