@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../providers/bookings_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
@@ -41,10 +40,6 @@ class _BookingsCalendarScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Resource Bookings'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_outlined),
-          onPressed: () => context.pop(),
-        ),
         bottom: AppBarToolbar(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

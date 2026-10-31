@@ -35,44 +35,6 @@ class M3CollapsingAppBar extends StatelessWidget {
   final PreferredSizeWidget? bottom;
   final Color? backgroundColor;
 
-  Widget? _buildLeading(BuildContext context) {
-    if (leading != null) return leading;
-    if (!automaticallyImplyLeading) return null;
-
-    final ScaffoldState? scaffold = Scaffold.maybeOf(context);
-    if (scaffold?.hasDrawer ?? false) {
-      return IconButton(
-        icon: const Icon(Icons.menu),
-        onPressed: () => scaffold!.openDrawer(),
-      );
-    }
-
-    final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
-    final bool canPop = parentRoute?.canPop ?? false;
-    if (!canPop) return null;
-
-    final theme = Theme.of(context);
-    return Center(
-      child: Container(
-        width: 40,
-        height: 40,
-        margin: const EdgeInsets.only(left: 8),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
-          shape: BoxShape.circle,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          iconSize: 20,
-          padding: EdgeInsets.zero,
-          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          onPressed: () => Navigator.maybePop(context),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -83,8 +45,8 @@ class M3CollapsingAppBar extends StatelessWidget {
       floating: floating,
       expandedHeight: expandedHeight,
       collapsedHeight: collapsedHeight,
-      automaticallyImplyLeading: false,
-      leading: _buildLeading(context),
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      leading: leading,
       actions: actions,
       bottom: bottom,
       backgroundColor: effectiveBg,

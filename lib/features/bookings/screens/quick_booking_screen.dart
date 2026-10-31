@@ -295,10 +295,6 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quick Book'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_outlined),
-          onPressed: () => context.pop(),
-        ),
         bottom: AppBarToolbar(child: pickerToolbar),
       ),
       body: groupsAsync.when(

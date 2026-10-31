@@ -71,7 +71,7 @@ void main() {
       expect(opacitiesAfter.contains(0.0), isTrue);
     });
 
-    testWidgets('renders tonal circular back button when canPop is true', (
+    testWidgets('renders back button when canPop is true', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -113,8 +113,8 @@ void main() {
       await tester.tap(find.text('Go to Subpage'));
       await tester.pumpAndSettle();
 
-      // Back button with arrow_back icon inside a circle container should exist
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      // Standard BackButton should exist consistently
+      expect(find.byType(BackButton), findsOneWidget);
     });
 
     testWidgets('renders actions in the pinned toolbar', (
