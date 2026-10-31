@@ -667,25 +667,38 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                                 iconColor = cs.onPrimaryContainer;
                                 textColor = cs.onPrimaryContainer;
                               } else if (slot.isMaintenance) {
-                                chipBg = Colors.orange.withValues(alpha: 0.10);
-                                chipBorder = Colors.orange.shade300;
+                                final isDark =
+                                    Theme.of(context).brightness ==
+                                    Brightness.dark;
+                                chipBg = isDark
+                                    ? Colors.orange.withValues(alpha: 0.15)
+                                    : Colors.orange.withValues(alpha: 0.10);
+                                chipBorder = isDark
+                                    ? Colors.orange.shade700
+                                    : Colors.orange.shade300;
                                 borderWidth = 1;
                                 icon = Icons.build_circle_outlined;
-                                iconColor = Colors.orange.shade800;
-                                textColor = Colors.orange.shade900;
+                                iconColor = isDark
+                                    ? Colors.orange.shade300
+                                    : Colors.orange.shade800;
+                                textColor = isDark
+                                    ? Colors.orange.shade200
+                                    : Colors.orange.shade900;
                               } else if (isAvail) {
-                                chipBg = cs.surface;
-                                chipBorder = cs.outline;
+                                chipBg = cs.surfaceContainer;
+                                chipBorder = cs.outlineVariant;
                                 borderWidth = 1;
                                 icon = Icons.access_time_outlined;
                                 iconColor = cs.onSurfaceVariant;
                                 textColor = cs.onSurface;
                               } else {
-                                chipBg = cs.surface;
-                                chipBorder = cs.outlineVariant;
+                                chipBg = cs.surfaceContainerLow
+                                    .withValues(alpha: 0.5);
+                                chipBorder = cs.outlineVariant
+                                    .withValues(alpha: 0.4);
                                 borderWidth = 1;
                                 icon = Icons.block_outlined;
-                                iconColor = cs.outline.withValues(alpha: 0.8);
+                                iconColor = cs.outline.withValues(alpha: 0.6);
                                 textColor = cs.outline;
                               }
 

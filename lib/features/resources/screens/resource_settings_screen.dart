@@ -662,7 +662,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: cs.surfaceContainerLow,
+                  color: cs.surfaceContainer,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: cs.outlineVariant.withValues(alpha: 0.5),
@@ -802,7 +802,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
             // Working Hours Card
             Card(
               elevation: 0,
-              color: cs.surfaceContainerLow,
+              color: cs.surfaceContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
                 side: BorderSide(
@@ -929,7 +929,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
 
             Card(
               elevation: 0,
-              color: cs.surfaceContainerLow,
+              color: cs.surfaceContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
                 side: BorderSide(

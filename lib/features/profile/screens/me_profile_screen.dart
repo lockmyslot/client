@@ -41,7 +41,7 @@ class MeProfileScreen extends ConsumerWidget {
                   // User Header Card
                   Card(
                     elevation: 0,
-                    color: colorScheme.surfaceContainerLow,
+                    color: colorScheme.surfaceContainer,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
@@ -109,7 +109,7 @@ class MeProfileScreen extends ConsumerWidget {
                       if (invites.isEmpty) {
                         return Card(
                           elevation: 0,
-                          color: colorScheme.surfaceContainerLow,
+                          color: colorScheme.surfaceContainer,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                             side: BorderSide(
@@ -211,7 +211,7 @@ class MeProfileScreen extends ConsumerWidget {
                               padding: const EdgeInsets.only(bottom: 10),
                               child: Card(
                                 elevation: 0,
-                                color: colorScheme.surfaceContainerLow,
+                                color: colorScheme.surfaceContainer,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                   side: BorderSide(
@@ -425,7 +425,7 @@ class MeProfileScreen extends ConsumerWidget {
                   ),
                   Card(
                     elevation: 0,
-                    color: colorScheme.surfaceContainerLow,
+                    color: colorScheme.surfaceContainer,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
@@ -460,8 +460,7 @@ class MeProfileScreen extends ConsumerWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: colorScheme.surfaceContainerHighest
-                                      .withValues(alpha: 0.6),
+                                  color: colorScheme.secondaryContainer,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -469,7 +468,7 @@ class MeProfileScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurfaceVariant,
+                                    color: colorScheme.onSecondaryContainer,
                                   ),
                                 ),
                               ),
@@ -491,7 +490,7 @@ class MeProfileScreen extends ConsumerWidget {
                   // About & System
                   Card(
                     elevation: 0,
-                    color: colorScheme.surfaceContainerLow,
+                    color: colorScheme.surfaceContainer,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(

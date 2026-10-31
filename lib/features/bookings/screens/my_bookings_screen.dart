@@ -113,7 +113,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                               elevation: 0,
                               color: Theme.of(context)
                                   .colorScheme
-                                  .surfaceContainerLow,
+                                  .surfaceContainer,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 side: BorderSide(

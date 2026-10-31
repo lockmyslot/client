@@ -92,7 +92,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
               child: Material(
                 color: isSelected
                     ? cs.primaryContainer.withValues(alpha: 0.25)
-                    : cs.surfaceContainerLow,
+                    : cs.surfaceContainer,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(

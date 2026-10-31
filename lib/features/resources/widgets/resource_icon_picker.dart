@@ -158,7 +158,7 @@ class _ResourceIconPickerSheetState extends State<ResourceIconPickerSheet> {
                 Material(
                   color: widget.initialIconKey == null
                       ? cs.primaryContainer.withValues(alpha: 0.4)
-                      : cs.surfaceContainerLow,
+                      : cs.surfaceContainer,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                     side: BorderSide(
@@ -273,7 +273,7 @@ class _ResourceIconPickerSheetState extends State<ResourceIconPickerSheet> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? cs.primaryContainer
-                                : cs.surfaceContainerLow,
+                                : cs.surfaceContainer,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: isSelected
@@ -350,7 +350,7 @@ class ResourceIconSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: cs.outlineVariant.withValues(alpha: 0.4),

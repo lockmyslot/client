@@ -287,7 +287,7 @@ class GroupsListScreen extends ConsumerWidget {
                                   },
                                   child: Card(
                                     elevation: 0,
-                                    color: colorScheme.surfaceContainerLow,
+                                    color: colorScheme.surfaceContainer,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                       side: BorderSide(
@@ -352,7 +352,7 @@ class GroupsListScreen extends ConsumerWidget {
                                                                   .circle,
                                                               border: Border.all(
                                                                 color: colorScheme
-                                                                    .surfaceContainerLow,
+                                                                    .surfaceContainer,
                                                                 width: 1.5,
                                                               ),
                                                             ),
@@ -381,7 +381,7 @@ class GroupsListScreen extends ConsumerWidget {
                                                                   .circle,
                                                               border: Border.all(
                                                                 color: colorScheme
-                                                                    .surfaceContainerLow,
+                                                                    .surfaceContainer,
                                                                 width: 1.5,
                                                               ),
                                                             ),

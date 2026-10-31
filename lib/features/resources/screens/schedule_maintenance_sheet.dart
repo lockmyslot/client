@@ -348,11 +348,10 @@ class _ScheduleMaintenanceSheetState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
     final membersAsync = ref.watch(groupMembersProvider(widget.groupId));
 
     return Material(
-      color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+      color: cs.surfaceContainerHigh,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       clipBehavior: Clip.antiAlias,
       child: Padding(

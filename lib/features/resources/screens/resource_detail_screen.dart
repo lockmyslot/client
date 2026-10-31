@@ -632,7 +632,7 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
         child: Card(
           margin: EdgeInsets.zero,
           elevation: 0,
-          color: colorScheme.surfaceContainerLow,
+          color: colorScheme.surfaceContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(

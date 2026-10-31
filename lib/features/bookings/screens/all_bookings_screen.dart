@@ -264,7 +264,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                             delay: Duration(milliseconds: index * 50),
                             child: Card(
                               elevation: 0,
-                              color: colorScheme.surfaceContainerLow,
+                              color: colorScheme.surfaceContainer,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                                 side: BorderSide(

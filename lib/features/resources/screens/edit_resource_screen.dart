@@ -23,6 +23,7 @@ class EditResourceScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
 
     if (initialResource != null) {
       return Scaffold(
@@ -66,7 +67,7 @@ class EditResourceScreen extends ConsumerWidget {
             loading: () => Container(
               height: 250,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+                color: cs.surfaceContainerHigh,
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(24)),
               ),
@@ -75,7 +76,7 @@ class EditResourceScreen extends ConsumerWidget {
             error: (err, _) => Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+                color: cs.surfaceContainerHigh,
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(24)),
               ),

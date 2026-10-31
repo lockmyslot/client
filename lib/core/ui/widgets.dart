@@ -165,7 +165,7 @@ class KpiStatChip extends StatelessWidget {
     );
 
     return Material(
-      color: backgroundColor ?? cs.surfaceContainerLow,
+      color: backgroundColor ?? cs.surfaceContainerHigh,
       shape: chipShape,
       clipBehavior: Clip.antiAlias,
       child: InkWell(

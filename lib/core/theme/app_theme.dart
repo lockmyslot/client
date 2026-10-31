@@ -49,6 +49,20 @@ class AppTheme {
       fontFamily: _fontFamily,
       colorScheme: cs,
       inputDecorationTheme: _inputDecorationTheme(cs),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: cs.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: 0.4),
+          ),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: cs.surfaceContainerHigh,
+        surfaceTintColor: Colors.transparent,
+      ),
       appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -91,6 +105,20 @@ class AppTheme {
       fontFamily: _fontFamily,
       colorScheme: cs,
       inputDecorationTheme: _inputDecorationTheme(cs),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: cs.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: 0.4),
+          ),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: cs.surfaceContainerHigh,
+        surfaceTintColor: Colors.transparent,
+      ),
       appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,

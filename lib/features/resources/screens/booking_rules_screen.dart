@@ -328,7 +328,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
                         elevation: 0,
                         color: Theme.of(
                           context,
-                        ).colorScheme.surfaceContainerLow,
+                        ).colorScheme.surfaceContainer,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                           side: BorderSide(
@@ -467,7 +467,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
                         elevation: 0,
                         color: Theme.of(
                           context,
-                        ).colorScheme.surfaceContainerLow,
+                        ).colorScheme.surfaceContainer,
                         child: Padding(
                           padding: kCardPadding,
                           child: Column(

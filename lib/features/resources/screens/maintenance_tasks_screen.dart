@@ -229,7 +229,7 @@ class _MaintenanceTaskCard extends ConsumerWidget {
 
     return Card(
       elevation: 0,
-      color: cs.surfaceContainerLow,
+      color: cs.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.4)),

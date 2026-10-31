@@ -43,7 +43,7 @@ class MembersScreen extends ConsumerWidget {
             child: Card(
               elevation: 0,
               margin: EdgeInsets.zero,
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              color: Theme.of(context).colorScheme.surfaceContainer,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -150,7 +150,7 @@ class MembersScreen extends ConsumerWidget {
                             elevation: 0,
                             color: Theme.of(context)
                                 .colorScheme
-                                .surfaceContainerLow,
+                                .surfaceContainer,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                               side: BorderSide(
@@ -205,7 +205,7 @@ class MembersScreen extends ConsumerWidget {
                                               border: Border.all(
                                                 color: Theme.of(context)
                                                     .colorScheme
-                                                    .surfaceContainerLow,
+                                                    .surfaceContainer,
                                                 width: 1.5,
                                               ),
                                             ),
@@ -232,7 +232,7 @@ class MembersScreen extends ConsumerWidget {
                                               border: Border.all(
                                                 color: Theme.of(context)
                                                     .colorScheme
-                                                    .surfaceContainerLow,
+                                                    .surfaceContainer,
                                                 width: 1.5,
                                               ),
                                             ),

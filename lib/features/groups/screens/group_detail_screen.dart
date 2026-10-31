@@ -286,7 +286,7 @@ class GroupDetailScreen extends ConsumerWidget {
                           ),
                           child: Card(
                             elevation: 0,
-                            color: colorScheme.surfaceContainerLow,
+                            color: colorScheme.surfaceContainer,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                               side: BorderSide(
