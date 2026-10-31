@@ -9,6 +9,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class MyBookingsScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -42,21 +43,25 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            const SliverAppBar.large(
+            const M3CollapsingAppBar(
               title: Text('My Bookings'),
               pinned: true,
             ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-                child: Row(
-                  children: [
-                    _buildFilterChip('All', null),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('Confirmed', 'CONFIRMED'),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('Cancelled', 'CANCELLED'),
-                  ],
+                child: SingleChildScrollView(
+                  clipBehavior: Clip.none,
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterChip('All', null),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Confirmed', 'CONFIRMED'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Cancelled', 'CANCELLED'),
+                    ],
+                  ),
                 ),
               ),
             ),

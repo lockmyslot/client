@@ -10,6 +10,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class MaintenanceTasksScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -74,7 +75,7 @@ class _MaintenanceTasksScreenState
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            const SliverAppBar.large(
+            const M3CollapsingAppBar(
               title: Text('Maintenance'),
               pinned: true,
             ),
@@ -139,38 +140,41 @@ class _MaintenanceTasksScreenState
                 ),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-              sliver: tasksAsync.when(
-                loading: () => const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (err, stack) => SliverFillRemaining(
-                  child: ErrorDisplay(
-                    error: err.toString(),
-                    onRetry: () => ref.invalidate(
-                      resourceMaintenanceProvider((
-                        groupId: widget.groupId,
-                        resourceId: widget.resourceId,
-                        status: _statusFilter,
-                      )),
-                    ),
+            tasksAsync.when(
+              loading: () => const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, stack) => SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorDisplay(
+                  error: err.toString(),
+                  onRetry: () => ref.invalidate(
+                    resourceMaintenanceProvider((
+                      groupId: widget.groupId,
+                      resourceId: widget.resourceId,
+                      status: _statusFilter,
+                    )),
                   ),
                 ),
-                data: (tasks) {
-                  if (tasks.isEmpty) {
-                    return SliverFillRemaining(
-                      child: EmptyState(
-                        icon: Icons.build_outlined,
-                        title: 'No Maintenance Tasks',
-                        description: _statusFilter != null
-                            ? 'No tasks found matching filter: $_statusFilter'
-                            : 'No maintenance has been scheduled for this resource.',
-                      ),
-                    );
-                  }
+              ),
+              data: (tasks) {
+                if (tasks.isEmpty) {
+                  return SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      icon: Icons.build_outlined,
+                      title: 'No Maintenance Tasks',
+                      description: _statusFilter != null
+                          ? 'No tasks found matching filter: $_statusFilter'
+                          : 'No maintenance has been scheduled for this resource.',
+                    ),
+                  );
+                }
 
-                  return SliverList(
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final task = tasks[index];
@@ -188,9 +192,9 @@ class _MaintenanceTasksScreenState
                       },
                       childCount: tasks.length,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ],
         ),

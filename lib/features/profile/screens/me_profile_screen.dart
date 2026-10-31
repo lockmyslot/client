@@ -6,6 +6,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 import 'theme_selection_sheet.dart';
 
 class MeProfileScreen extends ConsumerWidget {
@@ -27,7 +28,7 @@ class MeProfileScreen extends ConsumerWidget {
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          const SliverAppBar.large(
+          const M3CollapsingAppBar(
             title: Text('Me'),
             pinned: true,
           ),

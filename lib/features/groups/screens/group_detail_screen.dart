@@ -9,6 +9,7 @@ import '../../../core/ui/ui.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class GroupDetailScreen extends ConsumerWidget {
   final String groupId;
@@ -36,7 +37,7 @@ class GroupDetailScreen extends ConsumerWidget {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverAppBar.large(
+            M3CollapsingAppBar(
               title: groupAsync.when(
                 data: (group) => Text(group.name),
                 loading: () => const Text('Loading Group...'),
@@ -230,36 +231,37 @@ class GroupDetailScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-              sliver: resourcesAsync.when(
-                loading: () => const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+            resourcesAsync.when(
+              loading: () => const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, _) => SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorDisplay(
+                  error: err.toString(),
+                  onRetry: () =>
+                      ref.invalidate(groupResourcesProvider(groupId)),
                 ),
-                error: (err, _) => SliverFillRemaining(
-                  child: ErrorDisplay(
-                    error: err.toString(),
-                    onRetry: () =>
-                        ref.invalidate(groupResourcesProvider(groupId)),
-                  ),
-                ),
-                data: (resources) {
-                  final group = groupAsync.value;
-                  final isAdmin = group?.isAdmin ?? false;
+              ),
+              data: (resources) {
+                final group = groupAsync.value;
+                final isAdmin = group?.isAdmin ?? false;
 
-                  if (resources.isEmpty) {
-                    return SliverFillRemaining(
-                      child: EmptyState(
-                        icon: Icons.inventory_2_outlined,
-                        title: 'No Resources Added',
-                        description: isAdmin
-                            ? 'Create resources (e.g. Washing Machine, Court 1, Meeting Room) to allow member booking.'
-                            : 'No resources have been added to this group yet.',
-                        action: isAdmin
-                            ? PrimaryButton(
-                                onPressed: () {
-                                  final group = groupAsync.value;
-                                  CreateResourceSheet.show(
+                if (resources.isEmpty) {
+                  return SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      icon: Icons.inventory_2_outlined,
+                      title: 'No Resources Added',
+                      description: isAdmin
+                          ? 'Create resources (e.g. Washing Machine, Court 1, Meeting Room) to allow member booking.'
+                          : 'No resources have been added to this group yet.',
+                      action: isAdmin
+                          ? PrimaryButton(
+                              onPressed: () {
+                                final group = groupAsync.value;
+                                CreateResourceSheet.show(
                                     context,
                                     groupId: groupId,
                                     groupName: group?.name,
@@ -272,7 +274,9 @@ class GroupDetailScreen extends ConsumerWidget {
                     );
                   }
 
-                  return SliverList(
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final resource = resources[index];
@@ -370,9 +374,9 @@ class GroupDetailScreen extends ConsumerWidget {
                       },
                       childCount: resources.length,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ],
         ),

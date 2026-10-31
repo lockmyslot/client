@@ -10,6 +10,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class AllBookingsScreen extends ConsumerStatefulWidget {
   const AllBookingsScreen({super.key});
@@ -93,7 +94,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverAppBar.large(
+            M3CollapsingAppBar(
               title: const Text('Bookings'),
               pinned: true,
             ),

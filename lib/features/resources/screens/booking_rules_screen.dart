@@ -7,6 +7,7 @@ import '../../bookings/providers/availability_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class BookingRulesScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -209,7 +210,7 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          SliverAppBar.large(
+          M3CollapsingAppBar(
             title: const Text('Booking Rules'),
             pinned: true,
             actions: [
@@ -228,28 +229,30 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
               ),
             ],
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-            sliver: rulesAsync.when(
-              loading: () => const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (err, _) => SliverFillRemaining(
-                child: ErrorDisplay(
-                  error: err.toString(),
-                  onRetry: () => ref.invalidate(
-                    bookingRulesProvider((
-                      groupId: widget.groupId,
-                      resourceId: widget.resourceId,
-                    )),
-                  ),
+          rulesAsync.when(
+            loading: () => const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (err, _) => SliverFillRemaining(
+              hasScrollBody: false,
+              child: ErrorDisplay(
+                error: err.toString(),
+                onRetry: () => ref.invalidate(
+                  bookingRulesProvider((
+                    groupId: widget.groupId,
+                    resourceId: widget.resourceId,
+                  )),
                 ),
               ),
-              data: (existingRules) {
-                _populateExistingRules(existingRules);
-                final currentForm = _formData[_selectedScope]!;
+            ),
+            data: (existingRules) {
+              _populateExistingRules(existingRules);
+              final currentForm = _formData[_selectedScope]!;
 
-                return SliverList(
+              return SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     const Text('Rule Scope').h4(),
                     const SizedBox(height: 4),
@@ -514,9 +517,9 @@ class _BookingRulesScreenState extends ConsumerState<BookingRulesScreen> {
                       ),
                     ],
                   ]),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ],
       ),

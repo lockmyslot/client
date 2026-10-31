@@ -6,6 +6,7 @@ import '../widgets/resource_avatar.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class ResourcesListScreen extends ConsumerWidget {
   final String groupId;
@@ -25,36 +26,39 @@ class ResourcesListScreen extends ConsumerWidget {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            const SliverAppBar.large(
+            const M3CollapsingAppBar(
               title: Text('Resources'),
               pinned: true,
             ),
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: resourcesAsync.when(
-                loading: () => const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+            resourcesAsync.when(
+              loading: () => const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, _) => SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorDisplay(
+                  error: err.toString(),
+                  onRetry: () =>
+                      ref.invalidate(groupResourcesProvider(groupId)),
                 ),
-                error: (err, _) => SliverFillRemaining(
-                  child: ErrorDisplay(
-                    error: err.toString(),
-                    onRetry: () =>
-                        ref.invalidate(groupResourcesProvider(groupId)),
-                  ),
-                ),
-                data: (resources) {
-                  if (resources.isEmpty) {
-                    return const SliverFillRemaining(
-                      child: EmptyState(
-                        icon: Icons.inventory_2_outlined,
-                        title: 'No Resources Available',
-                        description:
-                            'There are no active resources set up in this group yet.',
-                      ),
-                    );
-                  }
+              ),
+              data: (resources) {
+                if (resources.isEmpty) {
+                  return const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      icon: Icons.inventory_2_outlined,
+                      title: 'No Resources Available',
+                      description:
+                          'There are no active resources set up in this group yet.',
+                    ),
+                  );
+                }
 
-                  return SliverList(
+                return SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final resource = resources[index];
@@ -146,9 +150,9 @@ class ResourcesListScreen extends ConsumerWidget {
                       },
                       childCount: resources.length,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ],
         ),

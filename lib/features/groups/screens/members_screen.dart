@@ -6,7 +6,9 @@ import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 import 'invite_member_sheet.dart';
 
 class MembersScreen extends ConsumerWidget {
@@ -88,7 +90,7 @@ class MembersScreen extends ConsumerWidget {
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          SliverAppBar.large(
+          M3CollapsingAppBar(
             title: const Text('Group Members'),
             pinned: true,
             actions: [
@@ -107,23 +109,36 @@ class MembersScreen extends ConsumerWidget {
                 ),
             ],
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            sliver: membersAsync.when(
-              loading: () => const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+          membersAsync.when(
+            loading: () => const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (err, _) => SliverFillRemaining(
+              hasScrollBody: false,
+              child: ErrorDisplay(
+                error: err.toString(),
+                onRetry: () => ref.invalidate(groupMembersProvider(groupId)),
               ),
-              error: (err, _) => SliverFillRemaining(
-                child: ErrorDisplay(
-                  error: err.toString(),
-                  onRetry: () => ref.invalidate(groupMembersProvider(groupId)),
-                ),
-              ),
-              data: (members) {
-                final group = groupAsync.value;
-                final isAdmin = group?.isAdmin ?? false;
+            ),
+            data: (members) {
+              final group = groupAsync.value;
+              final isAdmin = group?.isAdmin ?? false;
 
-                return SliverList(
+              if (members.isEmpty) {
+                return const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: EmptyState(
+                    icon: Icons.people_outline,
+                    title: 'No Members',
+                    description: 'There are no members in this group.',
+                  ),
+                );
+              }
+
+              return SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final member = members[index];
@@ -305,10 +320,10 @@ class MembersScreen extends ConsumerWidget {
                     },
                     childCount: members.length,
                   ),
+                  ),
                 );
               },
             ),
-          ),
         ],
       ),
     );

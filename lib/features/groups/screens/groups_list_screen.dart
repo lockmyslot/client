@@ -8,6 +8,7 @@ import '../../../core/ui/ui.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class GroupsListScreen extends ConsumerWidget {
   const GroupsListScreen({super.key});
@@ -57,44 +58,44 @@ class GroupsListScreen extends ConsumerWidget {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverAppBar.large(
+            M3CollapsingAppBar(
               title: const Text('My Groups'),
               pinned: true,
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-              sliver: groupsAsync.when(
-                loading: () => const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()),
+            groupsAsync.when(
+              loading: () => const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, stack) => SliverFillRemaining(
+                hasScrollBody: false,
+                child: ErrorDisplay(
+                  error: err.toString(),
+                  onRetry: () => ref.invalidate(myGroupsProvider),
                 ),
-                error: (err, stack) => SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: ErrorDisplay(
-                    error: err.toString(),
-                    onRetry: () => ref.invalidate(myGroupsProvider),
-                  ),
-                ),
-                data: (groups) {
-                  if (groups.isEmpty) {
-                    return SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: EmptyState(
-                        icon: Icons.group_work_outlined,
-                        title: 'No Groups Yet',
-                        description:
-                            'Create or join a group to start booking shared resources.',
-                        action: PrimaryButton(
-                          onPressed: () => CreateGroupSheet.show(context),
-                          child: const Text('Create Your First Group'),
-                        ),
+              ),
+              data: (groups) {
+                if (groups.isEmpty) {
+                  return SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      icon: Icons.group_work_outlined,
+                      title: 'No Groups Yet',
+                      description:
+                          'Create or join a group to start booking shared resources.',
+                      action: PrimaryButton(
+                        onPressed: () => CreateGroupSheet.show(context),
+                        child: const Text('Create Your First Group'),
                       ),
-                    );
-                  }
+                    ),
+                  );
+                }
 
-                  final hasPinned = groups.any((g) => g.isPinned);
+                final hasPinned = groups.any((g) => g.isPinned);
 
-                  return SliverList(
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final group = groups[index];
@@ -452,9 +453,9 @@ class GroupsListScreen extends ConsumerWidget {
                       },
                       childCount: groups.length,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ],
         ),

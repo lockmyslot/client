@@ -14,6 +14,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class ResourceDetailScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -143,7 +144,7 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverAppBar.large(
+            M3CollapsingAppBar(
               title: resourceAsync.when(
                 data: (res) => Text(res.name),
                 loading: () => const Text('Loading Resource...'),
@@ -416,54 +417,54 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                     ),
                   ),
                 ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                  sliver: bookingsAsync.when(
-                    loading: () => const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                    error: (err, _) => SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: ErrorDisplay(
-                          error: err.toString(),
-                          onRetry: () => ref.invalidate(
-                            resourceBookingsProvider((
-                              groupId: groupId,
-                              resourceId: resourceId,
-                              date: null,
-                            )),
-                          ),
+                bookingsAsync.when(
+                  loading: () => const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (err, _) => SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: ErrorDisplay(
+                        error: err.toString(),
+                        onRetry: () => ref.invalidate(
+                          resourceBookingsProvider((
+                            groupId: groupId,
+                            resourceId: resourceId,
+                            date: null,
+                          )),
                         ),
                       ),
                     ),
-                    data: (bookings) {
-                      if (bookings.isEmpty) {
-                        return const SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: EmptyState(
-                            icon: Icons.calendar_today_outlined,
-                            title: 'No Upcoming Bookings',
-                            description:
-                                'There are no bookings scheduled for this resource yet.',
-                          ),
-                        );
-                      }
+                  ),
+                  data: (bookings) {
+                    if (bookings.isEmpty) {
+                      return const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: EmptyState(
+                          icon: Icons.calendar_today_outlined,
+                          title: 'No Upcoming Bookings',
+                          description:
+                              'There are no bookings scheduled for this resource yet.',
+                        ),
+                      );
+                    }
 
-                      final sorted = [...bookings]
-                        ..sort(
-                          (a, b) => a.startTime.compareTo(b.startTime),
-                        );
+                    final sorted = [...bookings]
+                      ..sort(
+                        (a, b) => a.startTime.compareTo(b.startTime),
+                      );
 
-                      final myBookings = sorted
-                          .where((b) => b.userId == currentUserId)
-                          .toList();
-                      final othersBookings = sorted
-                          .where((b) => b.userId != currentUserId)
-                          .toList();
+                    final myBookings = sorted
+                        .where((b) => b.userId == currentUserId)
+                        .toList();
+                    final othersBookings = sorted
+                        .where((b) => b.userId != currentUserId)
+                        .toList();
 
-                      return SliverToBoxAdapter(
+                    return SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                      sliver: SliverToBoxAdapter(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -594,9 +595,9 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                               ),
                           ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
