@@ -449,6 +449,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
 
                         // Horizontal Quick Date Chips (7 days)
                         SingleChildScrollView(
+                          clipBehavior: Clip.none,
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: List.generate(7, (index) {
@@ -753,6 +754,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                                   const Text('Select Duration').h3(),
                                   const SizedBox(height: 12),
                                   SingleChildScrollView(
+                                    clipBehavior: Clip.none,
                                     scrollDirection: Axis.horizontal,
                                     child: Row(
                                       children: List.generate(4, (index) {

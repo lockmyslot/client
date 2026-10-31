@@ -86,4 +86,46 @@ void main() {
     expect(find.byType(M3CollapsingAppBar), findsOneWidget);
     expect(find.text('Book Tennis Court'), findsWidgets);
   });
+
+  testWidgets(
+    'AvailabilityScreen date pills horizontal scroll view does not clip chips with Clip.none',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            bookingsRepositoryProvider.overrideWithValue(
+              _FakeBookingsRepository(),
+            ),
+            resourceDetailProvider((
+              groupId: groupId,
+              resourceId: resourceId,
+            )).overrideWith((ref) => sampleResource),
+            availabilityProvider.overrideWith(
+              (ref, arg) async => availabilityData,
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme(),
+            home: const AvailabilityScreen(
+              groupId: groupId,
+              resourceId: resourceId,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Today'), findsOneWidget);
+      final todayFinder = find.text('Today');
+      final dateScrollView = tester.widget<SingleChildScrollView>(
+        find.ancestor(
+          of: todayFinder,
+          matching: find.byType(SingleChildScrollView),
+        ).first,
+      );
+      expect(dateScrollView.clipBehavior, equals(Clip.none));
+      expect(dateScrollView.scrollDirection, equals(Axis.horizontal));
+    },
+  );
 }
