@@ -7,7 +7,6 @@ import 'package:lockmyslot_app/core/theme/app_theme.dart';
 import 'package:lockmyslot_app/features/bookings/data/bookings_repository.dart';
 import 'package:lockmyslot_app/features/bookings/data/models/availability.dart';
 import 'package:lockmyslot_app/features/bookings/providers/availability_provider.dart';
-import 'package:lockmyslot_app/features/bookings/providers/bookings_provider.dart';
 import 'package:lockmyslot_app/features/bookings/screens/availability_screen.dart';
 import 'package:lockmyslot_app/features/resources/data/models/resource.dart';
 import 'package:lockmyslot_app/features/resources/providers/resources_provider.dart';

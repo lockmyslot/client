@@ -17,7 +17,7 @@ class M3CollapsingAppBar extends StatelessWidget {
     this.automaticallyImplyLeading = true,
     this.pinned = true,
     this.floating = false,
-    this.expandedHeight = 152.0,
+    this.expandedHeight,
     this.collapsedHeight,
     this.bottom,
     this.backgroundColor,
@@ -30,7 +30,7 @@ class M3CollapsingAppBar extends StatelessWidget {
   final bool automaticallyImplyLeading;
   final bool pinned;
   final bool floating;
-  final double expandedHeight;
+  final double? expandedHeight;
   final double? collapsedHeight;
   final PreferredSizeWidget? bottom;
   final Color? backgroundColor;
@@ -39,11 +39,14 @@ class M3CollapsingAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final effectiveBg = backgroundColor ?? theme.appBarTheme.backgroundColor ?? theme.colorScheme.surface;
+    final double bottomHeight = bottom?.preferredSize.height ?? 0.0;
+    final double baseExpandedHeight = expandedHeight ?? (subtitle != null ? 180.0 : 152.0);
+    final double effectiveExpandedHeight = baseExpandedHeight + bottomHeight;
 
     return SliverAppBar(
       pinned: pinned,
       floating: floating,
-      expandedHeight: expandedHeight,
+      expandedHeight: effectiveExpandedHeight,
       collapsedHeight: collapsedHeight,
       automaticallyImplyLeading: automaticallyImplyLeading,
       leading: leading,
@@ -57,7 +60,8 @@ class M3CollapsingAppBar extends StatelessWidget {
       flexibleSpace: _M3FlexibleSpace(
         title: title,
         subtitle: subtitle,
-        expandedHeight: expandedHeight,
+        expandedHeight: effectiveExpandedHeight,
+        bottomHeight: bottomHeight,
       ),
     );
   }
@@ -114,11 +118,13 @@ class _M3FlexibleSpace extends StatelessWidget {
     required this.title,
     this.subtitle,
     required this.expandedHeight,
+    this.bottomHeight = 0.0,
   });
 
   final Widget title;
   final Widget? subtitle;
   final double expandedHeight;
+  final double bottomHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -137,47 +143,41 @@ class _M3FlexibleSpace extends StatelessWidget {
     final double fadeOutProgress = (progress / 0.55).clamp(0.0, 1.0);
     final double opacity = 1.0 - Curves.easeInOut.transform(fadeOutProgress);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return ClipRect(
-          child: Container(
-            alignment: Alignment.bottomLeft,
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-            child: Opacity(
-              opacity: opacity,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DefaultTextStyle.merge(
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ) ?? TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                    child: title,
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 6),
-                    DefaultTextStyle.merge(
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ) ?? TextStyle(
-                        fontSize: 14,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      child: subtitle!,
-                    ),
-                  ],
-                ],
+    return Container(
+      alignment: Alignment.bottomLeft,
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 18 + bottomHeight),
+      child: Opacity(
+        opacity: opacity,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            DefaultTextStyle.merge(
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ) ?? TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
+              child: title,
             ),
-          ),
-        );
-      },
+            if (subtitle != null) ...[
+              const SizedBox(height: 6),
+              DefaultTextStyle.merge(
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ) ?? TextStyle(
+                  fontSize: 14,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                child: subtitle!,
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
