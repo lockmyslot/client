@@ -4,6 +4,38 @@ class AppTheme {
   static const Color _seedColor = Color(0xFF18181B);
   static const String _fontFamily = 'GoogleSansFlexRounded';
 
+  /// Builds the fallback palette used when the platform does not provide
+  /// dynamic colors.
+  ///
+  /// The default tonal-spot variant amplifies the seed's blue hue, which turns
+  /// the container roles into lavender/periwinkle pills that clash with the
+  /// neutral slate surfaces. The neutral variant keeps the same tonal
+  /// structure while staying in the slate family.
+  static ColorScheme _fallbackScheme(Brightness brightness) {
+    return ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.neutral,
+    );
+  }
+
+  /// Pulls a wallpaper-derived scheme back into the low-chroma slate family.
+  ///
+  /// Android's dynamic colors can make container roles (pills, badges, cards)
+  /// much more saturated than the rest of the UI. Re-seeding the dynamic
+  /// primary with the neutral variant keeps the wallpaper's hue while toning
+  /// the containers down so they stay visually consistent.
+  static ColorScheme harmonizeDynamic(
+    ColorScheme dynamicScheme,
+    Brightness brightness,
+  ) {
+    return ColorScheme.fromSeed(
+      seedColor: dynamicScheme.primary,
+      brightness: brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.neutral,
+    );
+  }
+
   static InputDecorationTheme _inputDecorationTheme(ColorScheme cs) {
     final borderRadius = BorderRadius.circular(12);
     return InputDecorationTheme(
@@ -37,12 +69,7 @@ class AppTheme {
   }
 
   static ThemeData darkTheme([ColorScheme? colorScheme]) {
-    final cs =
-        colorScheme ??
-        ColorScheme.fromSeed(
-          seedColor: _seedColor,
-          brightness: Brightness.dark,
-        );
+    final cs = colorScheme ?? _fallbackScheme(Brightness.dark);
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -93,12 +120,7 @@ class AppTheme {
   }
 
   static ThemeData lightTheme([ColorScheme? colorScheme]) {
-    final cs =
-        colorScheme ??
-        ColorScheme.fromSeed(
-          seedColor: _seedColor,
-          brightness: Brightness.light,
-        );
+    final cs = colorScheme ?? _fallbackScheme(Brightness.light);
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,

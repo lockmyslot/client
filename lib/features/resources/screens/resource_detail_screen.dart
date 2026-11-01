@@ -8,6 +8,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../bookings/data/bookings_repository.dart';
 import '../../bookings/data/models/booking.dart';
 import '../../bookings/providers/bookings_provider.dart';
+import '../../bookings/screens/reschedule_booking_sheet.dart';
 import '../../groups/providers/groups_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
@@ -74,6 +75,22 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
     }
   }
 
+  Future<void> _rescheduleBooking(BuildContext context, Booking booking) async {
+    final rescheduled = await RescheduleBookingSheet.show(
+      context,
+      booking: booking,
+    );
+    if (rescheduled != true) return;
+
+    ref.invalidate(
+      resourceBookingsProvider((
+        groupId: groupId,
+        resourceId: resourceId,
+        date: null,
+      )),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final resourceAsync = ref.watch(
@@ -104,6 +121,7 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
     );
 
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       floatingActionButton: resourceAsync.maybeWhen(
@@ -183,17 +201,23 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                             margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.red.withValues(alpha: 0.1),
+                              color: Colors.red.withValues(
+                                alpha: isDark ? 0.14 : 0.10,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: Colors.red.withValues(alpha: 0.3),
+                                color: Colors.red.withValues(
+                                  alpha: isDark ? 0.35 : 0.30,
+                                ),
                               ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.info_outline,
-                                  color: Colors.red,
+                                  color: isDark
+                                      ? Colors.red.shade300
+                                      : Colors.red,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 10),
@@ -201,7 +225,9 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                   child: Text(
                                     'This resource is currently inactive. New bookings are disabled.',
                                     style: TextStyle(
-                                      color: Colors.red.shade800,
+                                      color: isDark
+                                          ? Colors.red.shade200
+                                          : Colors.red.shade800,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -347,14 +373,18 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: isCurrentlyUnderMaintenance
-                                      ? Colors.orange.withValues(alpha: 0.12)
+                                      ? Colors.orange.withValues(
+                                          alpha: isDark ? 0.15 : 0.10,
+                                        )
                                       : colorScheme.primaryContainer.withValues(
                                           alpha: 0.35,
                                         ),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: isCurrentlyUnderMaintenance
-                                        ? Colors.orange.shade400
+                                        ? (isDark
+                                            ? Colors.orange.shade700
+                                            : Colors.orange.shade400)
                                         : colorScheme.primary.withValues(alpha: 0.3),
                                   ),
                                 ),
@@ -365,7 +395,9 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                           ? Icons.build_circle
                                           : Icons.info_outline,
                                       color: isCurrentlyUnderMaintenance
-                                          ? Colors.orange.shade800
+                                          ? (isDark
+                                              ? Colors.orange.shade300
+                                              : Colors.orange.shade800)
                                           : colorScheme.primary,
                                       size: 22,
                                     ),
@@ -383,7 +415,9 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                               fontWeight: FontWeight.bold,
                                               fontSize: 13,
                                               color: isCurrentlyUnderMaintenance
-                                                  ? Colors.orange.shade900
+                                                  ? (isDark
+                                                      ? Colors.orange.shade200
+                                                      : Colors.orange.shade900)
                                                   : colorScheme.primary,
                                             ),
                                           ),
@@ -622,7 +656,7 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
         : 'User';
 
     final isUpcoming = booking.startTime.isAfter(DateTime.now());
-    final showCancel = canCancel && booking.isConfirmed && isUpcoming;
+    final showActions = canCancel && booking.isConfirmed && isUpcoming;
     final isCancelling = _cancellingIds.contains(booking.id);
 
     return Padding(
@@ -672,38 +706,62 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                         overflow: TextOverflow.ellipsis,
                       ).small().muted(),
                     ),
-                    if (showCancel)
-                      isCancelling
-                          ? Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: colorScheme.error,
-                                ),
-                              ),
-                            )
-                          : TextButton.icon(
-                              onPressed: () =>
-                                  _cancelBooking(context, booking.id),
-                              style: TextButton.styleFrom(
-                                foregroundColor: colorScheme.error,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                                visualDensity: VisualDensity.compact,
-                              ),
-                              icon: const Icon(
-                                Icons.close_outlined,
-                                size: 16,
-                              ),
-                              label: const Text('Cancel'),
-                            ),
                   ],
                 ),
+                if (showActions) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => _rescheduleBooking(context, booking),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                        ),
+                        icon: const Icon(
+                          Icons.edit_calendar_outlined,
+                          size: 16,
+                        ),
+                        label: const Text('Reschedule'),
+                      ),
+                      const SizedBox(width: 8),
+                      if (isCancelling)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: colorScheme.error,
+                            ),
+                          ),
+                        )
+                      else
+                        OutlinedButton.icon(
+                          onPressed: () => _cancelBooking(context, booking.id),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: colorScheme.error,
+                            side: BorderSide(
+                              color: colorScheme.error.withValues(alpha: 0.5),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.close_outlined,
+                            size: 16,
+                          ),
+                          label: const Text('Cancel'),
+                        ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

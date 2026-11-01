@@ -18,8 +18,22 @@ class LockMySlotApp extends ConsumerWidget {
         return MaterialApp.router(
           title: 'Lock My Slot',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme(lightDynamic),
-          darkTheme: AppTheme.darkTheme(darkDynamic),
+          theme: AppTheme.lightTheme(
+            lightDynamic == null
+                ? null
+                : AppTheme.harmonizeDynamic(
+                    lightDynamic,
+                    Brightness.light,
+                  ),
+          ),
+          darkTheme: AppTheme.darkTheme(
+            darkDynamic == null
+                ? null
+                : AppTheme.harmonizeDynamic(
+                    darkDynamic,
+                    Brightness.dark,
+                  ),
+          ),
           themeMode: themeMode,
           routerConfig: router,
           builder: (context, child) {

@@ -23,26 +23,28 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
   String? _selectedGroupFilter;
   String? _selectedStatusFilter;
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(BuildContext context, String status) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgAlpha = isDark ? 0.16 : 0.12;
     Color bg;
     Color fg;
 
     switch (status.toUpperCase()) {
       case 'CONFIRMED':
-        bg = Colors.green.withValues(alpha: 0.12);
-        fg = Colors.green.shade700;
+        bg = Colors.green.withValues(alpha: bgAlpha);
+        fg = isDark ? Colors.green.shade300 : Colors.green.shade700;
         break;
       case 'CANCELLED':
-        bg = Colors.red.withValues(alpha: 0.12);
-        fg = Colors.red.shade700;
+        bg = Colors.red.withValues(alpha: bgAlpha);
+        fg = isDark ? Colors.red.shade300 : Colors.red.shade700;
         break;
       case 'COMPLETED':
-        bg = Colors.blue.withValues(alpha: 0.12);
-        fg = Colors.blue.shade700;
+        bg = Colors.blue.withValues(alpha: bgAlpha);
+        fg = isDark ? Colors.blue.shade300 : Colors.blue.shade700;
         break;
       default:
-        bg = Colors.grey.withValues(alpha: 0.12);
-        fg = Colors.grey.shade700;
+        bg = Colors.grey.withValues(alpha: bgAlpha);
+        fg = isDark ? Colors.grey.shade400 : Colors.grey.shade700;
     }
 
     return Container(
@@ -315,7 +317,10 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                             ],
                                           ),
                                         ),
-                                        _buildStatusBadge(booking.status),
+                                        _buildStatusBadge(
+                                          context,
+                                          booking.status,
+                                        ),
                                       ],
                                     ),
                                     const SizedBox(height: 12),
@@ -325,7 +330,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                         vertical: 8,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: colorScheme.surfaceContainer,
+                                        color: colorScheme.surfaceContainerHigh,
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Row(
