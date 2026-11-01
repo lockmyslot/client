@@ -44,38 +44,6 @@ class GroupDetailScreen extends ConsumerWidget {
                 error: (_, __) => const Text('Group Details'),
               ),
               pinned: true,
-              actions: [
-                groupAsync.maybeWhen(
-                  data: (group) {
-                    final isPinned = group.isPinned;
-                    return IconButton(
-                      icon: Icon(
-                        isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                        color: isPinned ? colorScheme.primary : null,
-                      ),
-                      tooltip: isPinned ? 'Unpin from top' : 'Pin to top',
-                      onPressed: () async {
-                        await ref
-                            .read(myGroupsProvider.notifier)
-                            .togglePin(group.id);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                isPinned
-                                    ? 'Unpinned from top'
-                                    : 'Pinned to top',
-                              ),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      },
-                    );
-                  },
-                  orElse: () => const SizedBox.shrink(),
-                ),
-              ],
             ),
             groupAsync.maybeWhen(
               data: (group) {
