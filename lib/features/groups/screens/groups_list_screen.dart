@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../data/groups_repository.dart';
 import '../providers/groups_provider.dart';
+import '../widgets/group_avatar.dart';
 import 'create_group_sheet.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/deep_link_utils.dart';
@@ -12,38 +13,6 @@ import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class GroupsListScreen extends ConsumerWidget {
   const GroupsListScreen({super.key});
-
-  String _getGroupInitials(String name) {
-    final trimmed = name.trim();
-    if (trimmed.isEmpty) return 'G';
-
-    final words = trimmed
-        .split(RegExp(r'[\s\-_]+'))
-        .where((w) => RegExp(r'[a-zA-Z0-9]').hasMatch(w))
-        .toList();
-
-    if (words.length >= 2) {
-      final first = words[0].characters.firstWhere(
-            (c) => RegExp(r'[a-zA-Z0-9]').hasMatch(c),
-            orElse: () => words[0].characters.first,
-          );
-      final second = words[1].characters.firstWhere(
-            (c) => RegExp(r'[a-zA-Z0-9]').hasMatch(c),
-            orElse: () => words[1].characters.first,
-          );
-      return '$first$second'.toUpperCase();
-    }
-
-    if (words.isNotEmpty) {
-      final word = words[0];
-      if (word.length <= 2) {
-        return word.toUpperCase();
-      }
-      return word.characters.first.toUpperCase();
-    }
-
-    return trimmed.characters.first.toUpperCase();
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -323,7 +292,7 @@ class GroupsListScreen extends ConsumerWidget {
                                                     ),
                                                     alignment: Alignment.center,
                                                     child: Text(
-                                                      _getGroupInitials(
+                                                      getGroupInitials(
                                                         group.name,
                                                       ),
                                                       style: TextStyle(

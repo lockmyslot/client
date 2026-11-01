@@ -5,8 +5,10 @@ import '../widgets/booking_details_form.dart';
 import '../../groups/providers/groups_provider.dart';
 import '../../groups/screens/create_group_sheet.dart';
 import '../../groups/data/models/group.dart';
+import '../../groups/widgets/group_avatar.dart';
 import '../../resources/providers/resources_provider.dart';
 import '../../resources/data/models/resource.dart';
+import '../../resources/widgets/resource_avatar.dart';
 import '../../../core/ui/ui.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -43,6 +45,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
     required String Function(T) label,
     required String Function(T) id,
     String? Function(T)? subtitle,
+    Widget Function(T)? leading,
     String? selectedId,
   }) {
     return showModalBottomSheet<T>(
@@ -65,6 +68,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
                   final item = items[index];
                   final isSelected = id(item) == selectedId;
                   return ListTile(
+                    leading: leading?.call(item),
                     trailing: isSelected
                         ? const Icon(Icons.check_outlined)
                         : null,
@@ -91,6 +95,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       label: (g) => g.name,
       subtitle: (g) =>
           '${g.memberCount} member${g.memberCount == 1 ? '' : 's'}',
+      leading: (g) => GroupAvatar(name: g.name),
       selectedId: _selectedGroupId,
     );
     if (group != null && group.id != _selectedGroupId) {
@@ -110,6 +115,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       label: (r) => r.name,
       subtitle: (r) =>
           'Capacity ${r.capacity} • ${r.slotDurationMinutes} min slots',
+      leading: (r) => ResourceAvatar(iconKey: r.icon, name: r.name),
       selectedId: _selectedResourceId,
     );
     if (resource != null) {
