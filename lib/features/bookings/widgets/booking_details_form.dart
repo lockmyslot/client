@@ -718,6 +718,10 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                   if (durationMinutes < 60) {
                     durationLabel =
                         '$durationMinutes mins';
+                  } else if (durationMinutes % 1440 == 0) {
+                    final days = durationMinutes ~/ 1440;
+                    durationLabel =
+                        '$days ${days == 1 ? 'day' : 'days'}';
                   } else if (durationMinutes % 60 == 0) {
                     durationLabel =
                         '${durationMinutes ~/ 60} ${durationMinutes == 60 ? 'hour' : 'hours'}';

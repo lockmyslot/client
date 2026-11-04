@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/resources_provider.dart';
 import '../widgets/resource_avatar.dart';
 import '../../../core/ui/ui.dart';
+import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 import '../../../shared/widgets/m3_collapsing_app_bar.dart';
@@ -113,7 +114,7 @@ class ResourcesListScreen extends ConsumerWidget {
                                                   colorScheme.onSurfaceVariant,
                                             ),
                                             const SizedBox(width: 4),
-                                            Text('${resource.slotDurationMinutes}m slot')
+                                            Text('${AppDateUtils.formatSlotDuration(resource.slotDurationMinutes, compact: true)} slot')
                                                 .small()
                                                 .muted(),
                                           ],

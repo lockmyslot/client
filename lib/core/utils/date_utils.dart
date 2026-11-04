@@ -125,5 +125,19 @@ class AppDateUtils {
       return '${minutes}m';
     }
   }
+
+  static String formatSlotDuration(int minutes, {bool compact = false}) {
+    if (minutes >= 1440 && minutes % 1440 == 0) {
+      final days = minutes ~/ 1440;
+      return compact ? '${days}d' : '$days ${days == 1 ? 'day' : 'days'}';
+    } else if (minutes > 60 && minutes % 60 == 0) {
+      final hours = minutes ~/ 60;
+      return compact ? '${hours}h' : '$hours ${hours == 1 ? 'hour' : 'hours'}';
+    } else if (minutes == 60) {
+      return compact ? '60m' : '60 min';
+    } else {
+      return compact ? '${minutes}m' : '$minutes min';
+    }
+  }
 }
 

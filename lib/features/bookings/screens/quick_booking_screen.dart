@@ -10,6 +10,7 @@ import '../../resources/providers/resources_provider.dart';
 import '../../resources/data/models/resource.dart';
 import '../../resources/widgets/resource_avatar.dart';
 import '../../../core/ui/ui.dart';
+import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 import '../../../shared/widgets/m3_collapsing_app_bar.dart';
@@ -114,7 +115,7 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       id: (r) => r.id,
       label: (r) => r.name,
       subtitle: (r) =>
-          'Capacity ${r.capacity} • ${r.slotDurationMinutes} min slots',
+          'Capacity ${r.capacity} • ${AppDateUtils.formatSlotDuration(r.slotDurationMinutes)} slots',
       leading: (r) => ResourceAvatar(iconKey: r.icon, name: r.name),
       selectedId: _selectedResourceId,
     );

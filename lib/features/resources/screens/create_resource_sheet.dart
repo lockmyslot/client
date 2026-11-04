@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/resources_repository.dart';
 import '../data/models/resource.dart';
+import '../data/models/slot_duration_unit.dart';
 import '../providers/resources_provider.dart';
 import '../widgets/resource_icon_picker.dart';
 import '../../../core/ui/ui.dart';
@@ -48,7 +49,9 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
   final _descController = TextEditingController();
   final _capacityController = TextEditingController(text: '1');
   final _durationController = TextEditingController(text: '60');
+  SlotDurationUnit _selectedUnit = SlotDurationUnit.minutes;
   String? _selectedIcon;
+  String? _selectedColor;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -61,6 +64,19 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
 
   void _onNameChanged() {
     if (mounted) setState(() {});
+  }
+
+  void _onUnitChanged(SlotDurationUnit newUnit) {
+    final currentVal = int.tryParse(_durationController.text.trim());
+    if (currentVal != null && currentVal > 0) {
+      final newVal = SlotDurationUnit.convertValue(
+        currentVal,
+        _selectedUnit,
+        newUnit,
+      );
+      _durationController.text = newVal.toString();
+    }
+    setState(() => _selectedUnit = newUnit);
   }
 
   @override
@@ -80,7 +96,8 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
 
     final name = _nameController.text.trim();
     final capacity = int.tryParse(_capacityController.text.trim()) ?? 1;
-    final duration = int.tryParse(_durationController.text.trim()) ?? 60;
+    final rawDuration = int.tryParse(_durationController.text.trim()) ?? 60;
+    final duration = SlotDurationUnit.toMinutes(rawDuration, _selectedUnit);
 
     setState(() {
       _isLoading = true;
@@ -94,6 +111,7 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
         name: name,
         description: _descController.text.trim(),
         icon: _selectedIcon,
+        color: _selectedColor,
         capacity: capacity,
         slotDurationMinutes: duration,
       );
@@ -200,9 +218,13 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
 
               ResourceIconSelector(
                 selectedIconKey: _selectedIcon,
+                selectedColor: _selectedColor,
                 resourceName: _nameController.text.trim(),
                 onChanged: (newIcon) {
                   setState(() => _selectedIcon = newIcon);
+                },
+                onColorChanged: (newColor) {
+                  setState(() => _selectedColor = newColor);
                 },
               ),
               const SizedBox(height: 14),
@@ -219,8 +241,10 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
               const SizedBox(height: 14),
 
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
+                    flex: 3,
                     child: TextFormField(
                       controller: _capacityController,
                       keyboardType: TextInputType.number,
@@ -244,31 +268,50 @@ class _CreateResourceSheetState extends ConsumerState<CreateResourceSheet> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 10),
                   Expanded(
+                    flex: 3,
                     child: TextFormField(
                       controller: _durationController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Slot Duration (m)',
-                        hintText: '60',
-                        prefixIcon: Icon(Icons.schedule_outlined),
+                      decoration: InputDecoration(
+                        labelText: 'Slot Duration',
+                        hintText: _selectedUnit == SlotDurationUnit.hours
+                            ? '1'
+                            : (_selectedUnit == SlotDurationUnit.days ? '1' : '60'),
+                        prefixIcon: const Icon(Icons.schedule_outlined),
                       ),
-                      validator: (val) {
-                        if (val == null || val.trim().isEmpty) {
-                          return 'Required';
+                      validator: (val) =>
+                          SlotDurationUnit.validate(val, _selectedUnit),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 3,
+                    child: DropdownButtonFormField<SlotDurationUnit>(
+                      key: ValueKey(_selectedUnit),
+                      initialValue: _selectedUnit,
+                      decoration: const InputDecoration(
+                        labelText: 'Unit',
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: SlotDurationUnit.minutes,
+                          child: Text('Minutes'),
+                        ),
+                        DropdownMenuItem(
+                          value: SlotDurationUnit.hours,
+                          child: Text('Hours'),
+                        ),
+                        DropdownMenuItem(
+                          value: SlotDurationUnit.days,
+                          child: Text('Days'),
+                        ),
+                      ],
+                      onChanged: (newUnit) {
+                        if (newUnit != null && newUnit != _selectedUnit) {
+                          _onUnitChanged(newUnit);
                         }
-                        final num = int.tryParse(val.trim());
-                        if (num == null || num <= 0) {
-                          return 'Must be > 0';
-                        }
-                        if (num < 15 || num > 1080) {
-                          return '15 to 1080 mins';
-                        }
-                        if (num % 15 != 0) {
-                          return 'Multiple of 15';
-                        }
-                        return null;
                       },
                     ),
                   ),

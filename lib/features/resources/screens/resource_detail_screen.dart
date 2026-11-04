@@ -251,7 +251,10 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                               const SizedBox(width: 8),
                               KpiStatChip(
                                 icon: Icons.timer_outlined,
-                                value: '${resource.slotDurationMinutes}m',
+                                value: AppDateUtils.formatSlotDuration(
+                                  resource.slotDurationMinutes,
+                                  compact: true,
+                                ),
                                 label: 'Slots',
                               ),
                               const SizedBox(width: 8),

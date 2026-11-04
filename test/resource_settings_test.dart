@@ -25,6 +25,7 @@ class FakeResourcesRepository extends ResourcesRepository {
     String? name,
     String? description,
     String? icon,
+    String? color,
     int? capacity,
     int? slotDurationMinutes,
     bool? isActive,

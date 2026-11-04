@@ -20,6 +20,7 @@ class FakeResourcesRepository extends ResourcesRepository {
     required String name,
     String? description,
     String? icon,
+    String? color,
     required int capacity,
     required int slotDurationMinutes,
   }) async {
@@ -28,6 +29,7 @@ class FakeResourcesRepository extends ResourcesRepository {
       'name': name,
       'description': description,
       'icon': icon,
+      'color': color,
       'capacity': capacity,
       'slotDurationMinutes': slotDurationMinutes,
     };

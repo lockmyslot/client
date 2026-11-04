@@ -6,6 +6,7 @@ import '../../resources/providers/resources_provider.dart';
 import '../../resources/screens/create_resource_sheet.dart';
 import '../../resources/widgets/resource_avatar.dart';
 import '../../../core/ui/ui.dart';
+import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -289,7 +290,7 @@ class GroupDetailScreen extends ConsumerWidget {
                                                   colorScheme.onSurfaceVariant,
                                             ),
                                             const SizedBox(width: 4),
-                                            Text('${resource.slotDurationMinutes}m slot')
+                                            Text('${AppDateUtils.formatSlotDuration(resource.slotDurationMinutes, compact: true)} slot')
                                                 .small()
                                                 .muted(),
                                           ],

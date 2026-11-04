@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/booking_rule.dart';
 import '../data/models/resource.dart';
+import '../data/models/slot_duration_unit.dart';
 import '../data/resources_repository.dart';
 import '../widgets/resource_icon_picker.dart';
 import '../providers/booking_rules_provider.dart';
@@ -56,6 +57,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
   late final TextEditingController _descController;
   late final TextEditingController _capacityController;
   late final TextEditingController _durationController;
+  SlotDurationUnit _selectedUnit = SlotDurationUnit.minutes;
   bool _isActive = true;
   String? _selectedIcon;
   bool _isConfigInitialized = false;
@@ -125,10 +127,26 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
     _nameController.text = resource.name;
     _descController.text = resource.description ?? '';
     _capacityController.text = resource.capacity.toString();
-    _durationController.text = resource.slotDurationMinutes.toString();
+    final parsed =
+        SlotDurationUnit.parseMinutes(resource.slotDurationMinutes);
+    _selectedUnit = parsed.unit;
+    _durationController.text = parsed.value.toString();
     _isActive = resource.isActive;
     _selectedIcon = resource.icon;
     _isConfigInitialized = true;
+  }
+
+  void _onUnitChanged(SlotDurationUnit newUnit) {
+    final currentVal = int.tryParse(_durationController.text.trim());
+    if (currentVal != null && currentVal > 0) {
+      final newVal = SlotDurationUnit.convertValue(
+        currentVal,
+        _selectedUnit,
+        newUnit,
+      );
+      _durationController.text = newVal.toString();
+    }
+    setState(() => _selectedUnit = newUnit);
   }
 
   void _populateExistingRules(List<BookingRule> rules) {
@@ -169,7 +187,8 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
     final name = _nameController.text.trim();
     final description = _descController.text.trim();
     final capacity = int.tryParse(_capacityController.text.trim()) ?? 1;
-    final duration = int.tryParse(_durationController.text.trim()) ?? 60;
+    final rawDuration = int.tryParse(_durationController.text.trim()) ?? 60;
+    final duration = SlotDurationUnit.toMinutes(rawDuration, _selectedUnit);
 
     setState(() {
       _isSavingConfig = true;
@@ -555,8 +574,10 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
             const SizedBox(height: 16),
 
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
+                  flex: 3,
                   child: TextFormField(
                     controller: _capacityController,
                     keyboardType: TextInputType.number,
@@ -580,31 +601,50 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
                     },
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 10),
                 Expanded(
+                  flex: 3,
                   child: TextFormField(
                     controller: _durationController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Slot Duration (m)',
-                      hintText: '60',
-                      prefixIcon: Icon(Icons.schedule_outlined),
+                    decoration: InputDecoration(
+                      labelText: 'Slot Duration',
+                      hintText: _selectedUnit == SlotDurationUnit.hours
+                          ? '1'
+                          : (_selectedUnit == SlotDurationUnit.days ? '1' : '60'),
+                      prefixIcon: const Icon(Icons.schedule_outlined),
                     ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return 'Required';
+                    validator: (val) =>
+                        SlotDurationUnit.validate(val, _selectedUnit),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 3,
+                  child: DropdownButtonFormField<SlotDurationUnit>(
+                    key: ValueKey(_selectedUnit),
+                    initialValue: _selectedUnit,
+                    decoration: const InputDecoration(
+                      labelText: 'Unit',
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: SlotDurationUnit.minutes,
+                        child: Text('Minutes'),
+                      ),
+                      DropdownMenuItem(
+                        value: SlotDurationUnit.hours,
+                        child: Text('Hours'),
+                      ),
+                      DropdownMenuItem(
+                        value: SlotDurationUnit.days,
+                        child: Text('Days'),
+                      ),
+                    ],
+                    onChanged: (newUnit) {
+                      if (newUnit != null && newUnit != _selectedUnit) {
+                        _onUnitChanged(newUnit);
                       }
-                      final num = int.tryParse(val.trim());
-                      if (num == null || num <= 0) {
-                        return 'Must be > 0';
-                      }
-                      if (num < 15 || num > 1080) {
-                        return '15 to 1080 mins';
-                      }
-                      if (num % 15 != 0) {
-                        return 'Multiple of 15';
-                      }
-                      return null;
                     },
                   ),
                 ),

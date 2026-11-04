@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/resources_repository.dart';
 import '../data/models/resource.dart';
+import '../data/models/slot_duration_unit.dart';
 import '../providers/resources_provider.dart';
 import '../widgets/resource_icon_picker.dart';
 import '../../../core/ui/ui.dart';
@@ -47,8 +48,10 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
   late final TextEditingController _descController;
   late final TextEditingController _capacityController;
   late final TextEditingController _durationController;
+  late SlotDurationUnit _selectedUnit;
   late bool _isActive;
   String? _selectedIcon;
+  String? _selectedColor;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -62,15 +65,32 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
         TextEditingController(text: widget.resource.description ?? '');
     _capacityController =
         TextEditingController(text: widget.resource.capacity.toString());
+    final parsed =
+        SlotDurationUnit.parseMinutes(widget.resource.slotDurationMinutes);
+    _selectedUnit = parsed.unit;
     _durationController = TextEditingController(
-      text: widget.resource.slotDurationMinutes.toString(),
+      text: parsed.value.toString(),
     );
     _isActive = widget.resource.isActive;
     _selectedIcon = widget.resource.icon;
+    _selectedColor = widget.resource.color;
   }
 
   void _onNameChanged() {
     if (mounted) setState(() {});
+  }
+
+  void _onUnitChanged(SlotDurationUnit newUnit) {
+    final currentVal = int.tryParse(_durationController.text.trim());
+    if (currentVal != null && currentVal > 0) {
+      final newVal = SlotDurationUnit.convertValue(
+        currentVal,
+        _selectedUnit,
+        newUnit,
+      );
+      _durationController.text = newVal.toString();
+    }
+    setState(() => _selectedUnit = newUnit);
   }
 
   @override
@@ -92,9 +112,10 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
     final description = _descController.text.trim();
     final capacity =
         int.tryParse(_capacityController.text.trim()) ?? widget.resource.capacity;
-    final duration =
+    final rawDuration =
         int.tryParse(_durationController.text.trim()) ??
         widget.resource.slotDurationMinutes;
+    final duration = SlotDurationUnit.toMinutes(rawDuration, _selectedUnit);
 
     setState(() {
       _isLoading = true;
@@ -109,6 +130,7 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
         name: name,
         description: description,
         icon: _selectedIcon ?? '',
+        color: _selectedColor ?? '',
         capacity: capacity,
         slotDurationMinutes: duration,
         isActive: _isActive,
@@ -233,9 +255,13 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
 
               ResourceIconSelector(
                 selectedIconKey: _selectedIcon,
+                selectedColor: _selectedColor,
                 resourceName: _nameController.text.trim(),
                 onChanged: (newIcon) {
                   setState(() => _selectedIcon = newIcon);
+                },
+                onColorChanged: (newColor) {
+                  setState(() => _selectedColor = newColor);
                 },
               ),
               const SizedBox(height: 14),
@@ -258,8 +284,10 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
               const SizedBox(height: 14),
 
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
+                    flex: 3,
                     child: TextFormField(
                       controller: _capacityController,
                       keyboardType: TextInputType.number,
@@ -283,31 +311,50 @@ class _EditResourceSheetState extends ConsumerState<EditResourceSheet> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 10),
                   Expanded(
+                    flex: 3,
                     child: TextFormField(
                       controller: _durationController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Slot Duration (m)',
-                        hintText: '60',
-                        prefixIcon: Icon(Icons.schedule_outlined),
+                      decoration: InputDecoration(
+                        labelText: 'Slot Duration',
+                        hintText: _selectedUnit == SlotDurationUnit.hours
+                            ? '1'
+                            : (_selectedUnit == SlotDurationUnit.days ? '1' : '60'),
+                        prefixIcon: const Icon(Icons.schedule_outlined),
                       ),
-                      validator: (val) {
-                        if (val == null || val.trim().isEmpty) {
-                          return 'Required';
+                      validator: (val) =>
+                          SlotDurationUnit.validate(val, _selectedUnit),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 3,
+                    child: DropdownButtonFormField<SlotDurationUnit>(
+                      key: ValueKey(_selectedUnit),
+                      initialValue: _selectedUnit,
+                      decoration: const InputDecoration(
+                        labelText: 'Unit',
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: SlotDurationUnit.minutes,
+                          child: Text('Minutes'),
+                        ),
+                        DropdownMenuItem(
+                          value: SlotDurationUnit.hours,
+                          child: Text('Hours'),
+                        ),
+                        DropdownMenuItem(
+                          value: SlotDurationUnit.days,
+                          child: Text('Days'),
+                        ),
+                      ],
+                      onChanged: (newUnit) {
+                        if (newUnit != null && newUnit != _selectedUnit) {
+                          _onUnitChanged(newUnit);
                         }
-                        final num = int.tryParse(val.trim());
-                        if (num == null || num <= 0) {
-                          return 'Must be > 0';
-                        }
-                        if (num < 15 || num > 1080) {
-                          return '15 to 1080 mins';
-                        }
-                        if (num % 15 != 0) {
-                          return 'Multiple of 15';
-                        }
-                        return null;
                       },
                     ),
                   ),

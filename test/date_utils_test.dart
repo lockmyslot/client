@@ -72,5 +72,18 @@ void main() {
       expect(AppDateUtils.formatDuration(const Duration(hours: 1, minutes: 30)), '1h 30m');
       expect(AppDateUtils.formatDuration(const Duration(minutes: 45)), '45m');
     });
+
+    test('formatSlotDuration formats minutes, hours, and days', () {
+      expect(AppDateUtils.formatSlotDuration(30), '30 min');
+      expect(AppDateUtils.formatSlotDuration(30, compact: true), '30m');
+      expect(AppDateUtils.formatSlotDuration(60), '60 min');
+      expect(AppDateUtils.formatSlotDuration(60, compact: true), '60m');
+      expect(AppDateUtils.formatSlotDuration(120), '2 hours');
+      expect(AppDateUtils.formatSlotDuration(120, compact: true), '2h');
+      expect(AppDateUtils.formatSlotDuration(1440), '1 day');
+      expect(AppDateUtils.formatSlotDuration(1440, compact: true), '1d');
+      expect(AppDateUtils.formatSlotDuration(2880), '2 days');
+      expect(AppDateUtils.formatSlotDuration(2880, compact: true), '2d');
+    });
   });
 }
