@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lockmyslot_app/core/api/api_client.dart';
 import 'package:lockmyslot_app/core/storage/secure_storage.dart';
 import 'package:lockmyslot_app/core/theme/app_theme.dart';
+import 'package:lockmyslot_app/core/utils/date_utils.dart';
 import 'package:lockmyslot_app/features/bookings/data/bookings_repository.dart';
 import 'package:lockmyslot_app/features/bookings/data/models/availability.dart';
 import 'package:lockmyslot_app/features/bookings/providers/availability_provider.dart';
@@ -126,6 +127,85 @@ void main() {
       );
       expect(dateScrollView.clipBehavior, equals(Clip.none));
       expect(dateScrollView.scrollDirection, equals(Axis.horizontal));
+    },
+  );
+
+  testWidgets(
+    'AvailabilityScreen changing date keeps date strip mounted and updates availability without resetting page',
+    (WidgetTester tester) async {
+      final tomorrow = DateTime.now().add(const Duration(days: 1));
+      final tomorrowStr = tomorrow.toIso8601String().split('T')[0];
+
+      final tomorrowAvailability = Availability(
+        date: tomorrowStr,
+        resourceId: resourceId,
+        slotDurationMinutes: 60,
+        availableFrom: '08:00',
+        availableUntil: '20:00',
+        userStats: const UserStats(
+          bookingsToday: 1,
+          hoursToday: 1.0,
+          maxBookingsPerDay: 2,
+          maxHoursPerDay: 4,
+          cooldownMinutes: 30,
+        ),
+        slots: [
+          TimeSlot(
+            startTime: DateTime.parse('${tomorrowStr}T10:00:00Z'),
+            endTime: DateTime.parse('${tomorrowStr}T11:00:00Z'),
+            status: 'available',
+            booked: 0,
+            capacity: 2,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            bookingsRepositoryProvider.overrideWithValue(
+              _FakeBookingsRepository(),
+            ),
+            resourceDetailProvider((
+              groupId: groupId,
+              resourceId: resourceId,
+            )).overrideWith((ref) => sampleResource),
+            availabilityProvider.overrideWith((ref, arg) async {
+              if (arg.date == tomorrowStr) {
+                return tomorrowAvailability;
+              }
+              return availabilityData;
+            }),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme(),
+            home: const AvailabilityScreen(
+              groupId: groupId,
+              resourceId: resourceId,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify initial date data is rendered
+      expect(find.text('Change Date'), findsOneWidget);
+      expect(find.text('Today'), findsOneWidget);
+      final initialSlotTime = AppDateUtils.formatTime(availabilityData.slots.first.startTime);
+      expect(find.text(initialSlotTime), findsOneWidget);
+
+      // Find the tomorrow date chip by text and tap it
+      await tester.tap(find.text(AppDateUtils.formatShortDate(tomorrow)));
+      await tester.pumpAndSettle();
+
+      // The date strip and Change Date button remain mounted throughout
+      expect(find.text('Change Date'), findsOneWidget);
+      expect(find.text('Today'), findsOneWidget);
+
+      // Tomorrow's slot should now be displayed
+      final tomorrowSlotTime = AppDateUtils.formatTime(tomorrowAvailability.slots.first.startTime);
+      expect(find.text(tomorrowSlotTime), findsOneWidget);
     },
   );
 }

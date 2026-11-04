@@ -313,6 +313,501 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
   );
 }
 
+  Widget _buildReschedulingBanner() {
+    final reschedulingBooking = widget.reschedulingBooking;
+    if (reschedulingBooking == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 10,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context)
+            .colorScheme
+            .primaryContainer
+            .withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context)
+              .colorScheme
+              .primary
+              .withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.update_outlined,
+            color: Theme.of(context).colorScheme.primary,
+            size: 22,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Rescheduling ${reschedulingBooking.resourceName ?? "Booking"}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ).small(),
+                const SizedBox(height: 2),
+                Text(
+                  'Current: ${AppDateUtils.formatDisplayDate(reschedulingBooking.startTime)} · ${AppDateUtils.formatTime(reschedulingBooking.startTime)} – ${AppDateUtils.formatTime(reschedulingBooking.endTime)}',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ).small(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SlideFadeSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: Text(
+            AppDateUtils.formatDisplayDate(_selectedDate),
+            key: ValueKey('date-header-$_selectedDateString'),
+          ).h3(),
+        ),
+        OutlineButton(
+          onPressed: _pickCalendarDate,
+          child: const Row(
+            children: [
+              Icon(Icons.event_outlined, size: 16),
+              SizedBox(width: 6),
+              Text('Change Date'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateChips() {
+    return SingleChildScrollView(
+      clipBehavior: Clip.none,
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(7, (index) {
+          final date = DateTime.now().add(
+            Duration(days: index),
+          );
+          final isSelected = AppDateUtils.isSameDay(
+            date,
+            _selectedDate,
+          );
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => _onDateSelected(date),
+              child: AnimatedScale(
+                scale: isSelected ? 1.05 : 1.0,
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOutBack,
+                child: AnimatedContainer(
+                  duration: const Duration(
+                    milliseconds: 220,
+                  ),
+                  curve: Curves.easeOutCubic,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.primary
+                        : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        index == 0
+                            ? 'Today'
+                            : AppDateUtils.formatShortDate(
+                                date,
+                              ),
+                        style: TextStyle(
+                          color: isSelected
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.onPrimary
+                              : null,
+                        ),
+                      ).small(),
+                      Text(
+                        AppDateUtils.formatWeekday(date),
+                        style: TextStyle(
+                          color: isSelected
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.onPrimary
+                              : null,
+                        ),
+                      ).mono().small(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildUserStatsCard(UserStats userStats) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 8,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text('Bookings').small().muted(),
+                  SlideFadeSwitcher(
+                    duration: const Duration(
+                      milliseconds: 300,
+                    ),
+                    child: Text(
+                      '${userStats.bookingsToday}${userStats.maxBookingsPerDay != null ? '/${userStats.maxBookingsPerDay}' : ''}',
+                      key: ValueKey(
+                        '${userStats.bookingsToday}/${userStats.maxBookingsPerDay}',
+                      ),
+                    ).h4(),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              height: 20,
+              width: 1,
+              color: Theme.of(
+                context,
+              ).colorScheme.outlineVariant,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text('Hours Used').small().muted(),
+                  SlideFadeSwitcher(
+                    duration: const Duration(
+                      milliseconds: 300,
+                    ),
+                    child: Text(
+                      '${userStats.hoursToday.toStringAsFixed(1)}${userStats.maxHoursPerDay != null ? '/${userStats.maxHoursPerDay}' : ''}h',
+                      key: ValueKey(
+                        '${userStats.hoursToday.toStringAsFixed(1)}/${userStats.maxHoursPerDay}h',
+                      ),
+                    ).h4(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeSlotGrid(Availability availability) {
+    final allSlots = availability.slots;
+    if (allSlots.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.event_busy_outlined,
+                size: 36,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No bookable slots available for this date.',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                (availability.availableFrom != null &&
+                        availability.availableUntil != null &&
+                        (availability.availableFrom != '00:00' ||
+                            availability.availableUntil != '24:00'))
+                    ? 'Slots are only generated within operating hours (${AppDateUtils.formatTimeString(availability.availableFrom)} – ${AppDateUtils.formatTimeString(availability.availableUntil)}).'
+                    : 'The resource may be fully booked or currently unavailable.',
+              ).small().muted(),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate:
+          const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 2.6,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+      itemCount: allSlots.length,
+      itemBuilder: (context, index) {
+        final slot = allSlots[index];
+        final isSelected =
+            _selectedStartTimeSlot?.startTime
+                .isAtSameMomentAs(slot.startTime) ??
+            false;
+        final isAvail = slot.isAvailable;
+
+        final cs = Theme.of(context).colorScheme;
+        Color chipBg;
+        Color chipBorder;
+        double borderWidth;
+        IconData icon;
+        Color? iconColor;
+        Color? textColor;
+        if (isSelected) {
+          chipBg = cs.primaryContainer;
+          chipBorder = cs.primary;
+          borderWidth = 1.5;
+          icon = Icons.check_outlined;
+          iconColor = cs.onPrimaryContainer;
+          textColor = cs.onPrimaryContainer;
+        } else if (slot.isMaintenance) {
+          final isDark =
+              Theme.of(context).brightness ==
+              Brightness.dark;
+          chipBg = isDark
+              ? Colors.orange.withValues(alpha: 0.15)
+              : Colors.orange.withValues(alpha: 0.10);
+          chipBorder = isDark
+              ? Colors.orange.shade700
+              : Colors.orange.shade300;
+          borderWidth = 1;
+          icon = Icons.build_circle_outlined;
+          iconColor = isDark
+              ? Colors.orange.shade300
+              : Colors.orange.shade800;
+          textColor = isDark
+              ? Colors.orange.shade200
+              : Colors.orange.shade900;
+        } else if (isAvail) {
+          chipBg = cs.surfaceContainer;
+          chipBorder = cs.outlineVariant;
+          borderWidth = 1;
+          icon = Icons.access_time_outlined;
+          iconColor = cs.onSurfaceVariant;
+          textColor = cs.onSurface;
+        } else {
+          chipBg = cs.surfaceContainerLow
+              .withValues(alpha: 0.5);
+          chipBorder = cs.outlineVariant
+              .withValues(alpha: 0.4);
+          borderWidth = 1;
+          icon = Icons.block_outlined;
+          iconColor = cs.outline.withValues(alpha: 0.6);
+          textColor = cs.outline;
+        }
+
+        return GestureDetector(
+          onTap: isAvail
+              ? () {
+                  setState(() {
+                    _selectedStartTimeSlot = slot;
+                    _errorMessage = null;
+                  });
+                }
+              : null,
+          child: AnimatedScale(
+            scale: isSelected ? 1.06 : 1.0,
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeOutBack,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeOutCubic,
+              decoration: BoxDecoration(
+                color: chipBg,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: chipBorder,
+                  width: borderWidth,
+                ),
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 13,
+                      color: iconColor,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      AppDateUtils.formatTime(
+                        slot.startTime,
+                      ),
+                      style: TextStyle(color: textColor),
+                    ).mono().small(),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDurationSelector(int slotMinutes) {
+    return SlideFadeSwitcher(
+      duration: const Duration(milliseconds: 350),
+      child: KeyedSubtree(
+        key: const ValueKey('duration'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Select Duration').h3(),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              clipBehavior: Clip.none,
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: List.generate(4, (index) {
+                  final durationUnits = index + 1;
+                  final durationMinutes =
+                      durationUnits * slotMinutes;
+                  final isSelected =
+                      _selectedDurationSlots ==
+                      durationUnits;
+
+                  String durationLabel;
+                  if (durationMinutes < 60) {
+                    durationLabel =
+                        '$durationMinutes mins';
+                  } else if (durationMinutes % 60 == 0) {
+                    durationLabel =
+                        '${durationMinutes ~/ 60} ${durationMinutes == 60 ? 'hour' : 'hours'}';
+                  } else {
+                    durationLabel =
+                        '${(durationMinutes / 60).toStringAsFixed(1)} hours';
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                      right: 8,
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedDurationSlots =
+                              durationUnits;
+                          _errorMessage = null;
+                        });
+                      },
+                      child: AnimatedScale(
+                        scale: isSelected ? 1.06 : 1.0,
+                        duration: const Duration(
+                          milliseconds: 280,
+                        ),
+                        curve: Curves.easeOutBack,
+                        child: AnimatedContainer(
+                          duration: const Duration(
+                            milliseconds: 240,
+                          ),
+                          curve: Curves.easeOutCubic,
+                          padding:
+                              const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Theme.of(
+                                    context,
+                                  ).colorScheme.primary
+                                : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                            borderRadius:
+                                BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            durationLabel,
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                  : null,
+                            ),
+                          ).small().semiBold(),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage() {
+    return SlideFadeSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: KeyedSubtree(
+        key: const ValueKey('error-msg'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _errorMessage!,
+              style: const TextStyle(color: Colors.red),
+            ).small(),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final availabilityAsync = ref.watch(
@@ -326,569 +821,101 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
       ),
     );
 
-    return SlideFadeSwitcher(
-      child: availabilityAsync.when(
-        loading: () => const KeyedSubtree(
-          key: ValueKey('loading'),
-          child: Center(child: CircularProgressIndicator()),
-        ),
-        error: (err, _) => KeyedSubtree(
-          key: const ValueKey('error'),
-          child: ErrorDisplay(
-            error: err.toString(),
-            onRetry: () => ref.invalidate(
-              availabilityProvider(
-                AvailabilityParams(
-                  groupId: widget.groupId,
-                  resourceId: widget.resourceId,
-                  date: _selectedDateString,
-                  excludeBookingId: widget.reschedulingBooking?.id,
-                ),
-              ),
-            ),
-          ),
-        ),
-        data: (availability) {
-          final userStats = availability.userStats;
-          final allSlots = availability.slots;
-          final slotMinutes = availability.slotDurationMinutes;
-          final requestedSlots = _calculateRequestedSlots(allSlots);
-          final isValid = _isRangeValid(requestedSlots);
-          final showSummary =
-              _selectedStartTimeSlot != null && requestedSlots.isNotEmpty;
+    final availability = availabilityAsync.valueOrNull;
+    final allSlots = availability?.slots ?? [];
+    final requestedSlots = _calculateRequestedSlots(allSlots);
+    final isValid = _isRangeValid(requestedSlots);
+    final showSummary =
+        _selectedStartTimeSlot != null && requestedSlots.isNotEmpty;
 
-          return KeyedSubtree(
-            key: ValueKey('data-$_selectedDateString'),
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (widget.reschedulingBooking != null) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
-                                  .withValues(alpha: 0.35),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withValues(alpha: 0.25),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.update_outlined,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 22,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Rescheduling ${widget.reschedulingBooking!.resourceName ?? "Booking"}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurface,
-                                        ),
-                                      ).small(),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Current: ${AppDateUtils.formatDisplayDate(widget.reschedulingBooking!.startTime)} · ${AppDateUtils.formatTime(widget.reschedulingBooking!.startTime)} – ${AppDateUtils.formatTime(widget.reschedulingBooking!.endTime)}',
-                                        style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant,
-                                        ),
-                                      ).small(),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
+                if (widget.reschedulingBooking != null) ...[
+                  _buildReschedulingBanner(),
+                  const SizedBox(height: 16),
+                ],
 
-                        // 1. Date Strip & Calendar Picker Launcher
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              AppDateUtils.formatDisplayDate(_selectedDate),
-                            ).h3(),
-                            OutlineButton(
-                              onPressed: _pickCalendarDate,
-                              child: const Row(
-                                children: [
-                                  Icon(Icons.event_outlined, size: 16),
-                                  SizedBox(width: 6),
-                                  Text('Change Date'),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
+                // 1. Date Strip & Calendar Picker Launcher
+                _buildDateHeader(),
+                const SizedBox(height: 12),
 
-                        // Horizontal Quick Date Chips (7 days)
-                        SingleChildScrollView(
-                          clipBehavior: Clip.none,
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: List.generate(7, (index) {
-                              final date = DateTime.now().add(
-                                Duration(days: index),
-                              );
-                              final isSelected = AppDateUtils.isSameDay(
-                                date,
-                                _selectedDate,
-                              );
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: GestureDetector(
-                                  onTap: () => _onDateSelected(date),
-                                  child: AnimatedScale(
-                                    scale: isSelected ? 1.05 : 1.0,
-                                    duration: const Duration(milliseconds: 260),
-                                    curve: Curves.easeOutBack,
-                                    child: AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 220,
-                                      ),
-                                      curve: Curves.easeOutCubic,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 10,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? Theme.of(
-                                                context,
-                                              ).colorScheme.primary
-                                            : Theme.of(context)
-                                                  .colorScheme
-                                                  .surfaceContainerHighest,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            index == 0
-                                                ? 'Today'
-                                                : AppDateUtils.formatShortDate(
-                                                    date,
-                                                  ),
-                                            style: TextStyle(
-                                              color: isSelected
-                                                  ? Theme.of(
-                                                      context,
-                                                    ).colorScheme.onPrimary
-                                                  : null,
-                                            ),
-                                          ).small(),
-                                          Text(
-                                            AppDateUtils.formatWeekday(date),
-                                            style: TextStyle(
-                                              color: isSelected
-                                                  ? Theme.of(
-                                                      context,
-                                                    ).colorScheme.onPrimary
-                                                  : null,
-                                            ),
-                                          ).mono().small(),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
+                // Horizontal Quick Date Chips (7 days)
+                _buildDateChips(),
+                const SizedBox(height: 20),
 
-                        const SizedBox(height: 20),
-
-                        // 2. User Allowance Stats Card
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      const Text('Bookings').small().muted(),
-                                      SlideFadeSwitcher(
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
-                                        child: Text(
-                                          '${userStats.bookingsToday}${userStats.maxBookingsPerDay != null ? '/${userStats.maxBookingsPerDay}' : ''}',
-                                          key: ValueKey(
-                                            '${userStats.bookingsToday}/${userStats.maxBookingsPerDay}',
-                                          ),
-                                        ).h4(),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  height: 20,
-                                  width: 1,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.outlineVariant,
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      const Text('Hours Used').small().muted(),
-                                      SlideFadeSwitcher(
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
-                                        child: Text(
-                                          '${userStats.hoursToday.toStringAsFixed(1)}${userStats.maxHoursPerDay != null ? '/${userStats.maxHoursPerDay}' : ''}h',
-                                          key: ValueKey(
-                                            '${userStats.hoursToday.toStringAsFixed(1)}/${userStats.maxHoursPerDay}h',
-                                          ),
-                                        ).h4(),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        // 3. Time Picker Section
-                        const Text('Select Start Time').h3(),
-                        const SizedBox(height: 4),
-                        _buildOperatingHoursBanner(availability),
-                        const SizedBox(height: 8),
-
-                        if (allSlots.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 24),
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.event_busy_outlined,
-                                    size: 36,
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'No bookable slots available for this date.',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    (availability.availableFrom != null &&
-                                            availability.availableUntil != null &&
-                                            (availability.availableFrom != '00:00' ||
-                                                availability.availableUntil != '24:00'))
-                                        ? 'Slots are only generated within operating hours (${AppDateUtils.formatTimeString(availability.availableFrom)} – ${AppDateUtils.formatTimeString(availability.availableUntil)}).'
-                                        : 'The resource may be fully booked or currently unavailable.',
-                                  ).small().muted(),
-                                ],
-                              ),
-                            ),
-                          )
-                        else
-                          // Time Selector Grid (Full Viewport Width Spanning)
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  childAspectRatio: 2.6,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 8,
-                                ),
-                            itemCount: allSlots.length,
-                            itemBuilder: (context, index) {
-                              final slot = allSlots[index];
-                              final isSelected =
-                                  _selectedStartTimeSlot?.startTime
-                                      .isAtSameMomentAs(slot.startTime) ??
-                                  false;
-                              final isAvail = slot.isAvailable;
-
-                              final cs = Theme.of(context).colorScheme;
-                              Color chipBg;
-                              Color chipBorder;
-                              double borderWidth;
-                              IconData icon;
-                              Color? iconColor;
-                              Color? textColor;
-                              if (isSelected) {
-                                chipBg = cs.primaryContainer;
-                                chipBorder = cs.primary;
-                                borderWidth = 1.5;
-                                icon = Icons.check_outlined;
-                                iconColor = cs.onPrimaryContainer;
-                                textColor = cs.onPrimaryContainer;
-                              } else if (slot.isMaintenance) {
-                                final isDark =
-                                    Theme.of(context).brightness ==
-                                    Brightness.dark;
-                                chipBg = isDark
-                                    ? Colors.orange.withValues(alpha: 0.15)
-                                    : Colors.orange.withValues(alpha: 0.10);
-                                chipBorder = isDark
-                                    ? Colors.orange.shade700
-                                    : Colors.orange.shade300;
-                                borderWidth = 1;
-                                icon = Icons.build_circle_outlined;
-                                iconColor = isDark
-                                    ? Colors.orange.shade300
-                                    : Colors.orange.shade800;
-                                textColor = isDark
-                                    ? Colors.orange.shade200
-                                    : Colors.orange.shade900;
-                              } else if (isAvail) {
-                                chipBg = cs.surfaceContainer;
-                                chipBorder = cs.outlineVariant;
-                                borderWidth = 1;
-                                icon = Icons.access_time_outlined;
-                                iconColor = cs.onSurfaceVariant;
-                                textColor = cs.onSurface;
-                              } else {
-                                chipBg = cs.surfaceContainerLow
-                                    .withValues(alpha: 0.5);
-                                chipBorder = cs.outlineVariant
-                                    .withValues(alpha: 0.4);
-                                borderWidth = 1;
-                                icon = Icons.block_outlined;
-                                iconColor = cs.outline.withValues(alpha: 0.6);
-                                textColor = cs.outline;
-                              }
-
-                              return GestureDetector(
-                                onTap: isAvail
-                                    ? () {
-                                        setState(() {
-                                          _selectedStartTimeSlot = slot;
-                                          _errorMessage = null;
-                                        });
-                                      }
-                                    : null,
-                                child: AnimatedScale(
-                                  scale: isSelected ? 1.06 : 1.0,
-                                  duration: const Duration(milliseconds: 280),
-                                  curve: Curves.easeOutBack,
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 240),
-                                    curve: Curves.easeOutCubic,
-                                    decoration: BoxDecoration(
-                                      color: chipBg,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: chipBorder,
-                                        width: borderWidth,
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            icon,
-                                            size: 13,
-                                            color: iconColor,
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            AppDateUtils.formatTime(
-                                              slot.startTime,
-                                            ),
-                                            style: TextStyle(color: textColor),
-                                          ).mono().small(),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-
-                        const SizedBox(height: 24),
-
-                        // 4. Duration Selector
-                        if (_selectedStartTimeSlot != null)
-                          SlideFadeSwitcher(
-                            duration: const Duration(milliseconds: 350),
-                            child: KeyedSubtree(
-                              key: const ValueKey('duration'),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('Select Duration').h3(),
-                                  const SizedBox(height: 12),
-                                  SingleChildScrollView(
-                                    clipBehavior: Clip.none,
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children: List.generate(4, (index) {
-                                        final durationUnits = index + 1;
-                                        final durationMinutes =
-                                            durationUnits * slotMinutes;
-                                        final isSelected =
-                                            _selectedDurationSlots ==
-                                            durationUnits;
-
-                                        String durationLabel;
-                                        if (durationMinutes < 60) {
-                                          durationLabel =
-                                              '$durationMinutes mins';
-                                        } else if (durationMinutes % 60 == 0) {
-                                          durationLabel =
-                                              '${durationMinutes ~/ 60} ${durationMinutes == 60 ? 'hour' : 'hours'}';
-                                        } else {
-                                          durationLabel =
-                                              '${(durationMinutes / 60).toStringAsFixed(1)} hours';
-                                        }
-
-                                        return Padding(
-                                          padding: const EdgeInsets.only(
-                                            right: 8,
-                                          ),
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                _selectedDurationSlots =
-                                                    durationUnits;
-                                                _errorMessage = null;
-                                              });
-                                            },
-                                            child: AnimatedScale(
-                                              scale: isSelected ? 1.06 : 1.0,
-                                              duration: const Duration(
-                                                milliseconds: 280,
-                                              ),
-                                              curve: Curves.easeOutBack,
-                                              child: AnimatedContainer(
-                                                duration: const Duration(
-                                                  milliseconds: 240,
-                                                ),
-                                                curve: Curves.easeOutCubic,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 10,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: isSelected
-                                                      ? Theme.of(
-                                                          context,
-                                                        ).colorScheme.primary
-                                                      : Theme.of(context)
-                                                            .colorScheme
-                                                            .surfaceContainerHighest,
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                                child: Text(
-                                                  durationLabel,
-                                                  style: TextStyle(
-                                                    color: isSelected
-                                                        ? Theme.of(context)
-                                                              .colorScheme
-                                                              .onPrimary
-                                                        : null,
-                                                  ),
-                                                ).small().semiBold(),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                        if (_errorMessage != null)
-                          SlideFadeSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            child: KeyedSubtree(
-                              key: const ValueKey('error-msg'),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _errorMessage!,
-                                    style: const TextStyle(color: Colors.red),
-                                  ).small(),
-                                  const SizedBox(height: 16),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
+                // 2. Availability Content (User Stats, Operating Hours, Slots, Duration, Error)
+                SlideFadeSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: availabilityAsync.when(
+                    loading: () => const KeyedSubtree(
+                      key: ValueKey('availability-loading'),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 48),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
                     ),
-                  ),
-                ),
-                if (showSummary)
-                  SlideFadeSwitcher(
-                    duration: const Duration(milliseconds: 350),
-                    child: KeyedSubtree(
-                      key: const ValueKey('summary'),
-                      child: _buildBottomBar(
-                        isValid: isValid,
-                        requestedSlots: requestedSlots,
+                    error: (err, _) => KeyedSubtree(
+                      key: const ValueKey('availability-error'),
+                      child: ErrorDisplay(
+                        error: err.toString(),
+                        onRetry: () => ref.invalidate(
+                          availabilityProvider(
+                            AvailabilityParams(
+                              groupId: widget.groupId,
+                              resourceId: widget.resourceId,
+                              date: _selectedDateString,
+                              excludeBookingId: widget.reschedulingBooking?.id,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    data: (availability) => KeyedSubtree(
+                      key: ValueKey('availability-data-$_selectedDateString'),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildUserStatsCard(availability.userStats),
+                          const SizedBox(height: 14),
+                          const Text('Select Start Time').h3(),
+                          const SizedBox(height: 4),
+                          _buildOperatingHoursBanner(availability),
+                          const SizedBox(height: 8),
+                          _buildTimeSlotGrid(availability),
+                          const SizedBox(height: 24),
+                          if (_selectedStartTimeSlot != null)
+                            _buildDurationSelector(
+                              availability.slotDurationMinutes,
+                            ),
+                          if (_errorMessage != null) _buildErrorMessage(),
+                        ],
                       ),
                     ),
                   ),
+                ),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        ),
+        SlideFadeSwitcher(
+          duration: const Duration(milliseconds: 350),
+          child: showSummary
+              ? KeyedSubtree(
+                  key: const ValueKey('summary'),
+                  child: _buildBottomBar(
+                    isValid: isValid,
+                    requestedSlots: requestedSlots,
+                  ),
+                )
+              : const SizedBox.shrink(key: ValueKey('no-summary')),
+        ),
+      ],
     );
   }
 }
