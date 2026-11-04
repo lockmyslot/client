@@ -52,39 +52,66 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
     return showModalBottomSheet<T>(
       context: context,
       showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Text(title).h4(),
-            ),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  final isSelected = id(item) == selectedId;
-                  return ListTile(
-                    leading: leading?.call(item),
-                    trailing: isSelected
-                        ? const Icon(Icons.check_outlined)
-                        : null,
-                    title: Text(label(item)),
-                    subtitle: subtitle != null
-                        ? Text(subtitle(item) ?? '')
-                        : null,
-                    onTap: () => Navigator.pop(context, item),
-                  );
-                },
+      builder: (context) {
+        final cs = Theme.of(context).colorScheme;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Text(title).h4(),
               ),
-            ),
-          ],
-        ),
-      ),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  itemCount: items.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 4),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    final isSelected = id(item) == selectedId;
+                    return ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      selected: isSelected,
+                      selectedTileColor:
+                          cs.primaryContainer.withValues(alpha: 0.25),
+                      leading: leading?.call(item),
+                      trailing: isSelected
+                          ? Icon(Icons.check_rounded, color: cs.primary)
+                          : null,
+                      title: Text(
+                        label(item),
+                        style: TextStyle(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected ? cs.primary : cs.onSurface,
+                        ),
+                      ),
+                      subtitle: subtitle != null && subtitle(item) != null
+                          ? Text(
+                              subtitle(item)!,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? cs.primary.withValues(alpha: 0.8)
+                                    : cs.onSurfaceVariant,
+                              ),
+                            )
+                          : null,
+                      onTap: () => Navigator.pop(context, item),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -134,90 +161,196 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
     }
   }
 
-  Widget _buildToolbarPickerCell({
+  Widget _buildM3SelectorCard({
     required String label,
     required String value,
-    required IconData icon,
+    required Widget leading,
     required VoidCallback? onTap,
     bool enabled = true,
   }) {
-    final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
-    final textColor = enabled ? null : mutedColor;
-    return InkWell(
-      onTap: enabled ? onTap : null,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: textColor),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label).small().muted(),
-                  const SizedBox(height: 2),
-                  Text(
-                    value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textColor != null
-                        ? TextStyle(color: textColor)
-                        : null,
-                  ),
-                ],
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Material(
+      color: enabled
+          ? cs.surfaceContainerLow
+          : cs.surfaceContainerLowest.withValues(alpha: 0.5),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: enabled
+              ? cs.outlineVariant.withValues(alpha: 0.6)
+              : cs.outlineVariant.withValues(alpha: 0.25),
+          width: 1,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Row(
+            children: [
+              leading,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: enabled
+                            ? cs.onSurfaceVariant
+                            : cs.onSurfaceVariant.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: enabled
+                            ? cs.onSurface
+                            : cs.onSurfaceVariant.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 4),
-            Icon(Icons.chevron_right_outlined, size: 18, color: textColor),
-          ],
+              const SizedBox(width: 4),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 20,
+                color: enabled
+                    ? cs.onSurfaceVariant
+                    : cs.outline.withValues(alpha: 0.4),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _toolbarDivider(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 24,
-      color: Theme.of(context).colorScheme.outlineVariant,
+  Widget _buildGroupPickerCell(List<Group> groups) {
+    final cs = Theme.of(context).colorScheme;
+    final selectedGroup = _selectedGroupId != null
+        ? groups.where((g) => g.id == _selectedGroupId).firstOrNull
+        : null;
+
+    final Widget leading;
+    if (selectedGroup != null) {
+      leading = GroupAvatar(
+        name: selectedGroup.name,
+        iconKey: selectedGroup.icon,
+        colorHex: selectedGroup.color,
+        size: 28,
+      );
+    } else {
+      leading = Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.groups_outlined, size: 16, color: cs.primary),
+      );
+    }
+
+    return _buildM3SelectorCard(
+      label: 'Group',
+      value: selectedGroup?.name ?? 'Select Group',
+      leading: leading,
+      onTap: () => _pickGroup(groups),
     );
   }
 
   Widget _buildResourcePickerCell(AsyncValue<List<Resource>>? resourcesAsync) {
+    final cs = Theme.of(context).colorScheme;
+
     if (_selectedGroupId == null) {
-      return _buildToolbarPickerCell(
+      return _buildM3SelectorCard(
         label: 'Resource',
-        value: 'Select a group first',
-        icon: Icons.perm_media_outlined,
+        value: 'Select group first',
+        leading: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.category_outlined,
+            size: 16,
+            color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+          ),
+        ),
         onTap: null,
         enabled: false,
       );
     }
     return resourcesAsync!.when(
-      loading: () => _buildToolbarPickerCell(
+      loading: () => _buildM3SelectorCard(
         label: 'Resource',
         value: 'Loading…',
-        icon: Icons.perm_media_outlined,
+        leading: const SizedBox(
+          width: 28,
+          height: 28,
+          child: Center(
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        ),
         onTap: null,
         enabled: false,
       ),
-      error: (err, _) => _buildToolbarPickerCell(
+      error: (err, _) => _buildM3SelectorCard(
         label: 'Resource',
         value: 'Failed to load',
-        icon: Icons.perm_media_outlined,
+        leading: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: cs.errorContainer.withValues(alpha: 0.4),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.error_outline, size: 16, color: cs.error),
+        ),
         onTap: null,
         enabled: false,
       ),
       data: (resources) {
         final activeResources = resources.where((r) => r.isActive).toList();
         if (activeResources.isEmpty) {
-          return _buildToolbarPickerCell(
+          return _buildM3SelectorCard(
             label: 'Resource',
             value: 'No active resources',
-            icon: Icons.perm_media_outlined,
+            leading: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.category_outlined,
+                size: 16,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+              ),
+            ),
             onTap: null,
             enabled: false,
           );
@@ -233,10 +366,31 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
         final selectedResource = activeResources
             .where((r) => r.id == _selectedResourceId)
             .firstOrNull;
-        return _buildToolbarPickerCell(
+
+        final Widget leading;
+        if (selectedResource != null) {
+          leading = ResourceAvatar(
+            iconKey: selectedResource.icon,
+            colorHex: selectedResource.color,
+            name: selectedResource.name,
+            size: 28,
+          );
+        } else {
+          leading = Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.category_outlined, size: 16, color: cs.primary),
+          );
+        }
+
+        return _buildM3SelectorCard(
           label: 'Resource',
           value: selectedResource?.name ?? 'Select Resource',
-          icon: Icons.perm_media_outlined,
+          leading: leading,
           onTap: () => _pickResource(activeResources),
         );
       },
@@ -287,23 +441,16 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       error: (_, __) => const SizedBox.shrink(),
       data: (groups) {
         if (groups.isEmpty) return const SizedBox.shrink();
-        final selectedGroup = _selectedGroupId != null
-            ? groups.where((g) => g.id == _selectedGroupId).firstOrNull
-            : null;
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: _buildToolbarPickerCell(
-                label: 'Group',
-                value: selectedGroup?.name ?? 'Select Group',
-                icon: Icons.group_outlined,
-                onTap: () => _pickGroup(groups),
-              ),
-            ),
-            _toolbarDivider(context),
-            Expanded(child: _buildResourcePickerCell(resourcesAsync)),
-          ],
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _buildGroupPickerCell(groups)),
+              const SizedBox(width: 8),
+              Expanded(child: _buildResourcePickerCell(resourcesAsync)),
+            ],
+          ),
         );
       },
     );
@@ -314,7 +461,10 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
           M3CollapsingAppBar(
             title: const Text('Quick Book'),
             pinned: true,
-            bottom: AppBarToolbar(child: pickerToolbar),
+            bottom: AppBarToolbar(
+              height: 64,
+              child: pickerToolbar,
+            ),
           ),
         ],
         body: groupsAsync.when(
