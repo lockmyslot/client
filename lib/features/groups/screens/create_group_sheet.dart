@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/ui/ui.dart';
+import '../../../shared/widgets/item_color_picker.dart';
 import '../data/groups_repository.dart';
 import '../data/models/group.dart';
 import '../providers/groups_provider.dart';
-import '../../../core/ui/ui.dart';
+import '../widgets/group_avatar.dart';
 
 class CreateGroupSheet extends ConsumerStatefulWidget {
   final void Function(Group group)? onSuccess;
@@ -37,11 +39,24 @@ class CreateGroupSheet extends ConsumerStatefulWidget {
 class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  String? _selectedColor;
+  String? _selectedIcon;
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_onNameChanged);
+  }
+
+  void _onNameChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     super.dispose();
   }
@@ -59,10 +74,15 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
 
     try {
       final repo = ref.read(groupsRepositoryProvider);
-      final newGroup = await repo.createGroup(name);
+      final newGroup = await repo.createGroup(
+        name,
+        color: _selectedColor,
+        icon: _selectedIcon,
+      );
       ref.invalidate(myGroupsProvider);
 
       if (mounted) {
+        setState(() => _isLoading = false);
         if (widget.onSuccess != null) {
           widget.onSuccess!(newGroup);
         } else {
@@ -156,6 +176,71 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
                   return null;
                 },
                 onFieldSubmitted: (_) => _handleCreate(),
+              ),
+              const SizedBox(height: 16),
+
+              // Preview & Color Coding
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainer,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: cs.outlineVariant.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        GroupAvatar(
+                          name: _nameController.text.trim().isEmpty
+                              ? 'Group'
+                              : _nameController.text.trim(),
+                          iconKey: _selectedIcon,
+                          colorHex: _selectedColor,
+                          size: 46,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _nameController.text.trim().isEmpty
+                                    ? 'New Group'
+                                    : _nameController.text.trim(),
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _selectedColor != null
+                                    ? 'Custom color applied'
+                                    : 'Theme default color',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    const Divider(height: 1),
+                    const SizedBox(height: 10),
+                    ItemColorPickerRow(
+                      selectedHex: _selectedColor,
+                      onChanged: (c) => setState(() => _selectedColor = c),
+                      title: 'Group Color',
+                    ),
+                  ],
+                ),
               ),
 
               if (_errorMessage != null) ...[

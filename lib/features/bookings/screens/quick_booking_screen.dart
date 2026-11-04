@@ -96,7 +96,11 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       label: (g) => g.name,
       subtitle: (g) =>
           '${g.memberCount} member${g.memberCount == 1 ? '' : 's'}',
-      leading: (g) => GroupAvatar(name: g.name),
+      leading: (g) => GroupAvatar(
+        name: g.name,
+        iconKey: g.icon,
+        colorHex: g.color,
+      ),
       selectedId: _selectedGroupId,
     );
     if (group != null && group.id != _selectedGroupId) {
@@ -116,7 +120,11 @@ class _QuickBookingScreenState extends ConsumerState<QuickBookingScreen> {
       label: (r) => r.name,
       subtitle: (r) =>
           'Capacity ${r.capacity} • ${AppDateUtils.formatSlotDuration(r.slotDurationMinutes)} slots',
-      leading: (r) => ResourceAvatar(iconKey: r.icon, name: r.name),
+      leading: (r) => ResourceAvatar(
+        iconKey: r.icon,
+        colorHex: r.color,
+        name: r.name,
+      ),
       selectedId: _selectedResourceId,
     );
     if (resource != null) {

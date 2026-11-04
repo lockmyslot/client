@@ -208,6 +208,7 @@ void main() {
       await tester.enterText(durationField, '60');
 
       // Toggle active status to false
+      await tester.ensureVisible(find.byType(Switch));
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 

@@ -212,7 +212,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Scroll to the card and tap it
-      await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -300));
+      await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -600));
       await tester.pumpAndSettle();
 
       final cardFinder = find.text('Booking Rules & Policies');

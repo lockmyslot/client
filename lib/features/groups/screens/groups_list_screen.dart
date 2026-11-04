@@ -349,30 +349,11 @@ class GroupsListScreen extends ConsumerWidget {
                                               Stack(
                                                 clipBehavior: Clip.none,
                                                 children: [
-                                                  Container(
-                                                    width: 48,
-                                                    height: 48,
-                                                    decoration: BoxDecoration(
-                                                      color: colorScheme
-                                                          .primaryContainer,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            12,
-                                                          ),
-                                                    ),
-                                                    alignment: Alignment.center,
-                                                    child: Text(
-                                                      getGroupInitials(
-                                                        group.name,
-                                                      ),
-                                                      style: TextStyle(
-                                                        color: colorScheme
-                                                            .onPrimaryContainer,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 16,
-                                                      ),
-                                                    ),
+                                                  GroupAvatar(
+                                                    name: group.name,
+                                                    iconKey: group.icon,
+                                                    colorHex: group.color,
+                                                    size: 48,
                                                   ),
                                                   if (group.isAdmin)
                                                     Positioned(

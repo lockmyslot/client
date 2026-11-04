@@ -83,6 +83,7 @@ class ResourcesListScreen extends ConsumerWidget {
                                 children: [
                                   ResourceAvatar(
                                     iconKey: resource.icon,
+                                    colorHex: resource.color,
                                     name: resource.name,
                                     size: 44,
                                   ),

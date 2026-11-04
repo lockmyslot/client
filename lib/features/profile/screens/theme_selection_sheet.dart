@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/item_color_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/ui/ui.dart';
 
@@ -21,6 +22,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final currentThemeMode = ref.watch(themeModeProvider);
+    final useItemColors = ref.watch(itemColorPreferenceProvider);
 
     return Container(
       decoration: BoxDecoration(
@@ -174,7 +176,39 @@ class ThemeSelectionSheet extends ConsumerWidget {
             );
           }),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
+          const Divider(height: 1),
+          const SizedBox(height: 8),
+
+          Material(
+            color: Colors.transparent,
+            child: SwitchListTile(
+              secondary: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.palette_outlined,
+                  size: 20,
+                  color: cs.primary,
+                ),
+              ),
+              title: const Text('Show Item Colors'),
+              subtitle:
+                  const Text('Display custom colors for groups and resources'),
+              value: useItemColors,
+              onChanged: (val) {
+                ref
+                    .read(itemColorPreferenceProvider.notifier)
+                    .setUseItemColors(val);
+              },
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+
+          const SizedBox(height: 14),
 
           PrimaryButton(
             onPressed: () => Navigator.of(context).maybePop(),

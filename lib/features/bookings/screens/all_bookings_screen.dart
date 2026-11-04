@@ -285,6 +285,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                       children: [
                                         ResourceAvatar(
                                           iconKey: booking.resourceIcon,
+                                          colorHex: booking.resourceColor,
                                           name: booking.resourceName ??
                                               'Resource',
                                           size: 34,

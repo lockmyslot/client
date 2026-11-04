@@ -60,6 +60,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
   SlotDurationUnit _selectedUnit = SlotDurationUnit.minutes;
   bool _isActive = true;
   String? _selectedIcon;
+  String? _selectedColor;
   bool _isConfigInitialized = false;
   bool _isSavingConfig = false;
   String? _configError;
@@ -133,6 +134,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
     _durationController.text = parsed.value.toString();
     _isActive = resource.isActive;
     _selectedIcon = resource.icon;
+    _selectedColor = resource.color;
     _isConfigInitialized = true;
   }
 
@@ -203,6 +205,7 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
         name: name,
         description: description,
         icon: _selectedIcon ?? '',
+        color: _selectedColor ?? '',
         capacity: capacity,
         slotDurationMinutes: duration,
         isActive: _isActive,
@@ -549,9 +552,13 @@ class _ResourceSettingsScreenState extends ConsumerState<ResourceSettingsScreen>
 
             ResourceIconSelector(
               selectedIconKey: _selectedIcon,
+              selectedColor: _selectedColor,
               resourceName: _nameController.text.trim(),
               onChanged: (newIcon) {
                 setState(() => _selectedIcon = newIcon);
+              },
+              onColorChanged: (newColor) {
+                setState(() => _selectedColor = newColor);
               },
             ),
             const SizedBox(height: 16),

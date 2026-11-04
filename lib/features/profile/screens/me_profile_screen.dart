@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../groups/providers/groups_provider.dart';
+import '../../../core/theme/item_color_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
@@ -17,6 +18,7 @@ class MeProfileScreen extends ConsumerWidget {
     final user = ref.watch(authProvider).user;
     final pendingInvitesAsync = ref.watch(pendingInvitesProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final useItemColors = ref.watch(itemColorPreferenceProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -480,6 +482,38 @@ class MeProfileScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           onTap: () => ThemeSelectionSheet.show(context),
+                        ),
+                        const Divider(height: 1),
+                        SwitchListTile(
+                          secondary: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primaryContainer.withValues(
+                                alpha: 0.5,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.palette_outlined,
+                              size: 20,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          title: const Text('Item Colors'),
+                          subtitle: Text(
+                            useItemColors
+                                ? 'Displaying groups and resources in their custom colors'
+                                : 'Using app theme colors for all icons',
+                          ),
+                          value: useItemColors,
+                          onChanged: (val) {
+                            ref
+                                .read(itemColorPreferenceProvider.notifier)
+                                .setUseItemColors(val);
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
                       ],
                     ),
