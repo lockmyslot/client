@@ -4,12 +4,11 @@ import '../providers/groups_provider.dart';
 import '../data/groups_repository.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
-import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 import '../../../shared/widgets/m3_collapsing_app_bar.dart';
-import 'invite_member_sheet.dart';
+import 'unified_invite_sheet.dart';
 
 class MembersScreen extends ConsumerWidget {
   final String groupId;
@@ -65,11 +64,12 @@ class MembersScreen extends ConsumerWidget {
                     ),
                     TextButton.icon(
                       onPressed: () {
-                        DeepLinkUtils.showInviteSheet(
+                        UnifiedInviteSheet.show(
                           context,
                           groupName: group.name,
                           inviteCode: inviteCode,
                           groupId: group.id,
+                          initialTab: InviteTab.share,
                         );
                       },
                       icon: const Icon(Icons.share_outlined, size: 16),
@@ -100,10 +100,12 @@ class MembersScreen extends ConsumerWidget {
                   tooltip: 'Invite by Username',
                   onPressed: () {
                     final group = groupAsync.value;
-                    InviteMemberSheet.show(
+                    UnifiedInviteSheet.show(
                       context,
                       groupId: groupId,
-                      groupName: group?.name,
+                      groupName: group?.name ?? 'Group',
+                      inviteCode: group?.inviteCode ?? '',
+                      initialTab: InviteTab.direct,
                     );
                   },
                 ),

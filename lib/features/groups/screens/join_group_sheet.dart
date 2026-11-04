@@ -159,10 +159,136 @@ class _JoinGroupSheetState extends ConsumerState<JoinGroupSheet> {
               ),
               const SizedBox(height: 18),
 
+              ref.watch(pendingInvitesProvider).maybeWhen(
+                data: (invites) {
+                  if (invites.isEmpty) return const SizedBox.shrink();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.mark_email_unread_outlined,
+                              size: 16, color: cs.primary),
+                          const SizedBox(width: 6),
+                          Text(
+                            'PENDING INVITATIONS (${invites.length})',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.1,
+                              color: cs.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ...invites.map((invite) {
+                        final inviter = invite.invitedByName ??
+                            invite.invitedByUsername ??
+                            'Admin';
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: cs.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: cs.outlineVariant.withValues(alpha: 0.6)),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      invite.groupName,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      'Invited by $inviter',
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          color: cs.onSurfaceVariant),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  await ref
+                                      .read(pendingInvitesProvider.notifier)
+                                      .decline(invite.id);
+                                },
+                                style: TextButton.styleFrom(
+                                  visualDensity: VisualDensity.compact,
+                                  foregroundColor: cs.error,
+                                ),
+                                child: const Text('Decline'),
+                              ),
+                              const SizedBox(width: 4),
+                              FilledButton.tonal(
+                                onPressed: () async {
+                                  await ref
+                                      .read(pendingInvitesProvider.notifier)
+                                      .accept(invite.id);
+                                  if (context.mounted) {
+                                    if (Navigator.of(context).canPop()) {
+                                      Navigator.of(context).pop();
+                                    }
+                                    GoRouter.maybeOf(context)
+                                        ?.push('/groups/${invite.groupId}');
+                                  }
+                                },
+                                style: FilledButton.styleFrom(
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                child: const Text('Accept'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                              child: Divider(
+                                  color: cs.outlineVariant.withValues(alpha: 0.5))),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              'OR ENTER CODE',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                              child: Divider(
+                                  color: cs.outlineVariant.withValues(alpha: 0.5))),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  );
+                },
+                orElse: () => const SizedBox.shrink(),
+              ),
+
               TextFormField(
                 controller: _codeController,
                 textCapitalization: TextCapitalization.characters,
-                autofocus: true,
+                autofocus: widget.initialCode == null || widget.initialCode!.isEmpty,
                 maxLength: 6,
                 decoration: const InputDecoration(
                   labelText: 'Invite Code *',

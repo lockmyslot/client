@@ -108,37 +108,27 @@ class GroupDetailScreen extends ConsumerWidget {
                             children: [
                               if (hasInviteCode) ...[
                                 Expanded(
-                                  child: Builder(
-                                    builder: (btnContext) {
-                                      return FilledButton.tonalIcon(
-                                        onPressed: () {
-                                          final box = btnContext
-                                              .findRenderObject() as RenderBox?;
-                                          final origin = box != null
-                                              ? box.localToGlobal(
-                                                      Offset.zero) &
-                                                  box.size
-                                              : null;
-                                          DeepLinkUtils.shareInviteCode(
-                                            context,
-                                            group.inviteCode!,
-                                            sharePositionOrigin: origin,
-                                          );
-                                        },
-                                        icon: const Icon(
-                                          Icons.share_outlined,
-                                          size: 16,
-                                        ),
-                                        label: const Text('Invite'),
-                                        style: FilledButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 10,
-                                          ),
-                                          visualDensity: VisualDensity.compact,
-                                        ),
+                                  child: FilledButton.tonalIcon(
+                                    onPressed: () {
+                                      DeepLinkUtils.showInviteSheet(
+                                        context,
+                                        groupName: group.name,
+                                        inviteCode: group.inviteCode!,
+                                        groupId: group.id,
                                       );
                                     },
+                                    icon: const Icon(
+                                      Icons.share_outlined,
+                                      size: 16,
+                                    ),
+                                    label: const Text('Invite'),
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 10,
+                                      ),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 10),

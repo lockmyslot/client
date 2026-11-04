@@ -123,11 +123,16 @@ class GroupsRepository {
     }
   }
 
-  Future<GroupMember> inviteMember(String groupId, String username) async {
-    final response = await _apiClient.post<GroupMember>(
+  Future<dynamic> inviteMember(String groupId, String username) async {
+    final response = await _apiClient.post<dynamic>(
       ApiConstants.inviteMember(groupId),
       body: {'username': username},
-      fromJson: (json) => GroupMember.fromJson(json as Map<String, dynamic>),
+      fromJson: (json) {
+        if (json is Map<String, dynamic>) {
+          return GroupInvite.fromJson(json);
+        }
+        return json;
+      },
     );
     return response.data;
   }

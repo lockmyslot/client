@@ -79,6 +79,7 @@ class MyGroupsNotifier extends AsyncNotifier<List<Group>> {
     final repo = ref.read(groupsRepositoryProvider);
     final group = await repo.joinGroup(inviteCode);
     ref.invalidateSelf();
+    ref.invalidate(pendingInvitesProvider);
     return group;
   }
 

@@ -5,6 +5,7 @@ import '../data/groups_repository.dart';
 import '../providers/groups_provider.dart';
 import '../widgets/group_avatar.dart';
 import 'create_group_sheet.dart';
+import 'join_group_sheet.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -17,12 +18,14 @@ class GroupsListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groupsAsync = ref.watch(myGroupsProvider);
+    final pendingInvitesAsync = ref.watch(pendingInvitesProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(myGroupsProvider);
+          ref.invalidate(pendingInvitesProvider);
         },
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -31,6 +34,73 @@ class GroupsListScreen extends ConsumerWidget {
               title: const Text('My Groups'),
               pinned: true,
             ),
+            if (pendingInvitesAsync.valueOrNull?.isNotEmpty ?? false)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: Material(
+                    color: colorScheme.primaryContainer.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(16),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => JoinGroupSheet.show(context),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.mark_email_unread_outlined,
+                                size: 18,
+                                color: colorScheme.onPrimary,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${pendingInvitesAsync.value!.length} Pending ${pendingInvitesAsync.value!.length == 1 ? "Invitation" : "Invitations"}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Tap to review and join your groups',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: colorScheme.onPrimaryContainer
+                                          .withValues(alpha: 0.8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            FilledButton.tonal(
+                              onPressed: () => JoinGroupSheet.show(context),
+                              style: FilledButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                backgroundColor: colorScheme.surface,
+                              ),
+                              child: const Text('Review'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             groupsAsync.when(
               loading: () => const SliverFillRemaining(
                 hasScrollBody: false,

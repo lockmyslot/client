@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
-import '../ui/ui.dart';
-import '../../features/groups/screens/invite_member_sheet.dart';
+import '../../features/groups/screens/unified_invite_sheet.dart';
 
 class DeepLinkUtils {
   static const String appScheme = 'lockmyslot';
@@ -20,26 +19,32 @@ class DeepLinkUtils {
     return '$appScheme://join?code=$cleanCode';
   }
 
-  /// Opens the system's native share sheet with the group invite code.
+  /// Opens the system's native share sheet with the group invite code and web link.
   static Future<void> shareInviteCode(
     BuildContext context,
     String inviteCode, {
+    String? groupName,
     Rect? sharePositionOrigin,
   }) async {
     final cleanCode = inviteCode.trim().toUpperCase();
+    final inviteLink = buildWebInviteLink(cleanCode);
+    final text = groupName != null && groupName.isNotEmpty
+        ? 'Join my group "$groupName" on LockMySlot!\nUse invite code: $cleanCode\nOr tap the link to join: $inviteLink'
+        : 'Join my group on LockMySlot!\nUse invite code: $cleanCode\nOr tap the link to join: $inviteLink';
+
     try {
       await SharePlus.instance.share(
         ShareParams(
-          text: cleanCode,
+          text: text,
           sharePositionOrigin: sharePositionOrigin,
         ),
       );
     } catch (_) {
       if (context.mounted) {
-        Clipboard.setData(ClipboardData(text: cleanCode));
+        Clipboard.setData(ClipboardData(text: text));
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Invite code copied to clipboard!'),
+            content: Text('Invite copied to clipboard!'),
             duration: Duration(seconds: 2),
           ),
         );
@@ -47,140 +52,20 @@ class DeepLinkUtils {
     }
   }
 
-  /// Shows an invite bottom sheet with options to copy the code or share the deep link.
+  /// Shows the unified invite bottom sheet with options to copy the code, share deep link, or invite by username.
   static void showInviteSheet(
     BuildContext context, {
     required String groupName,
     required String inviteCode,
     String? groupId,
+    InviteTab initialTab = InviteTab.share,
   }) {
-    final cleanCode = inviteCode.trim().toUpperCase();
-    final inviteLink = buildWebInviteLink(cleanCode);
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (modalContext) {
-        return SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text('Invite to $groupName').h3(),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.of(modalContext).pop(),
-                      ),
-                    ],
-                  ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Share this invite link or code with others to let them join your group.',
-                ).muted().small(),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(modalContext)
-                        .colorScheme
-                        .surfaceContainerHighest
-                        .withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(modalContext).colorScheme.outlineVariant,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text('INVITE CODE').small().semiBold().muted(),
-                      const SizedBox(height: 4),
-                      Text(cleanCode).mono().h2(),
-                      const SizedBox(height: 8),
-                      Text(
-                        inviteLink,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(modalContext).colorScheme.primary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                PrimaryButton(
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: inviteLink));
-                    Navigator.of(modalContext).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Invite link copied to clipboard!'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.link_outlined, size: 18),
-                      SizedBox(width: 8),
-                      Text('Copy Invite Link'),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SecondaryButton(
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: cleanCode));
-                    Navigator.of(modalContext).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Invite code copied to clipboard!'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.copy_outlined, size: 18),
-                      SizedBox(width: 8),
-                      Text('Copy Code Only'),
-                    ],
-                  ),
-                ),
-                if (groupId != null) ...[
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(modalContext).pop();
-                      InviteMemberSheet.show(
-                        context,
-                        groupId: groupId,
-                        groupName: groupName,
-                      );
-                    },
-                    icon: const Icon(Icons.alternate_email, size: 18),
-                    label: const Text('Invite by Username'),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
+    UnifiedInviteSheet.show(
+      context,
+      groupName: groupName,
+      inviteCode: inviteCode,
+      groupId: groupId,
+      initialTab: initialTab,
+    );
+  }
 }
