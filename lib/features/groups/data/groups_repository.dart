@@ -47,13 +47,59 @@ class GroupsRepository {
     }
   }
 
-  Future<Group> createGroup(String name) async {
+  Future<Group> createGroup(
+    String name, {
+    String? color,
+    String? icon,
+  }) async {
     final response = await _apiClient.post<Group>(
       ApiConstants.groups,
-      body: {'name': name},
+      body: {
+        'name': name,
+        if (color != null && color.isNotEmpty) 'color': color,
+        if (icon != null && icon.isNotEmpty) 'icon': icon,
+      },
       fromJson: (json) => Group.fromJson(json as Map<String, dynamic>),
     );
     return response.data;
+  }
+
+  Future<Group> updateGroup(
+    String groupId, {
+    String? name,
+    String? color,
+    String? icon,
+  }) async {
+    final response = await _apiClient.patch<Group>(
+      ApiConstants.groupDetail(groupId),
+      body: {
+        if (name != null) 'name': name,
+        if (color != null) 'color': color.isEmpty ? null : color,
+        if (icon != null) 'icon': icon.isEmpty ? null : icon,
+      },
+      fromJson: (json) => Group.fromJson(json as Map<String, dynamic>),
+    );
+    final group = response.data;
+    await _cache?.set('group_detail_$groupId', group.toJson());
+
+    final cachedGroups = await _cache?.getList<Group>(
+      'my_groups',
+      (json) => Group.fromJson(json as Map<String, dynamic>),
+    );
+    if (cachedGroups != null) {
+      final updated = cachedGroups.map((g) {
+        if (g.id == groupId) {
+          return group;
+        }
+        return g;
+      }).toList();
+      await _cache?.setList(
+        'my_groups',
+        updated.map((g) => g.toJson()).toList(),
+      );
+    }
+
+    return group;
   }
 
   Future<Group> joinGroup(String inviteCode) async {

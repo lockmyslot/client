@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/item_color_provider.dart';
+import '../../../core/theme/item_color_utils.dart';
 
 class ResourceIconOption {
   final String key;
@@ -160,31 +163,57 @@ String getResourceInitials(String? name) {
 }
 
 /// A standard avatar widget displaying either the resource's selected icon
-/// or initials if left alone.
-class ResourceAvatar extends StatelessWidget {
+/// or initials if left alone, with support for custom color coding or theme fallback.
+class ResourceAvatar extends ConsumerWidget {
   final String? iconKey;
+  final String? colorHex;
   final String name;
   final double size;
   final Color? backgroundColor;
   final Color? foregroundColor;
   final BorderRadius? borderRadius;
+  final bool? useItemColors;
 
   const ResourceAvatar({
     super.key,
     this.iconKey,
+    this.colorHex,
     required this.name,
     this.size = 40,
     this.backgroundColor,
     this.foregroundColor,
     this.borderRadius,
+    this.useItemColors,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final bg = backgroundColor ?? cs.primaryContainer;
-    final fg = foregroundColor ?? cs.onPrimaryContainer;
+    final isDark = theme.brightness == Brightness.dark;
+
+    bool shouldShowColor = useItemColors ?? true;
+    if (useItemColors == null) {
+      try {
+        shouldShowColor = ref.watch(itemColorPreferenceProvider);
+      } catch (_) {
+        shouldShowColor = true;
+      }
+    }
+
+    final parsedColor = parseHexColor(colorHex);
+    final style = getItemColorStyle(
+      itemColor: parsedColor,
+      useItemColors: shouldShowColor,
+      colorScheme: cs,
+      isDark: isDark,
+    );
+
+    final bg = backgroundColor ?? style.background;
+    final fg = foregroundColor ?? style.foreground;
+    final border = (backgroundColor == null && foregroundColor == null)
+        ? style.border
+        : cs.outlineVariant.withValues(alpha: 0.35);
     final radius = borderRadius ?? BorderRadius.circular(size * 0.28);
     final iconData = getResourceIcon(iconKey);
 
@@ -194,9 +223,7 @@ class ResourceAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: radius,
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: 0.35),
-        ),
+        border: Border.all(color: border),
       ),
       alignment: Alignment.center,
       child: iconData != null

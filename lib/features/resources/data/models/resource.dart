@@ -4,6 +4,7 @@ class Resource {
   final String name;
   final String? description;
   final String? icon;
+  final String? color;
   final int capacity;
   final int slotDurationMinutes;
   final bool isActive;
@@ -17,6 +18,7 @@ class Resource {
     required this.name,
     this.description,
     this.icon,
+    this.color,
     required this.capacity,
     required this.slotDurationMinutes,
     required this.isActive,
@@ -32,6 +34,7 @@ class Resource {
       name: json['name'] as String? ?? '',
       description: json['description'] as String?,
       icon: json['icon'] as String?,
+      color: json['color'] as String?,
       capacity: (json['capacity'] as num?)?.toInt() ?? 1,
       slotDurationMinutes:
           (json['slot_duration_minutes'] as num? ??
@@ -63,6 +66,7 @@ class Resource {
       'name': name,
       if (description != null) 'description': description,
       if (icon != null) 'icon': icon,
+      if (color != null) 'color': color,
       'capacity': capacity,
       'slot_duration_minutes': slotDurationMinutes,
       'is_active': isActive,
@@ -78,6 +82,7 @@ class Resource {
     String? name,
     String? description,
     String? icon,
+    String? color,
     int? capacity,
     int? slotDurationMinutes,
     bool? isActive,
@@ -91,6 +96,7 @@ class Resource {
       name: name ?? this.name,
       description: description ?? this.description,
       icon: icon ?? this.icon,
+      color: color ?? this.color,
       capacity: capacity ?? this.capacity,
       slotDurationMinutes: slotDurationMinutes ?? this.slotDurationMinutes,
       isActive: isActive ?? this.isActive,

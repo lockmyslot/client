@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/item_color_picker.dart';
 import 'resource_avatar.dart';
 
 /// Interactive modal bottom sheet to pick from the list of common items icons
@@ -327,14 +328,18 @@ class _ResourceIconPickerSheetState extends State<ResourceIconPickerSheet> {
 /// and bottom sheet dialog launcher.
 class ResourceIconSelector extends StatelessWidget {
   final String? selectedIconKey;
+  final String? selectedColor;
   final String resourceName;
   final ValueChanged<String?> onChanged;
+  final ValueChanged<String?>? onColorChanged;
 
   const ResourceIconSelector({
     super.key,
     required this.selectedIconKey,
+    this.selectedColor,
     required this.resourceName,
     required this.onChanged,
+    this.onColorChanged,
   });
 
   @override
@@ -364,6 +369,7 @@ class ResourceIconSelector extends StatelessWidget {
             children: [
               ResourceAvatar(
                 iconKey: selectedIconKey,
+                colorHex: selectedColor,
                 name: resourceName,
                 size: 48,
               ),
@@ -486,6 +492,16 @@ class ResourceIconSelector extends StatelessWidget {
               ],
             ),
           ),
+
+          if (onColorChanged != null) ...[
+            const SizedBox(height: 14),
+            const Divider(height: 1),
+            const SizedBox(height: 10),
+            ItemColorPickerRow(
+              selectedHex: selectedColor,
+              onChanged: onColorChanged!,
+            ),
+          ],
         ],
       ),
     );

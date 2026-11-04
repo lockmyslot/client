@@ -76,6 +76,7 @@ class ResourcesRepository {
     required String name,
     String? description,
     String? icon,
+    String? color,
     required int capacity,
     required int slotDurationMinutes,
   }) async {
@@ -86,6 +87,7 @@ class ResourcesRepository {
         if (description != null && description.isNotEmpty)
           'description': description,
         if (icon != null && icon.isNotEmpty) 'icon': icon,
+        if (color != null && color.isNotEmpty) 'color': color,
         'capacity': capacity,
         'slot_duration_minutes': slotDurationMinutes,
       },
@@ -100,6 +102,7 @@ class ResourcesRepository {
     String? name,
     String? description,
     String? icon,
+    String? color,
     int? capacity,
     int? slotDurationMinutes,
     bool? isActive,
@@ -110,6 +113,7 @@ class ResourcesRepository {
           if (name != null) 'name': name,
           if (description != null) 'description': description,
           if (icon != null) 'icon': icon.isEmpty ? null : icon,
+          if (color != null) 'color': color.isEmpty ? null : color,
           if (capacity != null) 'capacity': capacity,
           if (slotDurationMinutes != null)
             'slot_duration_minutes': slotDurationMinutes,

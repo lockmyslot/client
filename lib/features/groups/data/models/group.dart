@@ -2,6 +2,8 @@ class Group {
   final String id;
   final String name;
   final String? inviteCode;
+  final String? color;
+  final String? icon;
   final String role; // "ADMIN" | "MEMBER"
   final int memberCount;
   final DateTime createdAt;
@@ -11,6 +13,8 @@ class Group {
     required this.id,
     required this.name,
     this.inviteCode,
+    this.color,
+    this.icon,
     required this.role,
     required this.memberCount,
     required this.createdAt,
@@ -27,6 +31,8 @@ class Group {
     String? id,
     String? name,
     String? inviteCode,
+    String? color,
+    String? icon,
     String? role,
     int? memberCount,
     DateTime? createdAt,
@@ -36,6 +42,8 @@ class Group {
       id: id ?? this.id,
       name: name ?? this.name,
       inviteCode: inviteCode ?? this.inviteCode,
+      color: color ?? this.color,
+      icon: icon ?? this.icon,
       role: role ?? this.role,
       memberCount: memberCount ?? this.memberCount,
       createdAt: createdAt ?? this.createdAt,
@@ -49,6 +57,8 @@ class Group {
       name: json['name'] as String? ?? '',
       inviteCode:
           json['invite_code'] as String? ?? json['inviteCode'] as String?,
+      color: json['color'] as String?,
+      icon: json['icon'] as String?,
       role: json['role'] as String? ?? 'MEMBER',
       memberCount:
           json['member_count'] as int? ?? json['memberCount'] as int? ?? 1,
@@ -65,6 +75,8 @@ class Group {
       'id': id,
       'name': name,
       if (inviteCode != null) 'invite_code': inviteCode,
+      if (color != null) 'color': color,
+      if (icon != null) 'icon': icon,
       'role': role,
       'member_count': memberCount,
       'created_at': createdAt.toIso8601String(),

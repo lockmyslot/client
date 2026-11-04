@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/item_color_provider.dart';
+import '../../../core/theme/item_color_utils.dart';
+import '../../resources/widgets/resource_avatar.dart';
 
 /// Extracts up to two initials from a group [name].
 /// Words may be separated by spaces, hyphens, or underscores.
@@ -34,29 +38,60 @@ String getGroupInitials(String name) {
   return trimmed.characters.first.toUpperCase();
 }
 
-/// A standard avatar widget displaying a group's initials.
-class GroupAvatar extends StatelessWidget {
+/// A standard avatar widget displaying either a group's selected icon or initials,
+/// with support for custom color coding or theme fallback based on user preference.
+class GroupAvatar extends ConsumerWidget {
   final String name;
+  final String? iconKey;
+  final String? colorHex;
   final double size;
   final Color? backgroundColor;
   final Color? foregroundColor;
   final BorderRadius? borderRadius;
+  final bool? useItemColors;
 
   const GroupAvatar({
     super.key,
     required this.name,
+    this.iconKey,
+    this.colorHex,
     this.size = 40,
     this.backgroundColor,
     this.foregroundColor,
     this.borderRadius,
+    this.useItemColors,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final bg = backgroundColor ?? cs.primaryContainer;
-    final fg = foregroundColor ?? cs.onPrimaryContainer;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    bool shouldShowColor = useItemColors ?? true;
+    if (useItemColors == null) {
+      try {
+        shouldShowColor = ref.watch(itemColorPreferenceProvider);
+      } catch (_) {
+        shouldShowColor = true;
+      }
+    }
+
+    final parsedColor = parseHexColor(colorHex);
+    final style = getItemColorStyle(
+      itemColor: parsedColor,
+      useItemColors: shouldShowColor,
+      colorScheme: cs,
+      isDark: isDark,
+    );
+
+    final bg = backgroundColor ?? style.background;
+    final fg = foregroundColor ?? style.foreground;
+    final border = (backgroundColor == null && foregroundColor == null)
+        ? style.border
+        : cs.outlineVariant.withValues(alpha: 0.35);
     final radius = borderRadius ?? BorderRadius.circular(size * 0.25);
+    final iconData = getResourceIcon(iconKey);
 
     return Container(
       width: size,
@@ -64,22 +99,26 @@ class GroupAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: radius,
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: 0.35),
-        ),
+        border: Border.all(color: border),
       ),
       alignment: Alignment.center,
-      child: Text(
-        getGroupInitials(name),
-        style: TextStyle(
-          fontSize: size * 0.34,
-          fontWeight: FontWeight.bold,
-          color: fg,
-          letterSpacing: 0.5,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.clip,
-      ),
+      child: iconData != null
+          ? Icon(
+              iconData,
+              size: size * 0.52,
+              color: fg,
+            )
+          : Text(
+              getGroupInitials(name),
+              style: TextStyle(
+                fontSize: size * 0.34,
+                fontWeight: FontWeight.bold,
+                color: fg,
+                letterSpacing: 0.5,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+            ),
     );
   }
 }
