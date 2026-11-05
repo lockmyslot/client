@@ -9,6 +9,7 @@ import 'package:lockmyslot_app/features/groups/data/models/group.dart';
 import 'package:lockmyslot_app/features/groups/providers/groups_provider.dart';
 import 'package:lockmyslot_app/features/profile/screens/edit_profile_sheet.dart';
 import 'package:lockmyslot_app/features/profile/screens/me_profile_screen.dart';
+import 'package:lockmyslot_app/shared/widgets/m3_collapsing_app_bar.dart';
 
 class _FakeAuthNotifier extends StateNotifier<AuthState>
     implements AuthNotifier {
@@ -103,8 +104,14 @@ void main() {
     expect(find.widgetWithText(ListTile, 'Edit Profile'), findsOneWidget);
     expect(find.text('Name, username, password'), findsOneWidget);
 
-    // Verify app bar action icon
-    expect(find.byTooltip('Edit Profile'), findsOneWidget);
+    // Verify no top-right action icon in app bar
+    expect(
+      find.descendant(
+        of: find.byType(M3CollapsingAppBar),
+        matching: find.byType(IconButton),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('tapping Edit Profile opens EditProfileSheet prefilled',

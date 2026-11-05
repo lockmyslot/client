@@ -34,16 +34,9 @@ class MeProfileScreen extends ConsumerWidget {
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          M3CollapsingAppBar(
-            title: const Text('Me'),
+          const M3CollapsingAppBar(
+            title: Text('Me'),
             pinned: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                tooltip: 'Edit Profile',
-                onPressed: () => EditProfileSheet.show(context),
-              ),
-            ],
           ),
           SliverToBoxAdapter(
             child: Padding(

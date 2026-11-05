@@ -141,6 +141,19 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: cs.outlineVariant.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+
               // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
