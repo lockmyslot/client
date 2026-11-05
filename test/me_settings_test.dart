@@ -66,6 +66,9 @@ void main() {
     // Verify Theme tile and default title exist
     expect(find.text('Theme'), findsOneWidget);
     expect(find.text('System default'), findsWidgets);
+
+    // Verify Item Colors switch exists in Me tab
+    expect(find.text('Item Colors'), findsOneWidget);
   });
 
   testWidgets('tapping Theme tile opens ThemeSelectionSheet', (tester) async {
@@ -89,6 +92,9 @@ void main() {
     expect(find.text('Light'), findsOneWidget);
     expect(find.text('Dark'), findsOneWidget);
     expect(find.text('System default'), findsWidgets);
+
+    // Item Colors should not be duplicated inside ThemeSelectionSheet
+    expect(find.text('Show Item Colors'), findsNothing);
   });
 
   testWidgets('selecting Dark theme updates the theme mode', (tester) async {
