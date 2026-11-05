@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../groups/providers/groups_provider.dart';
+import '../../../core/theme/color_scheme_provider.dart';
 import '../../../core/theme/item_color_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/m3_collapsing_app_bar.dart';
+import 'color_scheme_selection_sheet.dart';
+import 'edit_profile_sheet.dart';
 import 'theme_selection_sheet.dart';
 
 class MeProfileScreen extends ConsumerWidget {
@@ -18,6 +21,7 @@ class MeProfileScreen extends ConsumerWidget {
     final user = ref.watch(authProvider).user;
     final pendingInvitesAsync = ref.watch(pendingInvitesProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final colorSchemePref = ref.watch(appColorSchemeProvider);
     final useItemColors = ref.watch(itemColorPreferenceProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -30,9 +34,16 @@ class MeProfileScreen extends ConsumerWidget {
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          const M3CollapsingAppBar(
-            title: Text('Me'),
+          M3CollapsingAppBar(
+            title: const Text('Me'),
             pinned: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                tooltip: 'Edit Profile',
+                onPressed: () => EditProfileSheet.show(context),
+              ),
+            ],
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -98,6 +109,12 @@ class MeProfileScreen extends ConsumerWidget {
                               'Member since ${AppDateUtils.formatDisplayDate(user!.createdAt)}',
                             ).small().muted(),
                           ],
+                          const SizedBox(height: 16),
+                          FilledButton.tonalIcon(
+                            onPressed: () => EditProfileSheet.show(context),
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                            label: const Text('Edit Profile'),
+                          ),
                         ],
                       ),
                     ),
@@ -413,6 +430,54 @@ class MeProfileScreen extends ConsumerWidget {
 
                   const SizedBox(height: 24),
 
+                  // Account Settings
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 8),
+                    child: Text(
+                      'Account',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurfaceVariant,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  Card(
+                    elevation: 0,
+                    color: colorScheme.surfaceContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer.withValues(
+                            alpha: 0.5,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.person_outline,
+                          size: 20,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      title: const Text('Edit Profile'),
+                      subtitle: const Text('Name, username, password'),
+                      trailing: const Icon(Icons.chevron_right, size: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      onTap: () => EditProfileSheet.show(context),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
                   // App Settings
                   Padding(
                     padding: const EdgeInsets.only(left: 4, bottom: 8),
@@ -484,6 +549,71 @@ class MeProfileScreen extends ConsumerWidget {
                           onTap: () => ThemeSelectionSheet.show(context),
                         ),
                         const Divider(height: 1),
+                        ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primaryContainer.withValues(
+                                alpha: 0.5,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.color_lens_outlined,
+                              size: 20,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          title: const Text('Color Scheme'),
+                          subtitle: Text(
+                            colorSchemePref.isMaterialYou
+                                ? 'Material You'
+                                : 'Preferred color scheme',
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (!colorSchemePref.isMaterialYou) ...[
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  margin: const EdgeInsets.only(right: 6),
+                                  decoration: BoxDecoration(
+                                    color: colorSchemePref.preferredColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ],
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.secondaryContainer,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  colorSchemePref.isMaterialYou
+                                      ? 'Material You'
+                                      : colorSchemePref.preferredColorName,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSecondaryContainer,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.chevron_right, size: 20),
+                            ],
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          onTap: () => ColorSchemeSelectionSheet.show(context),
+                        ),
+                        const Divider(height: 1),
                         SwitchListTile(
                           secondary: Container(
                             padding: const EdgeInsets.all(8),
@@ -494,7 +624,7 @@ class MeProfileScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
-                              Icons.palette_outlined,
+                              Icons.brush_outlined,
                               size: 20,
                               color: colorScheme.primary,
                             ),

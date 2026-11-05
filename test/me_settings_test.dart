@@ -7,6 +7,7 @@ import 'package:lockmyslot_app/features/bookings/data/models/booking.dart';
 import 'package:lockmyslot_app/features/bookings/providers/my_bookings_provider.dart';
 import 'package:lockmyslot_app/features/groups/data/models/group.dart';
 import 'package:lockmyslot_app/features/groups/providers/groups_provider.dart';
+import 'package:lockmyslot_app/features/profile/screens/color_scheme_selection_sheet.dart';
 import 'package:lockmyslot_app/features/profile/screens/me_profile_screen.dart';
 import 'package:lockmyslot_app/features/profile/screens/theme_selection_sheet.dart';
 
@@ -66,6 +67,10 @@ void main() {
     // Verify Theme tile and default title exist
     expect(find.text('Theme'), findsOneWidget);
     expect(find.text('System default'), findsWidgets);
+
+    // Verify Color Scheme tile and default title exist
+    expect(find.text('Color Scheme'), findsOneWidget);
+    expect(find.text('Material You'), findsWidgets);
 
     // Verify Item Colors switch exists in Me tab
     expect(find.text('Item Colors'), findsOneWidget);
@@ -149,6 +154,95 @@ void main() {
 
     // MeProfileScreen should now display Light
     expect(find.text('Light'), findsWidgets);
+  });
+
+  testWidgets('tapping Color Scheme tile opens ColorSchemeSelectionSheet',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(createMeScreen());
+    await tester.pumpAndSettle();
+
+    // Tap Color Scheme tile
+    await tester.tap(find.text('Color Scheme'));
+    await tester.pumpAndSettle();
+
+    // ColorSchemeSelectionSheet should be visible
+    expect(find.byType(ColorSchemeSelectionSheet), findsOneWidget);
+    expect(
+      find.text('Choose between Material You or your preferred color scheme'),
+      findsOneWidget,
+    );
+    expect(find.text('Material You'), findsWidgets);
+    expect(find.text('Preferred color scheme'), findsOneWidget);
+    expect(find.text('Select color palette'), findsOneWidget);
+  });
+
+  testWidgets(
+      'selecting preferred color scheme updates color scheme setting in Me tab',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(createMeScreen());
+    await tester.pumpAndSettle();
+
+    // Open ColorSchemeSelectionSheet
+    await tester.tap(find.text('Color Scheme'));
+    await tester.pumpAndSettle();
+
+    // Select a color option from palette (e.g. Indigo)
+    await tester.tap(find.byTooltip('Indigo'));
+    await tester.pumpAndSettle();
+
+    // Tap Done to close sheet
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+
+    // MeProfileScreen should now show Preferred color scheme and Indigo badge
+    expect(find.text('Preferred color scheme'), findsWidgets);
+    expect(find.text('Indigo'), findsOneWidget);
+  });
+
+  testWidgets('switching back to Material You updates setting in Me tab',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(createMeScreen());
+    await tester.pumpAndSettle();
+
+    // Open ColorSchemeSelectionSheet
+    await tester.tap(find.text('Color Scheme'));
+    await tester.pumpAndSettle();
+
+    // First pick preferred color
+    await tester.tap(find.byTooltip('Emerald'));
+    await tester.pumpAndSettle();
+
+    // Now tap Material You option
+    await tester.tap(find.text('Material You').first);
+    await tester.pumpAndSettle();
+
+    // Tap Done
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+
+    // Should be back to Material You
+    expect(find.text('Material You'), findsWidgets);
   });
 }
 

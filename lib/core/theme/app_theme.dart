@@ -36,6 +36,20 @@ class AppTheme {
     );
   }
 
+  /// Builds a scheme from a user's preferred seed color.
+  static ColorScheme schemeFromSeed(
+    Color seedColor,
+    Brightness brightness,
+  ) {
+    return ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: brightness,
+      dynamicSchemeVariant: seedColor == _seedColor
+          ? DynamicSchemeVariant.neutral
+          : DynamicSchemeVariant.tonalSpot,
+    );
+  }
+
   static InputDecorationTheme _inputDecorationTheme(ColorScheme cs) {
     final borderRadius = BorderRadius.circular(12);
     return InputDecorationTheme(

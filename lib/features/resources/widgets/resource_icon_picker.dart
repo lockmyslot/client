@@ -324,8 +324,8 @@ class _ResourceIconPickerSheetState extends State<ResourceIconPickerSheet> {
   }
 }
 
-/// A comprehensive form selector widget with live preview, quick-select chips,
-/// and bottom sheet dialog launcher.
+/// A form selector widget with live preview, bottom sheet dialog launcher,
+/// and item color picker.
 class ResourceIconSelector extends StatelessWidget {
   final String? selectedIconKey;
   final String? selectedColor;
@@ -348,9 +348,6 @@ class ResourceIconSelector extends StatelessWidget {
     final cs = theme.colorScheme;
     final iconLabel = getResourceIconLabel(selectedIconKey);
     final initials = getResourceInitials(resourceName);
-
-    // Prominent quick items: washing machine, room, computer, laptop, desk, tv
-    final quickItems = kCommonResourceIcons.take(6).toList();
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -420,77 +417,6 @@ class ResourceIconSelector extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-
-          const SizedBox(height: 12),
-          const Divider(height: 1),
-          const SizedBox(height: 10),
-
-          // Row 2: Quick selector chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: [
-                // Left alone / Initials Chip
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    avatar: Text(
-                      initials,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: selectedIconKey == null
-                            ? cs.onPrimary
-                            : cs.primary,
-                      ),
-                    ),
-                    label: const Text('Initials'),
-                    selected: selectedIconKey == null,
-                    onSelected: (selected) {
-                      if (selected) onChanged(null);
-                    },
-                  ),
-                ),
-
-                // Quick item chips
-                ...quickItems.map((item) {
-                  final isSelected = selectedIconKey == item.key;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      avatar: Icon(
-                        item.icon,
-                        size: 16,
-                        color: isSelected ? cs.onPrimary : cs.onSurface,
-                      ),
-                      label: Text(item.label),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        onChanged(selected ? item.key : null);
-                      },
-                    ),
-                  );
-                }),
-
-                // More... chip
-                ActionChip(
-                  avatar: const Icon(Icons.more_horiz, size: 16),
-                  label: const Text('More...'),
-                  onPressed: () async {
-                    final chosen = await ResourceIconPickerSheet.show(
-                      context,
-                      currentIconKey: selectedIconKey,
-                      resourceName: resourceName,
-                    );
-                    if (chosen != selectedIconKey) {
-                      onChanged(chosen);
-                    }
-                  },
-                ),
-              ],
-            ),
           ),
 
           if (onColorChanged != null) ...[

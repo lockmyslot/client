@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/color_scheme_provider.dart';
 import 'core/theme/theme_provider.dart';
 
 class LockMySlotApp extends ConsumerWidget {
@@ -12,28 +13,42 @@ class LockMySlotApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final colorSchemePref = ref.watch(appColorSchemeProvider);
 
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
+        ColorScheme? lightScheme;
+        ColorScheme? darkScheme;
+
+        if (colorSchemePref.isMaterialYou) {
+          if (lightDynamic != null) {
+            lightScheme = AppTheme.harmonizeDynamic(
+              lightDynamic,
+              Brightness.light,
+            );
+            darkScheme = darkDynamic != null
+                ? AppTheme.harmonizeDynamic(
+                    darkDynamic,
+                    Brightness.dark,
+                  )
+                : null;
+          }
+        } else {
+          lightScheme = AppTheme.schemeFromSeed(
+            colorSchemePref.preferredColor,
+            Brightness.light,
+          );
+          darkScheme = AppTheme.schemeFromSeed(
+            colorSchemePref.preferredColor,
+            Brightness.dark,
+          );
+        }
+
         return MaterialApp.router(
           title: 'Lock My Slot',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme(
-            lightDynamic == null
-                ? null
-                : AppTheme.harmonizeDynamic(
-                    lightDynamic,
-                    Brightness.light,
-                  ),
-          ),
-          darkTheme: AppTheme.darkTheme(
-            darkDynamic == null
-                ? null
-                : AppTheme.harmonizeDynamic(
-                    darkDynamic,
-                    Brightness.dark,
-                  ),
-          ),
+          theme: AppTheme.lightTheme(lightScheme),
+          darkTheme: AppTheme.darkTheme(darkScheme),
           themeMode: themeMode,
           routerConfig: router,
           builder: (context, child) {

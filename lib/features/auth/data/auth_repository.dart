@@ -85,10 +85,21 @@ class AuthRepository {
     return user;
   }
 
-  Future<User> updateMe(String displayName) async {
+  Future<User> updateMe({
+    String? displayName,
+    String? username,
+    String? password,
+  }) async {
+    final body = <String, dynamic>{
+      if (displayName != null && displayName.isNotEmpty)
+        'display_name': displayName,
+      if (username != null && username.isNotEmpty) 'username': username,
+      if (password != null && password.isNotEmpty) 'password': password,
+    };
+
     final response = await _apiClient.patch<User>(
       ApiConstants.me,
-      body: {'display_name': displayName},
+      body: body,
       fromJson: (json) => User.fromJson(json as Map<String, dynamic>),
     );
     final user = response.data;

@@ -163,7 +163,7 @@ void main() {
       expect(selected, 'washing_machine');
     });
 
-    testWidgets('ResourceIconSelector allows quick selection and initials fallback',
+    testWidgets('ResourceIconSelector allows selection and initials fallback via Browse button',
         (tester) async {
       String? currentIcon;
 
@@ -188,13 +188,21 @@ void main() {
       // Initially left alone -> initials "CL"
       expect(find.text('CL'), findsWidgets);
 
-      // Tap Computer quick chip
+      // Tap Browse button to open sheet
+      await tester.tap(find.text('Browse'));
+      await tester.pumpAndSettle();
+
+      // Tap Computer icon in sheet
       await tester.tap(find.text('Computer'));
       await tester.pumpAndSettle();
       expect(currentIcon, 'computer');
 
-      // Tap Initials chip to reset back to initials
-      await tester.tap(find.text('Initials'));
+      // Tap Browse button again
+      await tester.tap(find.text('Browse'));
+      await tester.pumpAndSettle();
+
+      // Tap Initials option to reset back to initials
+      await tester.tap(find.textContaining('Use Initials'));
       await tester.pumpAndSettle();
       expect(currentIcon, isNull);
     });
