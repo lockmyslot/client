@@ -130,10 +130,14 @@ void main() {
       await tester.enterText(nameField, 'Laundry Room Washer');
       await tester.pumpAndSettle();
 
-      // Tap "Washing Machine" icon chip
-      final washingMachineChip = find.text('Washing Machine');
-      await tester.ensureVisible(washingMachineChip);
-      await tester.tap(washingMachineChip);
+      // Tap Browse button and select "Washing Machine"
+      final browseBtn = find.text('Browse');
+      await tester.ensureVisible(browseBtn);
+      await tester.tap(browseBtn);
+      await tester.pumpAndSettle();
+
+      final washingMachineOption = find.text('Washing Machine');
+      await tester.tap(washingMachineOption);
       await tester.pumpAndSettle();
 
       // Submit

@@ -64,7 +64,7 @@ void main() {
       expect(selectedHex, isNull);
     });
 
-    testWidgets('tapping Reset to theme or Theme Default resets selected color to null',
+    testWidgets('tapping Theme Default resets selected color to null',
         (tester) async {
       String? selectedHex = '#EF4444';
 
@@ -85,8 +85,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Reset to theme'), findsOneWidget);
-      await tester.tap(find.text('Reset to theme'));
+      expect(find.byIcon(Icons.palette_outlined), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.palette_outlined));
       await tester.pumpAndSettle();
 
       expect(selectedHex, isNull);

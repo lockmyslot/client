@@ -266,10 +266,14 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Tap on the Room quick chip
-      final roomChip = find.text('Room');
-      await tester.ensureVisible(roomChip);
-      await tester.tap(roomChip);
+      // Tap Browse button and select "Room"
+      final browseBtn = find.text('Browse');
+      await tester.ensureVisible(browseBtn);
+      await tester.tap(browseBtn);
+      await tester.pumpAndSettle();
+
+      final roomOption = find.text('Room');
+      await tester.tap(roomOption);
       await tester.pumpAndSettle();
 
       // Submit
