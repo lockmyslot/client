@@ -72,8 +72,8 @@ class MembersScreen extends ConsumerWidget {
                           initialTab: InviteTab.share,
                         );
                       },
-                      icon: const Icon(Icons.share_outlined, size: 16),
-                      label: const Text('Share'),
+                      icon: const Icon(Icons.person_add_outlined, size: 16),
+                      label: const Text('Invite'),
                     ),
                   ],
                 ),
@@ -90,26 +90,9 @@ class MembersScreen extends ConsumerWidget {
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          M3CollapsingAppBar(
-            title: const Text('Group Members'),
+          const M3CollapsingAppBar(
+            title: Text('Group Members'),
             pinned: true,
-            actions: [
-              if (groupAsync.value?.isAdmin ?? false)
-                IconButton(
-                  icon: const Icon(Icons.person_add_outlined),
-                  tooltip: 'Invite by Username',
-                  onPressed: () {
-                    final group = groupAsync.value;
-                    UnifiedInviteSheet.show(
-                      context,
-                      groupId: groupId,
-                      groupName: group?.name ?? 'Group',
-                      inviteCode: group?.inviteCode ?? '',
-                      initialTab: InviteTab.direct,
-                    );
-                  },
-                ),
-            ],
           ),
           membersAsync.when(
             loading: () => const SliverFillRemaining(

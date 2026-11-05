@@ -11,6 +11,8 @@ import 'package:lockmyslot_app/features/groups/data/models/group_member.dart';
 import 'package:lockmyslot_app/features/groups/providers/groups_provider.dart';
 import 'package:lockmyslot_app/features/groups/screens/invite_member_sheet.dart';
 import 'package:lockmyslot_app/features/groups/screens/members_screen.dart';
+import 'package:lockmyslot_app/features/groups/screens/unified_invite_sheet.dart';
+import 'package:lockmyslot_app/shared/widgets/m3_collapsing_app_bar.dart';
 
 class FakeSecureStorage extends Fake implements SecureStorageService {}
 
@@ -203,8 +205,8 @@ void main() {
     });
   });
 
-  group('MembersScreen Admin Invite Tests', () {
-    testWidgets('displays invite by username icon button for admin', (
+  group('MembersScreen Invite Tests', () {
+    testWidgets('shows bottom bar invite button and no top-right invite icon', (
       WidgetTester tester,
     ) async {
       final adminGroup = Group(
@@ -250,14 +252,35 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Check admin invite icon in app bar
-      expect(find.byIcon(Icons.person_add_outlined), findsOneWidget);
+      // No invite action in app bar
+      expect(find.byTooltip('Invite by Username'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(M3CollapsingAppBar),
+          matching: find.byIcon(Icons.person_add_outlined),
+        ),
+        findsNothing,
+      );
+
+      // Bottom bar has invite code and Invite button
+      expect(find.text('AB12CD'), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Invite'), findsOneWidget);
+      expect(
+        find.widgetWithIcon(TextButton, Icons.person_add_outlined),
+        findsOneWidget,
+      );
+
       // Check usernames rendered
       expect(find.text('@admin_boss'), findsOneWidget);
       expect(find.text('@regular_joe'), findsOneWidget);
+
+      // Tapping Invite button opens UnifiedInviteSheet
+      await tester.tap(find.widgetWithText(TextButton, 'Invite'));
+      await tester.pumpAndSettle();
+      expect(find.byType(UnifiedInviteSheet), findsOneWidget);
     });
 
-    testWidgets('hides invite by username icon button for regular member', (
+    testWidgets('hides invite bottom bar when group has no invite code', (
       WidgetTester tester,
     ) async {
       final memberGroup = Group(
@@ -293,6 +316,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.person_add_outlined), findsNothing);
+      expect(find.text('Invite'), findsNothing);
     });
   });
 
