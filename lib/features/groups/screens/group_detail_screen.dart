@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/groups_provider.dart';
-import '../widgets/group_avatar.dart';
 import 'edit_group_sheet.dart';
 import '../../resources/providers/resources_provider.dart';
 import '../../resources/screens/create_resource_sheet.dart';
@@ -24,8 +23,7 @@ class GroupDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final groupAsync = ref.watch(groupDetailProvider(groupId));
     final resourcesAsync = ref.watch(groupResourcesProvider(groupId));
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -59,42 +57,6 @@ class GroupDetailScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
-                          child: Row(
-                            children: [
-                              GroupAvatar(
-                                name: group.name,
-                                iconKey: group.icon,
-                                colorHex: group.color,
-                                size: 48,
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      group.name,
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      '${group.memberCount} member${group.memberCount == 1 ? '' : 's'}',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                         // KPI Stat Chips
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
