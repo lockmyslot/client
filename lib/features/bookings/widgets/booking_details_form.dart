@@ -71,11 +71,39 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
   }
 
   // Find all slots in the range starting from _selectedStartTimeSlot for _selectedDurationSlots
-  List<TimeSlot> _calculateRequestedSlots(List<TimeSlot> allSlots) {
-    if (_selectedStartTimeSlot == null) return [];
+  List<TimeSlot> _calculateRequestedSlots(
+    List<TimeSlot> allSlots, {
+    TimeSlot? selectedSlot,
+    int? slotDurationMinutes,
+  }) {
+    final startSlot = selectedSlot ?? _selectedStartTimeSlot;
+    if (startSlot == null) return [];
+
+    final durationMinutes = slotDurationMinutes ?? 60;
+    final isDaySlot = durationMinutes >= 1440 && durationMinutes % 1440 == 0;
+
+    if (isDaySlot) {
+      final startIndex = allSlots.indexWhere(
+        (s) => s.startTime.isAtSameMomentAs(startSlot.startTime),
+      );
+      final actualStartSlot =
+          startIndex != -1 ? allSlots[startIndex] : startSlot;
+      final endTime = actualStartSlot.startTime.add(
+        Duration(minutes: _selectedDurationSlots * durationMinutes),
+      );
+      return [
+        TimeSlot(
+          startTime: actualStartSlot.startTime,
+          endTime: endTime,
+          status: actualStartSlot.status,
+          booked: actualStartSlot.booked,
+          capacity: actualStartSlot.capacity,
+        ),
+      ];
+    }
 
     final startIndex = allSlots.indexWhere(
-      (s) => s.startTime.isAtSameMomentAs(_selectedStartTimeSlot!.startTime),
+      (s) => s.startTime.isAtSameMomentAs(startSlot.startTime),
     );
     if (startIndex == -1) return [];
 
@@ -89,7 +117,11 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     return requested;
   }
 
-  bool _isRangeValid(List<TimeSlot> requestedSlots) {
+  bool _isRangeValid(List<TimeSlot> requestedSlots, {bool isDaySlot = false}) {
+    if (requestedSlots.isEmpty) return false;
+    if (isDaySlot) {
+      return requestedSlots.every((s) => s.isAvailable);
+    }
     if (requestedSlots.length < _selectedDurationSlots) return false;
     return requestedSlots.every((s) => s.isAvailable);
   }
@@ -248,7 +280,17 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
   Widget _buildBottomBar({
     required bool isValid,
     required List<TimeSlot> requestedSlots,
+    bool isDaySlot = false,
   }) {
+    final String timeRangeText;
+    if (isDaySlot) {
+      timeRangeText =
+          '${AppDateUtils.formatDisplayDate(_selectedDate)} • $_selectedDurationSlots ${_selectedDurationSlots == 1 ? 'day' : 'days'}';
+    } else {
+      timeRangeText =
+          '${AppDateUtils.formatDisplayDate(_selectedDate)} • ${AppDateUtils.formatTime(requestedSlots.first.startTime)} - ${AppDateUtils.formatTime(requestedSlots.last.endTime)}';
+    }
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -272,7 +314,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '${AppDateUtils.formatDisplayDate(_selectedDate)} • ${AppDateUtils.formatTime(requestedSlots.first.startTime)} - ${AppDateUtils.formatTime(requestedSlots.last.endTime)}',
+                  timeRangeText,
                 ).small().muted(),
               ),
               const SizedBox(width: 8),
@@ -532,43 +574,45 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     );
   }
 
+  Widget _buildNoSlotsMessage(Availability availability) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.event_busy_outlined,
+              size: 36,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No bookable slots available for this date.',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              (availability.availableFrom != null &&
+                      availability.availableUntil != null &&
+                      (availability.availableFrom != '00:00' ||
+                          availability.availableUntil != '24:00'))
+                  ? 'Slots are only generated within operating hours (${AppDateUtils.formatTimeString(availability.availableFrom)} – ${AppDateUtils.formatTimeString(availability.availableUntil)}).'
+                  : 'The resource may be fully booked or currently unavailable.',
+            ).small().muted(),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTimeSlotGrid(Availability availability) {
     final allSlots = availability.slots;
     if (allSlots.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.event_busy_outlined,
-                size: 36,
-                color: Theme.of(context).colorScheme.outline,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'No bookable slots available for this date.',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                (availability.availableFrom != null &&
-                        availability.availableUntil != null &&
-                        (availability.availableFrom != '00:00' ||
-                            availability.availableUntil != '24:00'))
-                    ? 'Slots are only generated within operating hours (${AppDateUtils.formatTimeString(availability.availableFrom)} – ${AppDateUtils.formatTimeString(availability.availableUntil)}).'
-                    : 'The resource may be fully booked or currently unavailable.',
-              ).small().muted(),
-            ],
-          ),
-        ),
-      );
+      return _buildNoSlotsMessage(availability);
     }
 
     return GridView.builder(
@@ -826,11 +870,20 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     );
 
     final availability = availabilityAsync.valueOrNull;
+    final slotDuration = availability?.slotDurationMinutes ?? 60;
+    final isDaySlot = slotDuration >= 1440 && slotDuration % 1440 == 0;
     final allSlots = availability?.slots ?? [];
-    final requestedSlots = _calculateRequestedSlots(allSlots);
-    final isValid = _isRangeValid(requestedSlots);
+    final effectiveSelectedSlot = isDaySlot
+        ? (allSlots.isNotEmpty ? allSlots.first : null)
+        : _selectedStartTimeSlot;
+    final requestedSlots = _calculateRequestedSlots(
+      allSlots,
+      selectedSlot: effectiveSelectedSlot,
+      slotDurationMinutes: slotDuration,
+    );
+    final isValid = _isRangeValid(requestedSlots, isDaySlot: isDaySlot);
     final showSummary =
-        _selectedStartTimeSlot != null && requestedSlots.isNotEmpty;
+        effectiveSelectedSlot != null && requestedSlots.isNotEmpty;
 
     return Column(
       children: [
@@ -880,27 +933,142 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                         ),
                       ),
                     ),
-                    data: (availability) => KeyedSubtree(
-                      key: ValueKey('availability-data-$_selectedDateString'),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildUserStatsCard(availability.userStats),
-                          const SizedBox(height: 14),
-                          const Text('Select Start Time').h3(),
-                          const SizedBox(height: 4),
-                          _buildOperatingHoursBanner(availability),
-                          const SizedBox(height: 8),
-                          _buildTimeSlotGrid(availability),
-                          const SizedBox(height: 24),
-                          if (_selectedStartTimeSlot != null)
-                            _buildDurationSelector(
-                              availability.slotDurationMinutes,
-                            ),
-                          if (_errorMessage != null) _buildErrorMessage(),
-                        ],
-                      ),
-                    ),
+                    data: (availability) {
+                      final daySlotDuration = availability.slotDurationMinutes;
+                      final isResourceDaySlot =
+                          daySlotDuration >= 1440 && daySlotDuration % 1440 == 0;
+                      final from = availability.availableFrom ?? '00:00';
+                      final until = availability.availableUntil ?? '24:00';
+                      final hasWorkingHours =
+                          (from != '00:00' || until != '24:00');
+                      final daySlots = availability.slots;
+                      final selectedSlot = isResourceDaySlot
+                          ? (daySlots.isNotEmpty ? daySlots.first : null)
+                          : _selectedStartTimeSlot;
+
+                      return KeyedSubtree(
+                        key: ValueKey('availability-data-$_selectedDateString'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildUserStatsCard(availability.userStats),
+                            const SizedBox(height: 14),
+                            if (!isResourceDaySlot) ...[
+                              const Text('Select Start Time').h3(),
+                              const SizedBox(height: 4),
+                              _buildOperatingHoursBanner(availability),
+                              const SizedBox(height: 8),
+                              _buildTimeSlotGrid(availability),
+                              const SizedBox(height: 24),
+                            ] else ...[
+                              if (hasWorkingHours) ...[
+                                _buildOperatingHoursBanner(availability),
+                                const SizedBox(height: 16),
+                              ],
+                              if (daySlots.isEmpty)
+                                _buildNoSlotsMessage(availability)
+                              else if (!daySlots.first.isAvailable) ...[
+                                if (daySlots.first.isMaintenance)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.orange.withValues(alpha: 0.15)
+                                          : Colors.orange.withValues(alpha: 0.10),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.orange.shade700
+                                            : Colors.orange.shade300,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.build_circle_outlined,
+                                          size: 16,
+                                          color: Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.orange.shade300
+                                              : Colors.orange.shade800,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            'Resource is under scheduled maintenance on this date.',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              color: Theme.of(context)
+                                                          .brightness ==
+                                                      Brightness.dark
+                                                  ? Colors.orange.shade200
+                                                  : Colors.orange.shade900,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                else if (daySlots.first.isFull)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outlineVariant,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.block_outlined,
+                                          size: 16,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            'This date is fully booked.',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                const SizedBox(height: 16),
+                              ],
+                            ],
+                            if (selectedSlot != null)
+                              _buildDurationSelector(
+                                availability.slotDurationMinutes,
+                              ),
+                            if (_errorMessage != null) _buildErrorMessage(),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -915,6 +1083,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                   child: _buildBottomBar(
                     isValid: isValid,
                     requestedSlots: requestedSlots,
+                    isDaySlot: isDaySlot,
                   ),
                 )
               : const SizedBox.shrink(key: ValueKey('no-summary')),
