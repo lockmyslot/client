@@ -48,19 +48,6 @@ class GroupDetailScreen extends ConsumerWidget {
                 error: (_, __) => const Text('Group Details'),
               ),
               pinned: true,
-              actions: [
-                if (groupAsync.valueOrNull?.isAdmin == true)
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined),
-                    tooltip: 'Edit Group',
-                    onPressed: () {
-                      final currentGroup = groupAsync.valueOrNull;
-                      if (currentGroup != null) {
-                        EditGroupSheet.show(context, currentGroup);
-                      }
-                    },
-                  ),
-              ],
             ),
             groupAsync.maybeWhen(
               data: (group) {
@@ -159,23 +146,18 @@ class GroupDetailScreen extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Row(
                             children: [
-                              if (hasInviteCode) ...[
+                              if (group.isAdmin) ...[
                                 Expanded(
-                                  child: FilledButton.tonalIcon(
+                                  child: OutlinedButton.icon(
                                     onPressed: () {
-                                      DeepLinkUtils.showInviteSheet(
-                                        context,
-                                        groupName: group.name,
-                                        inviteCode: group.inviteCode!,
-                                        groupId: group.id,
-                                      );
+                                      EditGroupSheet.show(context, group);
                                     },
                                     icon: const Icon(
-                                      Icons.share_outlined,
+                                      Icons.edit_outlined,
                                       size: 16,
                                     ),
-                                    label: const Text('Invite'),
-                                    style: FilledButton.styleFrom(
+                                    label: const Text('Edit'),
+                                    style: OutlinedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 12,
                                         vertical: 10,

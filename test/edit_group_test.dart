@@ -3,9 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockmyslot_app/features/groups/data/groups_repository.dart';
 import 'package:lockmyslot_app/features/groups/data/models/group.dart';
+import 'package:lockmyslot_app/features/groups/providers/groups_provider.dart';
 import 'package:lockmyslot_app/features/groups/screens/create_group_sheet.dart';
 import 'package:lockmyslot_app/features/groups/screens/edit_group_sheet.dart';
+import 'package:lockmyslot_app/features/groups/screens/group_detail_screen.dart';
 import 'package:lockmyslot_app/features/groups/widgets/group_avatar.dart';
+import 'package:lockmyslot_app/features/resources/providers/resources_provider.dart';
+import 'package:lockmyslot_app/shared/widgets/m3_collapsing_app_bar.dart';
 
 class FakeGroupsRepository extends Fake implements GroupsRepository {
   Map<String, dynamic>? lastCreateArgs;
@@ -153,6 +157,104 @@ void main() {
       expect(fakeRepo.lastUpdateArgs!['name'], equals('Design Team'));
       expect(fakeRepo.lastUpdateArgs!['color'], equals('#F43F5E'));
       expect(updatedGroup?.color, equals('#F43F5E'));
+    });
+  });
+
+  group('GroupDetailScreen Edit Action Tests', () {
+    testWidgets(
+        'admin sees Edit button in quick action row and no top-right edit icon or invite button',
+        (tester) async {
+      final fakeRepo = FakeGroupsRepository();
+      final adminGroup = Group(
+        id: 'grp-admin',
+        name: 'Tennis Club',
+        color: '#10B981',
+        inviteCode: 'TEN123',
+        role: 'ADMIN',
+        memberCount: 4,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            groupsRepositoryProvider.overrideWithValue(fakeRepo),
+            groupDetailProvider('grp-admin')
+                .overrideWith((ref) async => adminGroup),
+            groupResourcesProvider('grp-admin').overrideWith((ref) async => []),
+          ],
+          child: const MaterialApp(
+            home: GroupDetailScreen(groupId: 'grp-admin'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Top right edit icon in M3CollapsingAppBar should NOT exist
+      final m3AppBar = find.byType(M3CollapsingAppBar);
+      expect(m3AppBar, findsOneWidget);
+      expect(
+        find.descendant(of: m3AppBar, matching: find.byTooltip('Edit Group')),
+        findsNothing,
+      );
+
+      // "Invite" button should NOT exist in quick actions
+      expect(find.text('Invite'), findsNothing);
+
+      // Group code pill should exist
+      expect(find.textContaining('TEN123'), findsOneWidget);
+
+      // "Edit" action button should exist in quick actions as OutlinedButton
+      final editButton = find.widgetWithText(OutlinedButton, 'Edit');
+      expect(editButton, findsOneWidget);
+
+      // Tapping Edit button opens EditGroupSheet
+      await tester.tap(editButton);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EditGroupSheet), findsOneWidget);
+    });
+
+    testWidgets(
+        'non-admin does not see Edit button in quick action row or top-right edit icon',
+        (tester) async {
+      final fakeRepo = FakeGroupsRepository();
+      final memberGroup = Group(
+        id: 'grp-member',
+        name: 'Book Club',
+        color: '#3B82F6',
+        inviteCode: 'BOOK12',
+        role: 'MEMBER',
+        memberCount: 3,
+        createdAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            groupsRepositoryProvider.overrideWithValue(fakeRepo),
+            groupDetailProvider('grp-member')
+                .overrideWith((ref) async => memberGroup),
+            groupResourcesProvider('grp-member')
+                .overrideWith((ref) async => []),
+          ],
+          child: const MaterialApp(
+            home: GroupDetailScreen(groupId: 'grp-member'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // No edit button in quick actions or app bar
+      expect(find.widgetWithText(OutlinedButton, 'Edit'), findsNothing);
+      expect(find.text('Invite'), findsNothing);
+      expect(find.byTooltip('Edit Group'), findsNothing);
+
+      // Group code pill is still displayed for member
+      expect(find.textContaining('BOOK12'), findsOneWidget);
+      // My Bookings button is displayed
+      expect(
+          find.widgetWithText(OutlinedButton, 'My Bookings'), findsOneWidget);
     });
   });
 }
