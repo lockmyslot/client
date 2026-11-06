@@ -233,11 +233,15 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     if (is24Hours) {
       return Row(
         children: [
-          Icon(Icons.schedule_outlined, size: 14, color: cs.onSurfaceVariant),
-          const SizedBox(width: 5),
+          Icon(Icons.schedule_outlined, size: 16, color: cs.onSurfaceVariant),
+          const SizedBox(width: 6),
           Text(
             'Operating hours: Open 24 hours (All day)',
-            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+            style: TextStyle(
+              fontSize: 13,
+              color: cs.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       );
@@ -247,12 +251,12 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     final formattedUntil = AppDateUtils.formatTimeString(until);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: cs.primaryContainer.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(8),
+        color: cs.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: cs.primary.withValues(alpha: 0.25),
+          color: cs.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
       child: Row(
@@ -260,16 +264,16 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
         children: [
           Icon(
             Icons.schedule_outlined,
-            size: 14,
+            size: 16,
             color: cs.primary,
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           Text(
             'Operating hours: $formattedFrom – $formattedUntil',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: cs.primary,
+              color: cs.onSurface,
             ),
           ),
         ],
@@ -282,6 +286,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     required List<TimeSlot> requestedSlots,
     bool isDaySlot = false,
   }) {
+    final cs = Theme.of(context).colorScheme;
     final String timeRangeText;
     if (isDaySlot) {
       timeRangeText =
@@ -292,16 +297,24 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: cs.surfaceContainerHigh,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
+            color: cs.outlineVariant.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       child: SafeArea(
         top: false,
         child: Column(
@@ -309,51 +322,113 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
-            children: [
-              const Icon(Icons.bookmark_added_outlined, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  timeRangeText,
-                ).small().muted(),
-              ),
-              const SizedBox(width: 8),
-              PrimaryBadge(child: Text(isValid ? 'Available' : 'Unavailable')),
-            ],
-          ),
-          if (!isValid) ...[
-            const SizedBox(height: 8),
-            const Text(
-              'One or more slots in the selected duration are already booked or restricted.',
-              style: TextStyle(color: Colors.red),
-            ).small(),
-          ],
-          const SizedBox(height: 12),
-          PrimaryButton(
-            expand: true,
-            onPressed: (isValid && !_isBooking)
-                ? () => _handleConfirmBooking(requestedSlots)
-                : null,
-            child: _isBooking
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
+              children: [
+                Icon(
+                  Icons.bookmark_added_outlined,
+                  size: 20,
+                  color: cs.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    timeRangeText,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
                     ),
-                  )
-                : Text(
-                    widget.reschedulingBooking != null
-                        ? 'Confirm Reschedule'
-                        : 'Confirm Booking',
                   ),
-          ),
-        ],
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isValid
+                        ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                        : cs.errorContainer,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isValid
+                          ? const Color(0xFF10B981).withValues(alpha: 0.4)
+                          : cs.error.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isValid
+                            ? Icons.check_circle_outline
+                            : Icons.error_outline,
+                        size: 13,
+                        color: isValid
+                            ? const Color(0xFF10B981)
+                            : cs.onErrorContainer,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isValid ? 'Available' : 'Unavailable',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isValid
+                              ? const Color(0xFF10B981)
+                              : cs.onErrorContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (!isValid) ...[
+              const SizedBox(height: 8),
+              Text(
+                'One or more slots in the selected duration are already booked or restricted.',
+                style: TextStyle(
+                  color: cs.error,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+            const SizedBox(height: 14),
+            SizedBox(
+              height: 50,
+              child: FilledButton(
+                onPressed: (isValid && !_isBooking)
+                    ? () => _handleConfirmBooking(requestedSlots)
+                    : null,
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: _isBooking
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: cs.onPrimary,
+                        ),
+                      )
+                    : Text(
+                        widget.reschedulingBooking != null
+                            ? 'Confirm Reschedule'
+                            : 'Confirm Booking',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildReschedulingBanner() {
     final reschedulingBooking = widget.reschedulingBooking;
@@ -412,6 +487,8 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
   }
 
   Widget _buildDateHeader() {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -420,23 +497,33 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
           child: Text(
             AppDateUtils.formatDisplayDate(_selectedDate),
             key: ValueKey('date-header-$_selectedDateString'),
-          ).h3(),
-        ),
-        OutlineButton(
-          onPressed: _pickCalendarDate,
-          child: const Row(
-            children: [
-              Icon(Icons.event_outlined, size: 16),
-              SizedBox(width: 6),
-              Text('Change Date'),
-            ],
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.2,
+            ),
           ),
+        ),
+        FilledButton.tonalIcon(
+          onPressed: _pickCalendarDate,
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            backgroundColor: cs.surfaceContainerHigh,
+            foregroundColor: cs.onSurface,
+          ),
+          icon: const Icon(Icons.calendar_month_outlined, size: 16),
+          label: const Text('Change Date'),
         ),
       ],
     );
   }
 
   Widget _buildDateChips() {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return SingleChildScrollView(
       clipBehavior: Clip.none,
       scrollDirection: Axis.horizontal,
@@ -449,61 +536,91 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
             date,
             _selectedDate,
           );
+          final isToday = index == 0;
+
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => _onDateSelected(date),
-              child: AnimatedScale(
-                scale: isSelected ? 1.05 : 1.0,
-                duration: const Duration(milliseconds: 260),
-                curve: Curves.easeOutBack,
-                child: AnimatedContainer(
-                  duration: const Duration(
-                    milliseconds: 220,
-                  ),
-                  curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Theme.of(
-                            context,
-                          ).colorScheme.primary
-                        : Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        index == 0
-                            ? 'Today'
-                            : AppDateUtils.formatShortDate(
-                                date,
-                              ),
-                        style: TextStyle(
-                          color: isSelected
-                              ? Theme.of(
-                                  context,
-                                ).colorScheme.onPrimary
-                              : null,
+            padding: const EdgeInsets.only(right: 10),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _onDateSelected(date),
+                borderRadius: BorderRadius.circular(16),
+                child: AnimatedScale(
+                  scale: isSelected ? 1.04 : 1.0,
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutBack,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    width: 70,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? cs.primaryContainer
+                          : cs.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? cs.primary
+                            : cs.outlineVariant.withValues(alpha: 0.5),
+                        width: isSelected ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          AppDateUtils.formatWeekday(date).toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                            color: isSelected
+                                ? cs.onPrimaryContainer
+                                : cs.onSurfaceVariant,
+                          ),
                         ),
-                      ).small(),
-                      Text(
-                        AppDateUtils.formatWeekday(date),
-                        style: TextStyle(
-                          color: isSelected
-                              ? Theme.of(
-                                  context,
-                                ).colorScheme.onPrimary
-                              : null,
+                        const SizedBox(height: 4),
+                        Text(
+                          '${date.day}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? cs.onPrimaryContainer
+                                : cs.onSurface,
+                          ),
                         ),
-                      ).mono().small(),
-                    ],
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? cs.primary.withValues(alpha: 0.2)
+                                : (isToday
+                                    ? cs.primary.withValues(alpha: 0.12)
+                                    : Colors.transparent),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            isToday
+                                ? 'Today'
+                                : AppDateUtils.formatShortDate(date),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight:
+                                  isToday ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected
+                                  ? cs.onPrimaryContainer
+                                  : (isToday ? cs.primary : cs.onSurfaceVariant),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -515,61 +632,121 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
   }
 
   Widget _buildUserStatsCard(UserStats userStats) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 8,
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: 0.4),
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text('Bookings').small().muted(),
-                  SlideFadeSwitcher(
-                    duration: const Duration(
-                      milliseconds: 300,
-                    ),
-                    child: Text(
-                      '${userStats.bookingsToday}${userStats.maxBookingsPerDay != null ? '/${userStats.maxBookingsPerDay}' : ''}',
-                      key: ValueKey(
-                        '${userStats.bookingsToday}/${userStats.maxBookingsPerDay}',
-                      ),
-                    ).h4(),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: cs.primaryContainer,
+                    shape: BoxShape.circle,
                   ),
-                ],
-              ),
-            ),
-            Container(
-              height: 20,
-              width: 1,
-              color: Theme.of(
-                context,
-              ).colorScheme.outlineVariant,
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text('Hours Used').small().muted(),
-                  SlideFadeSwitcher(
-                    duration: const Duration(
-                      milliseconds: 300,
-                    ),
-                    child: Text(
-                      '${userStats.hoursToday.toStringAsFixed(1)}${userStats.maxHoursPerDay != null ? '/${userStats.maxHoursPerDay}' : ''}h',
-                      key: ValueKey(
-                        '${userStats.hoursToday.toStringAsFixed(1)}/${userStats.maxHoursPerDay}h',
-                      ),
-                    ).h4(),
+                  child: Icon(
+                    Icons.event_available_outlined,
+                    size: 18,
+                    color: cs.onPrimaryContainer,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Bookings',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      SlideFadeSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: Text(
+                          '${userStats.bookingsToday}${userStats.maxBookingsPerDay != null ? '/${userStats.maxBookingsPerDay}' : ''}',
+                          key: ValueKey(
+                            '${userStats.bookingsToday}/${userStats.maxBookingsPerDay}',
+                          ),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: 36,
+            width: 1,
+            color: cs.outlineVariant.withValues(alpha: 0.5),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: cs.secondaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.schedule_outlined,
+                    size: 18,
+                    color: cs.onSecondaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Hours Used',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      SlideFadeSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: Text(
+                          '${userStats.hoursToday.toStringAsFixed(1)}${userStats.maxHoursPerDay != null ? '/${userStats.maxHoursPerDay}' : ''}h',
+                          key: ValueKey(
+                            '${userStats.hoursToday.toStringAsFixed(1)}/${userStats.maxHoursPerDay}h',
+                          ),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -618,13 +795,12 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate:
-          const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            childAspectRatio: 2.6,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 2.6,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
       itemCount: allSlots.length,
       itemBuilder: (context, index) {
         final slot = allSlots[index];
@@ -645,7 +821,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
           chipBg = cs.primaryContainer;
           chipBorder = cs.primary;
           borderWidth = 1.5;
-          icon = Icons.check_outlined;
+          icon = Icons.check_circle_outlined;
           iconColor = cs.onPrimaryContainer;
           textColor = cs.onPrimaryContainer;
         } else if (slot.isMaintenance) {
@@ -667,66 +843,75 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
               ? Colors.orange.shade200
               : Colors.orange.shade900;
         } else if (isAvail) {
-          chipBg = cs.surfaceContainer;
-          chipBorder = cs.outlineVariant;
+          chipBg = cs.surfaceContainerLow;
+          chipBorder = cs.outlineVariant.withValues(alpha: 0.6);
           borderWidth = 1;
           icon = Icons.access_time_outlined;
           iconColor = cs.onSurfaceVariant;
           textColor = cs.onSurface;
         } else {
-          chipBg = cs.surfaceContainerLow
+          chipBg = cs.surfaceContainerLowest
               .withValues(alpha: 0.5);
           chipBorder = cs.outlineVariant
-              .withValues(alpha: 0.4);
+              .withValues(alpha: 0.3);
           borderWidth = 1;
           icon = Icons.block_outlined;
           iconColor = cs.outline.withValues(alpha: 0.6);
           textColor = cs.outline;
         }
 
-        return GestureDetector(
-          onTap: isAvail
-              ? () {
-                  setState(() {
-                    _selectedStartTimeSlot = slot;
-                    _errorMessage = null;
-                  });
-                }
-              : null,
-          child: AnimatedScale(
-            scale: isSelected ? 1.06 : 1.0,
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeOutBack,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeOutCubic,
-              decoration: BoxDecoration(
-                color: chipBg,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: chipBorder,
-                  width: borderWidth,
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: isAvail
+                ? () {
+                    setState(() {
+                      _selectedStartTimeSlot = slot;
+                      _errorMessage = null;
+                    });
+                  }
+                : null,
+            borderRadius: BorderRadius.circular(12),
+            child: AnimatedScale(
+              scale: isSelected ? 1.05 : 1.0,
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutBack,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                decoration: BoxDecoration(
+                  color: chipBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: chipBorder,
+                    width: borderWidth,
+                  ),
                 ),
-              ),
-              child: Center(
-                child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      icon,
-                      size: 13,
-                      color: iconColor,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      AppDateUtils.formatTime(
-                        slot.startTime,
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        icon,
+                        size: 14,
+                        color: iconColor,
                       ),
-                      style: TextStyle(color: textColor),
-                    ).mono().small(),
-                  ],
+                      const SizedBox(width: 5),
+                      Text(
+                        AppDateUtils.formatTime(
+                          slot.startTime,
+                        ),
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -737,6 +922,39 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
   }
 
   Widget _buildDurationSelector(int slotMinutes) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final segments = List.generate(4, (index) {
+      final durationUnits = index + 1;
+      final durationMinutes = durationUnits * slotMinutes;
+
+      String durationLabel;
+      if (durationMinutes < 60) {
+        durationLabel = '$durationMinutes mins';
+      } else if (durationMinutes % 1440 == 0) {
+        final days = durationMinutes ~/ 1440;
+        durationLabel = '$days ${days == 1 ? 'day' : 'days'}';
+      } else if (durationMinutes % 60 == 0) {
+        durationLabel =
+            '${durationMinutes ~/ 60} ${durationMinutes == 60 ? 'hour' : 'hours'}';
+      } else {
+        durationLabel =
+            '${(durationMinutes / 60).toStringAsFixed(1)} hours';
+      }
+
+      return ButtonSegment<int>(
+        value: durationUnits,
+        label: Text(
+          durationLabel,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      );
+    });
+
     return SlideFadeSwitcher(
       duration: const Duration(milliseconds: 350),
       child: KeyedSubtree(
@@ -744,90 +962,37 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Select Duration').h3(),
+            Text(
+              'Select Duration',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 12),
-            SingleChildScrollView(
-              clipBehavior: Clip.none,
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(4, (index) {
-                  final durationUnits = index + 1;
-                  final durationMinutes =
-                      durationUnits * slotMinutes;
-                  final isSelected =
-                      _selectedDurationSlots ==
-                      durationUnits;
-
-                  String durationLabel;
-                  if (durationMinutes < 60) {
-                    durationLabel =
-                        '$durationMinutes mins';
-                  } else if (durationMinutes % 1440 == 0) {
-                    final days = durationMinutes ~/ 1440;
-                    durationLabel =
-                        '$days ${days == 1 ? 'day' : 'days'}';
-                  } else if (durationMinutes % 60 == 0) {
-                    durationLabel =
-                        '${durationMinutes ~/ 60} ${durationMinutes == 60 ? 'hour' : 'hours'}';
-                  } else {
-                    durationLabel =
-                        '${(durationMinutes / 60).toStringAsFixed(1)} hours';
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.only(
-                      right: 8,
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedDurationSlots =
-                              durationUnits;
-                          _errorMessage = null;
-                        });
-                      },
-                      child: AnimatedScale(
-                        scale: isSelected ? 1.06 : 1.0,
-                        duration: const Duration(
-                          milliseconds: 280,
-                        ),
-                        curve: Curves.easeOutBack,
-                        child: AnimatedContainer(
-                          duration: const Duration(
-                            milliseconds: 240,
-                          ),
-                          curve: Curves.easeOutCubic,
-                          padding:
-                              const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Theme.of(
-                                    context,
-                                  ).colorScheme.primary
-                                : Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
-                            borderRadius:
-                                BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            durationLabel,
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary
-                                  : null,
-                            ),
-                          ).small().semiBold(),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<int>(
+                segments: segments,
+                selected: {_selectedDurationSlots},
+                onSelectionChanged: (Set<int> newSelection) {
+                  setState(() {
+                    _selectedDurationSlots = newSelection.first;
+                    _errorMessage = null;
+                  });
+                },
+                showSelectedIcon: true,
+                style: SegmentedButton.styleFrom(
+                  selectedBackgroundColor: cs.primaryContainer,
+                  selectedForegroundColor: cs.onPrimaryContainer,
+                  backgroundColor: cs.surfaceContainerLow,
+                  foregroundColor: cs.onSurface,
+                  side: BorderSide(
+                    color: cs.outlineVariant.withValues(alpha: 0.5),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -954,10 +1119,16 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                             _buildUserStatsCard(availability.userStats),
                             const SizedBox(height: 14),
                             if (!isResourceDaySlot) ...[
-                              const Text('Select Start Time').h3(),
-                              const SizedBox(height: 4),
-                              _buildOperatingHoursBanner(availability),
+                              Text(
+                                'Select Start Time',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
                               const SizedBox(height: 8),
+                              _buildOperatingHoursBanner(availability),
+                              const SizedBox(height: 12),
                               _buildTimeSlotGrid(availability),
                               const SizedBox(height: 24),
                             ] else ...[
