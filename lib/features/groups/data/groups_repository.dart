@@ -210,6 +210,23 @@ class GroupsRepository {
     await _apiClient.delete(ApiConstants.removeMember(groupId, userId));
   }
 
+  Future<GroupMember> updateMemberRole(
+    String groupId,
+    String userId,
+    String role, {
+    DateTime? expiresAt,
+  }) async {
+    final response = await _apiClient.patch<GroupMember>(
+      ApiConstants.updateMemberRole(groupId, userId),
+      body: {
+        'role': role,
+        if (expiresAt != null) 'expires_at': expiresAt.toIso8601String(),
+      },
+      fromJson: (json) => GroupMember.fromJson(json as Map<String, dynamic>),
+    );
+    return response.data;
+  }
+
   Future<void> leaveGroup(String groupId) async {
     await _apiClient.post(ApiConstants.leaveGroup(groupId));
   }

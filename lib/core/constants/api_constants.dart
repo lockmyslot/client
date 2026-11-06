@@ -13,6 +13,8 @@ class ApiConstants {
   static String groupMembers(String id) => '/groups/$id/members';
   static String removeMember(String groupId, String userId) =>
       '/groups/$groupId/members/$userId';
+  static String updateMemberRole(String groupId, String userId) =>
+      '/groups/$groupId/members/$userId/role';
   static String leaveGroup(String id) => '/groups/$id/leave';
   static String pinGroup(String id) => '/groups/$id/pin';
   static String regenerateInvite(String id) => '/groups/$id/regenerate_invite';

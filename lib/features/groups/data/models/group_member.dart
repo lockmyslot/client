@@ -5,6 +5,7 @@ class GroupMember {
   final String displayName;
   final String? username;
   final String role;
+  final DateTime? expiresAt;
   final DateTime joinedAt;
 
   const GroupMember({
@@ -14,6 +15,7 @@ class GroupMember {
     required this.displayName,
     this.username,
     required this.role,
+    this.expiresAt,
     required this.joinedAt,
   });
 
@@ -21,7 +23,32 @@ class GroupMember {
   bool get isGuest => role.toUpperCase() == 'GUEST';
   bool get isMod =>
       role.toUpperCase() == 'MOD' || role.toUpperCase() == 'MODERATOR';
+  bool get isModerator => isMod;
   bool get isMember => role.toUpperCase() == 'MEMBER';
+  bool get isExpired =>
+      isGuest && expiresAt != null && DateTime.now().isAfter(expiresAt!);
+
+  GroupMember copyWith({
+    String? id,
+    String? groupId,
+    String? userId,
+    String? displayName,
+    String? username,
+    String? role,
+    DateTime? expiresAt,
+    DateTime? joinedAt,
+  }) {
+    return GroupMember(
+      id: id ?? this.id,
+      groupId: groupId ?? this.groupId,
+      userId: userId ?? this.userId,
+      displayName: displayName ?? this.displayName,
+      username: username ?? this.username,
+      role: role ?? this.role,
+      expiresAt: expiresAt ?? this.expiresAt,
+      joinedAt: joinedAt ?? this.joinedAt,
+    );
+  }
 
   factory GroupMember.fromJson(Map<String, dynamic> json) {
     final userMap = json['user'] as Map<String, dynamic>?;
@@ -38,6 +65,11 @@ class GroupMember {
           json['username'] as String? ??
           userMap?['username'] as String?,
       role: json['role'] as String? ?? 'MEMBER',
+      expiresAt: json['expires_at'] != null
+          ? DateTime.tryParse(json['expires_at'] as String)
+          : json['expiresAt'] != null
+              ? DateTime.tryParse(json['expiresAt'] as String)
+              : null,
       joinedAt: json['joined_at'] != null
           ? DateTime.parse(json['joined_at'] as String)
           : DateTime.now(),
@@ -52,6 +84,7 @@ class GroupMember {
       'display_name': displayName,
       if (username != null) 'username': username,
       'role': role,
+      if (expiresAt != null) 'expires_at': expiresAt!.toIso8601String(),
       'joined_at': joinedAt.toIso8601String(),
     };
   }

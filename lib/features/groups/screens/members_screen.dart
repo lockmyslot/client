@@ -9,6 +9,7 @@ import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 import 'unified_invite_sheet.dart';
+import 'change_role_sheet.dart';
 
 class MembersScreen extends ConsumerWidget {
   final String groupId;
@@ -23,7 +24,7 @@ class MembersScreen extends ConsumerWidget {
     final inviteCodeBar = groupAsync.maybeWhen(
       data: (group) {
         final inviteCode = group.inviteCode;
-        if (inviteCode == null || inviteCode.isEmpty) {
+        if (inviteCode == null || inviteCode.isEmpty || group.isGuest) {
           return null;
         }
         return SafeArea(
@@ -109,6 +110,7 @@ class MembersScreen extends ConsumerWidget {
             data: (members) {
               final group = groupAsync.value;
               final isAdmin = group?.isAdmin ?? false;
+              final isModerator = group?.isModerator ?? false;
 
               if (members.isEmpty) {
                 return const SliverFillRemaining(
@@ -255,7 +257,10 @@ class MembersScreen extends ConsumerWidget {
                                         ],
                                         const SizedBox(height: 2),
                                         Text(
-                                          'Joined ${AppDateUtils.formatDisplayDate(member.joinedAt)}',
+                                          member.isGuest &&
+                                                  member.expiresAt != null
+                                              ? 'Joined ${AppDateUtils.formatDisplayDate(member.joinedAt)} • Expires ${AppDateUtils.formatDisplayDate(member.expiresAt!)}'
+                                              : 'Joined ${AppDateUtils.formatDisplayDate(member.joinedAt)}',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ).muted().small(),
@@ -263,12 +268,30 @@ class MembersScreen extends ConsumerWidget {
                                     ),
                                   ),
                                   if (isAdmin && !member.isAdmin) ...[
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: 4),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.manage_accounts_outlined,
+                                        size: 20,
+                                      ),
+                                      tooltip: 'Change Role',
+                                      onPressed: () => ChangeRoleSheet.show(
+                                        context,
+                                        groupId: groupId,
+                                        member: member,
+                                      ),
+                                    ),
+                                  ],
+                                  if ((isAdmin && !member.isAdmin) ||
+                                      (isModerator && member.isGuest)) ...[
+                                    const SizedBox(width: 4),
                                     IconButton(
                                       icon: const Icon(
                                         Icons.delete_outline,
                                         color: Colors.red,
+                                        size: 20,
                                       ),
+                                      tooltip: 'Remove Member',
                                       onPressed: () async {
                                         final confirmed =
                                             await ConfirmDialog.show(

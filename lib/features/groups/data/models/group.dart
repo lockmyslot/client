@@ -4,7 +4,8 @@ class Group {
   final String? inviteCode;
   final String? color;
   final String? icon;
-  final String role; // "ADMIN" | "MEMBER"
+  final String role; // "ADMIN" | "MODERATOR" | "MEMBER" | "GUEST"
+  final DateTime? expiresAt;
   final int memberCount;
   final DateTime createdAt;
   final bool isPinned;
@@ -16,6 +17,7 @@ class Group {
     this.color,
     this.icon,
     required this.role,
+    this.expiresAt,
     required this.memberCount,
     required this.createdAt,
     this.isPinned = false,
@@ -25,7 +27,10 @@ class Group {
   bool get isGuest => role.toUpperCase() == 'GUEST';
   bool get isMod =>
       role.toUpperCase() == 'MOD' || role.toUpperCase() == 'MODERATOR';
+  bool get isModerator => isMod;
   bool get isMember => role.toUpperCase() == 'MEMBER';
+  bool get isExpired =>
+      isGuest && expiresAt != null && DateTime.now().isAfter(expiresAt!);
 
   Group copyWith({
     String? id,
@@ -34,6 +39,7 @@ class Group {
     String? color,
     String? icon,
     String? role,
+    DateTime? expiresAt,
     int? memberCount,
     DateTime? createdAt,
     bool? isPinned,
@@ -45,6 +51,7 @@ class Group {
       color: color ?? this.color,
       icon: icon ?? this.icon,
       role: role ?? this.role,
+      expiresAt: expiresAt ?? this.expiresAt,
       memberCount: memberCount ?? this.memberCount,
       createdAt: createdAt ?? this.createdAt,
       isPinned: isPinned ?? this.isPinned,
@@ -60,6 +67,11 @@ class Group {
       color: json['color'] as String?,
       icon: json['icon'] as String?,
       role: json['role'] as String? ?? 'MEMBER',
+      expiresAt: json['expires_at'] != null
+          ? DateTime.tryParse(json['expires_at'] as String)
+          : json['expiresAt'] != null
+              ? DateTime.tryParse(json['expiresAt'] as String)
+              : null,
       memberCount:
           json['member_count'] as int? ?? json['memberCount'] as int? ?? 1,
       createdAt: json['created_at'] != null
@@ -78,6 +90,7 @@ class Group {
       if (color != null) 'color': color,
       if (icon != null) 'icon': icon,
       'role': role,
+      if (expiresAt != null) 'expires_at': expiresAt!.toIso8601String(),
       'member_count': memberCount,
       'created_at': createdAt.toIso8601String(),
       'is_pinned': isPinned,
