@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ui/ui.dart';
+import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../data/groups_repository.dart';
 import '../providers/groups_provider.dart';
@@ -59,14 +60,18 @@ class _UnifiedInviteSheetState extends ConsumerState<UnifiedInviteSheet>
   // Direct invite state
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
+  String _selectedRole = 'GUEST';
+  late DateTime _expiresAt;
   bool _isInviting = false;
   String? _directInviteError;
   String? _lastInvitedUser;
+  String? _lastInvitedRole;
 
   @override
   void initState() {
     super.initState();
     _currentCode = widget.inviteCode.trim().toUpperCase();
+    _expiresAt = DateTime.now().add(const Duration(days: 7));
     _tabController = TabController(
       length: 2,
       vsync: this,
@@ -79,6 +84,31 @@ class _UnifiedInviteSheetState extends ConsumerState<UnifiedInviteSheet>
     _tabController.dispose();
     _usernameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickExpirationDate() async {
+    final now = DateTime.now();
+    final initial = _expiresAt.isAfter(now)
+        ? _expiresAt
+        : now.add(const Duration(days: 1));
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: now.add(const Duration(days: 1)),
+      lastDate: now.add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() {
+        _expiresAt = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          23,
+          59,
+          59,
+        );
+      });
+    }
   }
 
   String _formatError(String rawError, String username) {
@@ -111,11 +141,29 @@ class _UnifiedInviteSheetState extends ConsumerState<UnifiedInviteSheet>
       _isInviting = true;
       _directInviteError = null;
       _lastInvitedUser = null;
+      _lastInvitedRole = null;
     });
 
     try {
       final repo = ref.read(groupsRepositoryProvider);
-      await repo.inviteMember(widget.groupId!, cleanUsername);
+      DateTime? expiry;
+      if (_selectedRole == 'GUEST') {
+        expiry = DateTime(
+          _expiresAt.year,
+          _expiresAt.month,
+          _expiresAt.day,
+          23,
+          59,
+          59,
+        );
+      }
+
+      await repo.inviteMember(
+        widget.groupId!,
+        cleanUsername,
+        role: _selectedRole,
+        expiresAt: expiry,
+      );
 
       ref.invalidate(groupMembersProvider(widget.groupId!));
       ref.invalidate(groupDetailProvider(widget.groupId!));
@@ -125,6 +173,7 @@ class _UnifiedInviteSheetState extends ConsumerState<UnifiedInviteSheet>
         setState(() {
           _isInviting = false;
           _lastInvitedUser = cleanUsername;
+          _lastInvitedRole = _selectedRole;
           _usernameController.clear();
         });
       }
@@ -567,13 +616,26 @@ class _UnifiedInviteSheetState extends ConsumerState<UnifiedInviteSheet>
                     const Icon(Icons.check_circle_outline, size: 18, color: Colors.green),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        'Invitation sent to @$_lastInvitedUser!',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.green,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Invitation sent to @$_lastInvitedUser!',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green,
+                            ),
+                          ),
+                          if (_lastInvitedRole != null)
+                            Text(
+                              'Role: $_lastInvitedRole',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.green,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],
@@ -630,6 +692,90 @@ class _UnifiedInviteSheetState extends ConsumerState<UnifiedInviteSheet>
               },
             ),
             const SizedBox(height: 16),
+
+            // Role selection
+            Text(
+              'Invite as Role',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ChoiceChip(
+                  key: const Key('role_chip_guest'),
+                  label: const Text('Guest (Default)'),
+                  avatar: const Icon(Icons.schedule, size: 16),
+                  selected: _selectedRole == 'GUEST',
+                  onSelected: (selected) {
+                    if (selected) setState(() => _selectedRole = 'GUEST');
+                  },
+                ),
+                ChoiceChip(
+                  key: const Key('role_chip_member'),
+                  label: const Text('Member'),
+                  avatar: const Icon(Icons.person_outline, size: 16),
+                  selected: _selectedRole == 'MEMBER',
+                  onSelected: (selected) {
+                    if (selected) setState(() => _selectedRole = 'MEMBER');
+                  },
+                ),
+                ChoiceChip(
+                  key: const Key('role_chip_moderator'),
+                  label: const Text('Moderator'),
+                  avatar: const Icon(Icons.security, size: 16),
+                  selected: _selectedRole == 'MODERATOR',
+                  onSelected: (selected) {
+                    if (selected) setState(() => _selectedRole = 'MODERATOR');
+                  },
+                ),
+                ChoiceChip(
+                  key: const Key('role_chip_admin'),
+                  label: const Text('Admin'),
+                  avatar: const Icon(Icons.shield, size: 16),
+                  selected: _selectedRole == 'ADMIN',
+                  onSelected: (selected) {
+                    if (selected) setState(() => _selectedRole = 'ADMIN');
+                  },
+                ),
+              ],
+            ),
+            if (_selectedRole == 'GUEST') ...[
+              const SizedBox(height: 12),
+              Card(
+                elevation: 0,
+                color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: cs.outlineVariant.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: ListTile(
+                  dense: true,
+                  leading: Icon(Icons.event_available, color: cs.primary),
+                  title: const Text('Guest Access Expires On'),
+                  subtitle: Text(
+                    AppDateUtils.formatDisplayDate(_expiresAt),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: cs.primary,
+                    ),
+                  ),
+                  trailing: FilledButton.tonal(
+                    onPressed: _pickExpirationDate,
+                    child: const Text('Change Date'),
+                  ),
+                  onTap: _pickExpirationDate,
+                ),
+              ),
+            ],
+            const SizedBox(height: 20),
 
             // Submit button
             PrimaryButton(

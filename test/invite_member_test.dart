@@ -24,7 +24,12 @@ class FakeGroupsRepository extends GroupsRepository {
   Exception? throwError;
 
   @override
-  Future<GroupMember> inviteMember(String groupId, String username) async {
+  Future<dynamic> inviteMember(
+    String groupId,
+    String username, {
+    String role = 'GUEST',
+    DateTime? expiresAt,
+  }) async {
     lastGroupId = groupId;
     lastUsername = username;
     if (throwError != null) {
@@ -36,7 +41,7 @@ class FakeGroupsRepository extends GroupsRepository {
       userId: 'user-new',
       displayName: 'Invited User',
       username: username,
-      role: 'MEMBER',
+      role: role,
       joinedAt: DateTime.now(),
     );
   }

@@ -18,13 +18,22 @@ class FakeGroupsRepository extends GroupsRepository {
 
   String? lastGroupId;
   String? lastUsername;
+  String? lastRole;
+  DateTime? lastExpiresAt;
   String? lastRegeneratedGroupId;
   Exception? throwError;
 
   @override
-  Future<dynamic> inviteMember(String groupId, String username) async {
+  Future<dynamic> inviteMember(
+    String groupId,
+    String username, {
+    String role = 'GUEST',
+    DateTime? expiresAt,
+  }) async {
     lastGroupId = groupId;
     lastUsername = username;
+    lastRole = role;
+    lastExpiresAt = expiresAt;
     if (throwError != null) {
       throw throwError!;
     }
@@ -33,6 +42,8 @@ class FakeGroupsRepository extends GroupsRepository {
       groupId: groupId,
       groupName: 'Test Group',
       invitedByUsername: 'admin',
+      role: role,
+      expiresAt: expiresAt,
       status: 'PENDING',
       createdAt: DateTime.now(),
     );
@@ -175,12 +186,48 @@ void main() {
       );
 
       await tester.enterText(find.byType(TextFormField), '@johndoe');
+      await tester.ensureVisible(find.text('Send Invitation'));
       await tester.tap(find.text('Send Invitation'));
       await tester.pumpAndSettle();
 
       expect(fakeRepo.lastUsername, 'johndoe');
       expect(fakeRepo.lastGroupId, 'group-1');
+      expect(fakeRepo.lastRole, 'GUEST');
+      expect(fakeRepo.lastExpiresAt, isNotNull);
       expect(find.text('Invitation sent to @johndoe!'), findsOneWidget);
+    });
+
+    testWidgets('allows admin to invite user as Member, Moderator, or Admin', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            groupsRepositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: UnifiedInviteSheet(
+                groupName: 'Design Squad',
+                inviteCode: 'DES123',
+                groupId: 'group-1',
+                initialTab: InviteTab.direct,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextFormField), 'alice');
+      // Select Moderator role chip
+      await tester.tap(find.byKey(const Key('role_chip_moderator')));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Send Invitation'));
+      await tester.tap(find.text('Send Invitation'));
+      await tester.pumpAndSettle();
+
+      expect(fakeRepo.lastUsername, 'alice');
+      expect(fakeRepo.lastRole, 'MODERATOR');
+      expect(fakeRepo.lastExpiresAt, isNull);
     });
 
     testWidgets('regenerates invite code after confirmation', (tester) async {

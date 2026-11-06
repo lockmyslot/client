@@ -292,25 +292,56 @@ class MeProfileScreen extends ConsumerWidget {
                                               ],
                                             ),
                                           ),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: colorScheme.primary
-                                                  .withValues(alpha: 0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Text(
-                                              'PENDING',
-                                              style: TextStyle(
-                                                color: colorScheme.primary,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 4,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: colorScheme.primary
+                                                      .withValues(alpha: 0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: Text(
+                                                  'PENDING',
+                                                  style: TextStyle(
+                                                    color: colorScheme.primary,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
+                                              const SizedBox(height: 4),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 6,
+                                                  vertical: 2,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: colorScheme
+                                                      .secondaryContainer
+                                                      .withValues(alpha: 0.6),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  invite.role.toUpperCase(),
+                                                  style: TextStyle(
+                                                    color: colorScheme
+                                                        .onSecondaryContainer,
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -324,9 +355,12 @@ class MeProfileScreen extends ConsumerWidget {
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
-                                            AppDateUtils.formatDisplayDate(
-                                              invite.createdAt,
-                                            ),
+                                            invite.isGuest &&
+                                                    invite.expiresAt != null
+                                                ? '${AppDateUtils.formatDisplayDate(invite.createdAt)} · Expires ${AppDateUtils.formatDisplayDate(invite.expiresAt!)}'
+                                                : AppDateUtils.formatDisplayDate(
+                                                    invite.createdAt,
+                                                  ),
                                             style: theme.textTheme.bodySmall
                                                 ?.copyWith(
                                               color:

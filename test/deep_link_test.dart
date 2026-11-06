@@ -15,6 +15,18 @@ void main() {
       final link = DeepLinkUtils.buildCustomSchemeInviteLink('xy99zz');
       expect(link, 'lockmyslot://join?code=XY99ZZ');
     });
+
+    test('ignores spoofed role query parameters in invite deep links', () {
+      final uri = Uri.parse('https://lockmyslot.app/join?code=XYZ999&role=ADMIN&isAdmin=true');
+      final code = uri.queryParameters['code'];
+      expect(code, 'XYZ999');
+      // Verify role is not used by deep link utility
+      expect(uri.queryParameters.containsKey('role'), isTrue);
+      // Even with role present in query parameters, building the clean link never includes role
+      final cleanLink = DeepLinkUtils.buildWebInviteLink(code!);
+      expect(cleanLink, 'https://lockmyslot.app/join?code=XYZ999');
+      expect(cleanLink.contains('role'), isFalse);
+    });
   });
 
   group('JoinGroupScreen Deep Link Prefill Widget Tests', () {

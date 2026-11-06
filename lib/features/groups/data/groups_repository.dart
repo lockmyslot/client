@@ -169,10 +169,19 @@ class GroupsRepository {
     }
   }
 
-  Future<dynamic> inviteMember(String groupId, String username) async {
+  Future<dynamic> inviteMember(
+    String groupId,
+    String username, {
+    String role = 'GUEST',
+    DateTime? expiresAt,
+  }) async {
     final response = await _apiClient.post<dynamic>(
       ApiConstants.inviteMember(groupId),
-      body: {'username': username},
+      body: {
+        'username': username,
+        'role': role,
+        if (expiresAt != null) 'expires_at': expiresAt.toUtc().toIso8601String(),
+      },
       fromJson: (json) {
         if (json is Map<String, dynamic>) {
           return GroupInvite.fromJson(json);
