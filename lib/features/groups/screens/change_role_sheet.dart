@@ -207,7 +207,7 @@ class _ChangeRoleSheetState extends ConsumerState<ChangeRoleSheet> {
                 title: 'Guest',
                 subtitle:
                     'Temporary access, auto-removed on the set expiration date',
-                icon: Icons.schedule,
+                icon: Icons.badge,
               ),
               if (_selectedRole == 'GUEST') ...[
                 const SizedBox(height: 16),

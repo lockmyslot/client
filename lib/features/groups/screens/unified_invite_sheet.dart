@@ -710,7 +710,7 @@ class _UnifiedInviteSheetState extends ConsumerState<UnifiedInviteSheet>
                 ChoiceChip(
                   key: const Key('role_chip_guest'),
                   label: const Text('Guest (Default)'),
-                  avatar: const Icon(Icons.schedule, size: 16),
+                  avatar: const Icon(Icons.badge, size: 16),
                   selected: _selectedRole == 'GUEST',
                   onSelected: (selected) {
                     if (selected) setState(() => _selectedRole = 'GUEST');
