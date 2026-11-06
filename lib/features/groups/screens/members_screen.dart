@@ -18,6 +18,9 @@ class MembersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     final groupAsync = ref.watch(groupDetailProvider(groupId));
     final membersAsync = ref.watch(groupMembersProvider(groupId));
 
@@ -27,58 +30,94 @@ class MembersScreen extends ConsumerWidget {
         if (inviteCode == null || inviteCode.isEmpty || group.isGuest) {
           return null;
         }
+
         return SafeArea(
           top: false,
           child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: cs.surfaceContainerHigh,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
               border: Border(
                 top: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant,
+                  color: cs.outlineVariant.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 16,
+                  offset: const Offset(0, -4),
+                ),
+              ],
             ),
-            child: Card(
-              elevation: 0,
-              margin: EdgeInsets.zero,
-              color: Theme.of(context).colorScheme.surfaceContainer,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: cs.primaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.vpn_key_outlined,
+                    size: 20,
+                    color: cs.onPrimaryContainer,
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.vpn_key_outlined, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Group Invite Code').small().muted(),
-                          Text(inviteCode).mono().semiBold(),
-                        ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Group Invite Code',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    TextButton.icon(
-                      onPressed: () {
-                        UnifiedInviteSheet.show(
-                          context,
-                          groupName: group.name,
-                          inviteCode: inviteCode,
-                          groupId: group.id,
-                          initialTab: InviteTab.share,
-                        );
-                      },
-                      icon: const Icon(Icons.person_add_outlined, size: 16),
-                      label: const Text('Invite'),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        inviteCode,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                TextButton.icon(
+                  onPressed: () {
+                    UnifiedInviteSheet.show(
+                      context,
+                      groupName: group.name,
+                      inviteCode: inviteCode,
+                      groupId: group.id,
+                      initialTab: InviteTab.share,
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    backgroundColor:
+                        cs.primaryContainer.withValues(alpha: 0.5),
+                    foregroundColor: cs.onPrimaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  icon: const Icon(Icons.person_add_outlined, size: 16),
+                  label: const Text('Invite'),
+                ),
+              ],
             ),
           ),
         );
@@ -91,8 +130,12 @@ class MembersScreen extends ConsumerWidget {
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          const M3CollapsingAppBar(
-            title: Text('Group Members'),
+          M3CollapsingAppBar(
+            title: const Text('Group Members'),
+            subtitle: groupAsync.maybeWhen(
+              data: (g) => Text(g.name),
+              orElse: () => null,
+            ),
             pinned: true,
           ),
           membersAsync.when(
@@ -130,197 +173,188 @@ class MembersScreen extends ConsumerWidget {
                     (context, index) {
                       final member = members[index];
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.only(bottom: 10),
                         child: Entrance(
-                          delay: Duration(milliseconds: 60 + index * 60),
-                          child: Card(
-                            elevation: 0,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainer,
-                            shape: RoundedRectangleBorder(
+                          delay: Duration(milliseconds: 60 + index * 50),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerLow,
                               borderRadius: BorderRadius.circular(16),
-                              side: BorderSide(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .outlineVariant
+                              border: Border.all(
+                                color: cs.outlineVariant
                                     .withValues(alpha: 0.4),
                               ),
                             ),
-                            child: Padding(
-                              padding: kCardPadding,
-                              child: Row(
-                                children: [
-                                  Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primaryContainer,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            member.displayName.isNotEmpty
-                                                ? member.displayName[0]
-                                                      .toUpperCase()
-                                                : 'U',
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onPrimaryContainer,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                            padding: const EdgeInsets.all(14),
+                            child: Row(
+                              children: [
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: cs.primaryContainer,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          member.displayName.isNotEmpty
+                                              ? member.displayName[0]
+                                                  .toUpperCase()
+                                              : 'U',
+                                          style: TextStyle(
+                                            color: cs.onPrimaryContainer,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
                                           ),
                                         ),
                                       ),
-                                      if (member.isAdmin)
-                                        Positioned(
-                                          right: -2,
-                                          bottom: -2,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(2.5),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .surfaceContainer,
-                                                width: 1.5,
-                                              ),
-                                            ),
-                                            child: Icon(
-                                              Icons.shield,
-                                              size: 9,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onPrimary,
+                                    ),
+                                    if (member.isAdmin)
+                                      Positioned(
+                                        right: -2,
+                                        bottom: -2,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(3),
+                                          decoration: BoxDecoration(
+                                            color: cs.primary,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: cs.surfaceContainerLow,
+                                              width: 2,
                                             ),
                                           ),
-                                        )
-                                      else if (member.isGuest)
-                                        Positioned(
-                                          right: -2,
-                                          bottom: -2,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(2.5),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary,
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .surfaceContainer,
-                                                width: 1.5,
-                                              ),
-                                            ),
-                                            child: Icon(
-                                              Icons.badge,
-                                              size: 9,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSecondary,
-                                            ),
+                                          child: Icon(
+                                            Icons.shield,
+                                            size: 10,
+                                            color: cs.onPrimary,
                                           ),
                                         ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          member.displayName,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ).semiBold(),
-                                        if (member.username != null &&
-                                            member.username!.isNotEmpty) ...[
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            '@${member.username}',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ).muted().small(),
-                                        ],
+                                      )
+                                    else if (member.isGuest)
+                                      Positioned(
+                                        right: -2,
+                                        bottom: -2,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(3),
+                                          decoration: BoxDecoration(
+                                            color: cs.secondary,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: cs.surfaceContainerLow,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.badge,
+                                            size: 10,
+                                            color: cs.onSecondary,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        member.displayName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      if (member.username != null &&
+                                          member.username!.isNotEmpty) ...[
                                         const SizedBox(height: 2),
                                         Text(
-                                          member.isGuest &&
-                                                  member.expiresAt != null
-                                              ? 'Joined ${AppDateUtils.formatDisplayDate(member.joinedAt)} • Expires ${AppDateUtils.formatDisplayDate(member.expiresAt!)}'
-                                              : 'Joined ${AppDateUtils.formatDisplayDate(member.joinedAt)}',
+                                          '@${member.username}',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                        ).muted().small(),
+                                          style: theme.textTheme.labelMedium
+                                              ?.copyWith(
+                                            color: cs.onSurfaceVariant,
+                                          ),
+                                        ),
                                       ],
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        member.isGuest &&
+                                                member.expiresAt != null
+                                            ? 'Joined ${AppDateUtils.formatDisplayDate(member.joinedAt)} • Expires ${AppDateUtils.formatDisplayDate(member.expiresAt!)}'
+                                            : 'Joined ${AppDateUtils.formatDisplayDate(member.joinedAt)}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: cs.onSurfaceVariant
+                                              .withValues(alpha: 0.8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (isAdmin && !member.isAdmin) ...[
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.manage_accounts_outlined,
+                                      size: 20,
+                                    ),
+                                    tooltip: 'Change Role',
+                                    onPressed: () => ChangeRoleSheet.show(
+                                      context,
+                                      groupId: groupId,
+                                      member: member,
                                     ),
                                   ),
-                                  if (isAdmin && !member.isAdmin) ...[
-                                    const SizedBox(width: 4),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.manage_accounts_outlined,
-                                        size: 20,
-                                      ),
-                                      tooltip: 'Change Role',
-                                      onPressed: () => ChangeRoleSheet.show(
-                                        context,
-                                        groupId: groupId,
-                                        member: member,
-                                      ),
-                                    ),
-                                  ],
-                                  if ((isAdmin && !member.isAdmin) ||
-                                      (isModerator && member.isGuest)) ...[
-                                    const SizedBox(width: 4),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.delete_outline,
-                                        color: Colors.red,
-                                        size: 20,
-                                      ),
-                                      tooltip: 'Remove Member',
-                                      onPressed: () async {
-                                        final confirmed =
-                                            await ConfirmDialog.show(
-                                          context,
-                                          title: 'Remove Member',
-                                          message:
-                                              'Are you sure you want to remove ${member.displayName} from the group?',
-                                          confirmText: 'Remove',
-                                          isDestructive: true,
-                                        );
-                                        if (confirmed == true) {
-                                          await ref
-                                              .read(groupsRepositoryProvider)
-                                              .removeMember(
-                                                groupId,
-                                                member.userId,
-                                              );
-                                          ref.invalidate(
-                                            groupMembersProvider(groupId),
-                                          );
-                                          ref.invalidate(
-                                            groupDetailProvider(groupId),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
                                 ],
-                              ),
+                                if ((isAdmin && !member.isAdmin) ||
+                                    (isModerator && member.isGuest)) ...[
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color: cs.error,
+                                      size: 20,
+                                    ),
+                                    tooltip: 'Remove Member',
+                                    onPressed: () async {
+                                      final confirmed =
+                                          await ConfirmDialog.show(
+                                        context,
+                                        title: 'Remove Member',
+                                        message:
+                                            'Are you sure you want to remove ${member.displayName} from the group?',
+                                        confirmText: 'Remove',
+                                        isDestructive: true,
+                                      );
+                                      if (confirmed == true) {
+                                        await ref
+                                            .read(groupsRepositoryProvider)
+                                            .removeMember(
+                                              groupId,
+                                              member.userId,
+                                            );
+                                        ref.invalidate(
+                                          groupMembersProvider(groupId),
+                                        );
+                                        ref.invalidate(
+                                          groupDetailProvider(groupId),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                         ),
@@ -328,10 +362,10 @@ class MembersScreen extends ConsumerWidget {
                     },
                     childCount: members.length,
                   ),
-                  ),
-                );
-              },
-            ),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
