@@ -25,6 +25,9 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     final bookingsAsync = ref.watch(
       myBookingsProvider((
         groupId: widget.groupId,
@@ -49,18 +52,49 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-                child: SingleChildScrollView(
-                  clipBehavior: Clip.none,
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterChip('All', null),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Confirmed', 'CONFIRMED'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Cancelled', 'CANCELLED'),
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<String?>(
+                    segments: const [
+                      ButtonSegment(
+                        value: null,
+                        label: Text(
+                          'All',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: 'CONFIRMED',
+                        label: Text(
+                          'Confirmed',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: 'CANCELLED',
+                        label: Text(
+                          'Cancelled',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
                     ],
+                    selected: {_selectedStatusFilter},
+                    onSelectionChanged: (val) {
+                      setState(() => _selectedStatusFilter = val.first);
+                    },
+                    style: SegmentedButton.styleFrom(
+                      selectedBackgroundColor: cs.primaryContainer,
+                      selectedForegroundColor: cs.onPrimaryContainer,
+                      backgroundColor: cs.surfaceContainerLow,
+                      foregroundColor: cs.onSurface,
+                      side: BorderSide(
+                        color: cs.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -96,7 +130,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                 }
 
                 return SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -104,159 +138,193 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                         final isUpcoming = booking.startTime.isAfter(
                           DateTime.now(),
                         );
+                        final isConfirmed = booking.isConfirmed;
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Entrance(
                             delay: Duration(milliseconds: index * 60),
-                            child: Card(
-                              elevation: 0,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainer,
-                              shape: RoundedRectangleBorder(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: cs.surfaceContainerLow,
                                 borderRadius: BorderRadius.circular(16),
-                                side: BorderSide(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .outlineVariant
+                                border: Border.all(
+                                  color: cs.outlineVariant
                                       .withValues(alpha: 0.4),
                                 ),
                               ),
-                              child: Padding(
-                                padding: kCardPadding,
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        ResourceAvatar(
-                                          iconKey: booking.resourceIcon,
-                                          colorHex: booking.resourceColor,
-                                          name: booking.resourceName ??
-                                              'Resource',
-                                          size: 34,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            booking.resourceName ??
-                                                'Resource Booking',
-                                          ).h3(),
-                                        ),
-                                        PrimaryBadge(
-                                          child: Text(booking.status),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.schedule_outlined,
-                                          size: 18,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            '${AppDateUtils.formatDisplayDate(booking.startTime)} · ${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}',
-                                          ).small(),
-                                        ),
-                                      ],
-                                    ),
-                                    if (booking.isConfirmed &&
-                                        isUpcoming) ...[
-                                      const SizedBox(height: 12),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          OutlinedButton.icon(
-                                            onPressed: () async {
-                                              final res =
-                                                  await RescheduleBookingSheet
-                                                      .show(
-                                                context,
-                                                booking: booking,
-                                              );
-                                              if (res == true) {
-                                                ref.invalidate(
-                                                  myBookingsProvider((
-                                                    groupId: widget.groupId,
-                                                    status:
-                                                        _selectedStatusFilter,
-                                                  )),
-                                                );
-                                              }
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                                vertical: 8,
-                                              ),
-                                            ),
-                                            icon: const Icon(
-                                              Icons.edit_calendar_outlined,
-                                              size: 18,
-                                            ),
-                                            label: const Text('Reschedule'),
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      ResourceAvatar(
+                                        iconKey: booking.resourceIcon,
+                                        colorHex: booking.resourceColor,
+                                        name: booking.resourceName ??
+                                            'Resource',
+                                        size: 38,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          booking.resourceName ??
+                                              'Resource Booking',
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          const SizedBox(width: 8),
-                                          TextButton.icon(
-                                            onPressed: () async {
-                                              final confirmed =
-                                                  await ConfirmDialog.show(
-                                                context,
-                                                title: 'Cancel Booking',
-                                                message:
-                                                    'Are you sure you want to cancel this booking?',
-                                                confirmText: 'Cancel Booking',
-                                                isDestructive: true,
-                                              );
-                                              if (confirmed == true) {
-                                                await ref
-                                                    .read(
-                                                      bookingsRepositoryProvider,
-                                                    )
-                                                    .cancelBooking(
-                                                      widget.groupId,
-                                                      booking.id,
-                                                    );
-                                                ref.invalidate(
-                                                  myBookingsProvider((
-                                                    groupId: widget.groupId,
-                                                    status:
-                                                        _selectedStatusFilter,
-                                                  )),
-                                                );
-                                              }
-                                            },
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: Theme.of(
-                                                context,
-                                              ).colorScheme.error,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                                vertical: 8,
-                                              ),
-                                            ),
-                                            icon: const Icon(
-                                              Icons.close_outlined,
-                                              size: 18,
-                                            ),
-                                            label: const Text('Cancel'),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: isConfirmed
+                                              ? const Color(0xFF10B981)
+                                                  .withValues(alpha: 0.15)
+                                              : cs.errorContainer,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: isConfirmed
+                                                ? const Color(0xFF10B981)
+                                                    .withValues(alpha: 0.4)
+                                                : cs.error
+                                                    .withValues(alpha: 0.4),
                                           ),
-                                        ],
+                                        ),
+                                        child: Text(
+                                          booking.status.toUpperCase(),
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: isConfirmed
+                                                ? const Color(0xFF10B981)
+                                                : cs.onErrorContainer,
+                                          ),
+                                        ),
                                       ),
                                     ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.schedule_outlined,
+                                        size: 16,
+                                        color: cs.primary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          '${AppDateUtils.formatDisplayDate(booking.startTime)} · ${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: cs.onSurfaceVariant,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (isConfirmed && isUpcoming) ...[
+                                    const SizedBox(height: 14),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        FilledButton.tonalIcon(
+                                          onPressed: () async {
+                                            final res =
+                                                await RescheduleBookingSheet
+                                                    .show(
+                                              context,
+                                              booking: booking,
+                                            );
+                                            if (res == true) {
+                                              ref.invalidate(
+                                                myBookingsProvider((
+                                                  groupId: widget.groupId,
+                                                  status:
+                                                      _selectedStatusFilter,
+                                                )),
+                                              );
+                                            }
+                                          },
+                                          style: FilledButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 8,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                          ),
+                                          icon: const Icon(
+                                            Icons.edit_calendar_outlined,
+                                            size: 16,
+                                          ),
+                                          label: const Text('Reschedule'),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        OutlinedButton.icon(
+                                          onPressed: () async {
+                                            final confirmed =
+                                                await ConfirmDialog.show(
+                                              context,
+                                              title: 'Cancel Booking',
+                                              message:
+                                                  'Are you sure you want to cancel this booking?',
+                                              confirmText: 'Cancel Booking',
+                                              isDestructive: true,
+                                            );
+                                            if (confirmed == true) {
+                                              await ref
+                                                  .read(
+                                                    bookingsRepositoryProvider,
+                                                  )
+                                                  .cancelBooking(
+                                                    widget.groupId,
+                                                    booking.id,
+                                                  );
+                                              ref.invalidate(
+                                                myBookingsProvider((
+                                                  groupId: widget.groupId,
+                                                  status:
+                                                      _selectedStatusFilter,
+                                                )),
+                                              );
+                                            }
+                                          },
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: cs.error,
+                                            side: BorderSide(
+                                              color: cs.error
+                                                  .withValues(alpha: 0.4),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 8,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                          ),
+                                          icon: const Icon(
+                                            Icons.close_rounded,
+                                            size: 16,
+                                          ),
+                                          label: const Text('Cancel'),
+                                        ),
+                                      ],
+                                    ),
                                   ],
-                                ),
+                                ],
                               ),
                             ),
                           ),
@@ -271,19 +339,6 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, String? value) {
-    final isSelected = _selectedStatusFilter == value;
-    return FilterChip(
-      selected: isSelected,
-      label: Text(label),
-      onSelected: (_) {
-        setState(() => _selectedStatusFilter = value);
-      },
-      showCheckmark: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }

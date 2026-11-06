@@ -302,7 +302,7 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                             children: [
                               if (isAdmin) ...[
                                 Expanded(
-                                  child: OutlinedButton.icon(
+                                  child: FilledButton.tonalIcon(
                                     onPressed: () => context.push(
                                       '/groups/$groupId/resources/$resourceId/settings',
                                     ),
@@ -311,19 +311,17 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                       size: 16,
                                     ),
                                     label: const Text('Settings'),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 10,
+                                    style: FilledButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
-                                      visualDensity: VisualDensity.compact,
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 10),
                               ],
                               Expanded(
-                                child: OutlinedButton.icon(
+                                child: FilledButton.tonalIcon(
                                   onPressed: () => context.push(
                                     '/groups/$groupId/resources/$resourceId/maintenance',
                                   ),
@@ -332,12 +330,10 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                     size: 16,
                                   ),
                                   label: const Text('Maintenance'),
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 10,
+                                  style: FilledButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
-                                    visualDensity: VisualDensity.compact,
                                   ),
                                 ),
                               ),

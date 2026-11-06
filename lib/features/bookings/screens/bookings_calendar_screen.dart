@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/bookings_provider.dart';
+import '../../resources/providers/resources_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
+import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 
 class BookingsCalendarScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -27,8 +29,173 @@ class _BookingsCalendarScreenState
 
   String get _selectedDateString => AppDateUtils.formatDate(_selectedDate);
 
+  void _onDateSelected(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+    });
+  }
+
+  Future<void> _pickCalendarDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      _onDateSelected(picked);
+    }
+  }
+
+  Widget _buildDateHeader() {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SlideFadeSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: Text(
+            AppDateUtils.formatDisplayDate(_selectedDate),
+            key: ValueKey('date-header-$_selectedDateString'),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.2,
+            ),
+          ),
+        ),
+        FilledButton.tonalIcon(
+          onPressed: _pickCalendarDate,
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            backgroundColor: cs.surfaceContainerHigh,
+            foregroundColor: cs.onSurface,
+          ),
+          icon: const Icon(Icons.calendar_month_outlined, size: 16),
+          label: const Text('Change Date'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateChips() {
+    final cs = Theme.of(context).colorScheme;
+
+    return SingleChildScrollView(
+      clipBehavior: Clip.none,
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(7, (index) {
+          final date = DateTime.now().add(Duration(days: index));
+          final isSelected = AppDateUtils.isSameDay(date, _selectedDate);
+          final isToday = index == 0;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _onDateSelected(date),
+                borderRadius: BorderRadius.circular(16),
+                child: AnimatedScale(
+                  scale: isSelected ? 1.04 : 1.0,
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutBack,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    width: 70,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? cs.primaryContainer
+                          : cs.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? cs.primary
+                            : cs.outlineVariant.withValues(alpha: 0.5),
+                        width: isSelected ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          AppDateUtils.formatWeekday(date).toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                            color: isSelected
+                                ? cs.onPrimaryContainer
+                                : cs.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${date.day}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? cs.onPrimaryContainer
+                                : cs.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? cs.primary.withValues(alpha: 0.2)
+                                : (isToday
+                                    ? cs.primary.withValues(alpha: 0.12)
+                                    : Colors.transparent),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            isToday ? 'Today' : AppDateUtils.formatShortDate(date),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight:
+                                  isToday ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected
+                                  ? cs.onPrimaryContainer
+                                  : (isToday ? cs.primary : cs.onSurfaceVariant),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final resourceAsync = ref.watch(
+      resourceDetailProvider((
+        groupId: widget.groupId,
+        resourceId: widget.resourceId,
+      )),
+    );
+
     final bookingsAsync = ref.watch(
       resourceBookingsProvider((
         groupId: widget.groupId,
@@ -37,156 +204,218 @@ class _BookingsCalendarScreenState
       )),
     );
 
+    final titleText = resourceAsync.maybeWhen(
+      data: (r) => '${r.name} Bookings',
+      orElse: () => 'Resource Bookings',
+    );
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Resource Bookings'),
-        bottom: AppBarToolbar(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          M3CollapsingAppBar(
+            title: Text(titleText),
+            pinned: true,
+          ),
+        ],
+        body: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(
+              resourceBookingsProvider((
+                groupId: widget.groupId,
+                resourceId: widget.resourceId,
+                date: _selectedDateString,
+              )),
+            );
+          },
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
             children: [
-              IconButton(
-                icon: const Icon(Icons.chevron_left_outlined),
-                onPressed: () {
-                  setState(() {
-                    _selectedDate = _selectedDate.subtract(
-                      const Duration(days: 1),
-                    );
-                  });
-                },
-              ),
+              // Date Header & Change Date CTA
+              _buildDateHeader(),
+              const SizedBox(height: 12),
+
+              // 7-Day Date Carousel
+              _buildDateChips(),
+              const SizedBox(height: 24),
+
+              // Bookings Content
               SlideFadeSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: Text(
-                  AppDateUtils.formatDisplayDate(_selectedDate),
-                  key: ValueKey('date-$_selectedDateString'),
-                ).h4(),
-              ),
-              IconButton(
-                icon: const Icon(Icons.chevron_right_outlined),
-                onPressed: () {
-                  setState(() {
-                    _selectedDate = _selectedDate.add(const Duration(days: 1));
-                  });
-                },
+                child: bookingsAsync.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 48),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (err, _) => ErrorDisplay(
+                    error: err.toString(),
+                    onRetry: () => ref.invalidate(
+                      resourceBookingsProvider((
+                        groupId: widget.groupId,
+                        resourceId: widget.resourceId,
+                        date: _selectedDateString,
+                      )),
+                    ),
+                  ),
+                  data: (bookings) {
+                    if (bookings.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 24),
+                        child: EmptyState(
+                          icon: Icons.event_available_outlined,
+                          title: 'No Bookings',
+                          description:
+                              'No bookings scheduled for ${AppDateUtils.formatDisplayDate(_selectedDate)}.',
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Scheduled Bookings (${bookings.length})',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...List.generate(bookings.length, (index) {
+                          final booking = bookings[index];
+                          final duration =
+                              booking.endTime.difference(booking.startTime);
+                          final durationText =
+                              AppDateUtils.formatDuration(duration);
+                          final userName = (booking.userDisplayName != null &&
+                                  booking.userDisplayName!.trim().isNotEmpty)
+                              ? booking.userDisplayName!
+                              : 'User';
+
+                          final timeDisplay =
+                              '${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}';
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Entrance(
+                              delay: Duration(milliseconds: index * 60),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: cs.surfaceContainerLow,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: cs.outlineVariant
+                                        .withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.schedule_outlined,
+                                          size: 16,
+                                          color: cs.primary,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            timeDisplay,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: cs.onSurface,
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 3,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF10B981)
+                                                .withValues(alpha: 0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: const Color(0xFF10B981)
+                                                  .withValues(alpha: 0.4),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Confirmed',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFF10B981),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 12,
+                                          backgroundColor: cs.primaryContainer,
+                                          child: Text(
+                                            userName.isNotEmpty
+                                                ? userName[0].toUpperCase()
+                                                : 'U',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: cs.onPrimaryContainer,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            userName,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              color: cs.onSurface,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: cs.surfaceContainerHigh,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            durationText,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: cs.onSurfaceVariant,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    );
+                  },
+                ),
               ),
             ],
           ),
-        ),
-      ),
-      body: SlideFadeSwitcher(
-        child: bookingsAsync.when(
-          loading: () => const KeyedSubtree(
-            key: ValueKey('loading'),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          error: (err, _) => KeyedSubtree(
-            key: const ValueKey('error'),
-            child: ErrorDisplay(
-              error: err.toString(),
-              onRetry: () => ref.invalidate(
-                resourceBookingsProvider((
-                  groupId: widget.groupId,
-                  resourceId: widget.resourceId,
-                  date: _selectedDateString,
-                )),
-              ),
-            ),
-          ),
-          data: (bookings) {
-            if (bookings.isEmpty) {
-              return KeyedSubtree(
-                key: ValueKey('empty-$_selectedDateString'),
-                child: EmptyState(
-                  icon: Icons.event_available_outlined,
-                  title: 'No Bookings',
-                  description:
-                      'No bookings scheduled for ${AppDateUtils.formatDisplayDate(_selectedDate)}.',
-                ),
-              );
-            }
-
-            return KeyedSubtree(
-              key: ValueKey('data-$_selectedDateString'),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(12),
-                itemCount: bookings.length,
-                itemBuilder: (context, index) {
-                  final booking = bookings[index];
-                  final duration =
-                      booking.endTime.difference(booking.startTime);
-                  final durationText = AppDateUtils.formatDuration(duration);
-                  final userName = (booking.userDisplayName != null &&
-                          booking.userDisplayName!.trim().isNotEmpty)
-                      ? booking.userDisplayName!
-                      : 'User';
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Entrance(
-                      delay: Duration(milliseconds: index * 60),
-                      child: Card(
-                        margin: EdgeInsets.zero,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outlineVariant
-                                .withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: kCardPadding,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppDateUtils.formatBookingHeader(
-                                  booking.startTime,
-                                ),
-                              ).h4().semiBold(),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 9,
-                                    backgroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withValues(alpha: 0.12),
-                                    child: Text(
-                                      userName.isNotEmpty
-                                          ? userName[0].toUpperCase()
-                                          : 'U',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      '$durationText · $userName',
-                                      overflow: TextOverflow.ellipsis,
-                                    ).small().muted(),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
         ),
       ),
     );
