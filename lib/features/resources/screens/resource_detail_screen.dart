@@ -505,13 +505,17 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                             Padding(
                               padding: const EdgeInsets.only(
                                 top: 4,
-                                bottom: 8,
+                                bottom: 10,
                               ),
                               child: Row(
                                 children: [
-                                  const Text('My Bookings')
-                                      .textLarge()
-                                      .semiBold(),
+                                  Text(
+                                    'My Bookings',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
                                   const SizedBox(width: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -520,28 +524,25 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: colorScheme.primaryContainer,
-                                      borderRadius:
-                                          BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
                                       '${myBookings.length}',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color:
-                                            colorScheme.onPrimaryContainer,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.onPrimaryContainer,
                                       ),
                                     ),
                                   ),
                                   const Spacer(),
                                   IconButton(
                                     icon: const Icon(
-                                      Icons.refresh_outlined,
-                                      size: 16,
+                                      Icons.refresh_rounded,
+                                      size: 18,
                                     ),
+                                    tooltip: 'Refresh bookings',
                                     visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
                                     onPressed: () => ref.invalidate(
                                       resourceBookingsProvider((
                                         groupId: groupId,
@@ -555,10 +556,41 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                             ),
                             if (myBookings.isEmpty)
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Text(
-                                  'You have no upcoming bookings for this resource.',
-                                ).small().muted(),
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surfaceContainerLow,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: colorScheme.outlineVariant
+                                          .withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.event_available_outlined,
+                                        size: 16,
+                                        color: colorScheme.onSurfaceVariant
+                                            .withValues(alpha: 0.7),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'You have no upcoming bookings for this resource.',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               )
                             else
                               ...myBookings.asMap().entries.map(
@@ -577,13 +609,17 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                             Padding(
                               padding: const EdgeInsets.only(
                                 top: 4,
-                                bottom: 8,
+                                bottom: 10,
                               ),
                               child: Row(
                                 children: [
-                                  const Text('Other Bookings')
-                                      .textLarge()
-                                      .semiBold(),
+                                  Text(
+                                    'Other Bookings',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
                                   const SizedBox(width: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -593,16 +629,14 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                     decoration: BoxDecoration(
                                       color: colorScheme
                                           .surfaceContainerHighest,
-                                      borderRadius:
-                                          BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
                                       '${othersBookings.length}',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color:
-                                            colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -611,10 +645,41 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                             ),
                             if (othersBookings.isEmpty)
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Text(
-                                  'No bookings from other members.',
-                                ).small().muted(),
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surfaceContainerLow,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: colorScheme.outlineVariant
+                                          .withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.event_note_outlined,
+                                        size: 16,
+                                        color: colorScheme.onSurfaceVariant
+                                            .withValues(alpha: 0.7),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'No bookings from other members.',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               )
                             else
                               ...othersBookings.asMap().entries.map(
@@ -647,6 +712,7 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
     ColorScheme colorScheme, {
     bool canCancel = false,
   }) {
+    final theme = Theme.of(context);
     final duration = booking.endTime.difference(booking.startTime);
     final durationText = AppDateUtils.formatDuration(duration);
     final userName = (booking.userDisplayName != null &&
@@ -655,114 +721,186 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
         : 'User';
 
     final isUpcoming = booking.startTime.isAfter(DateTime.now());
-    final showActions = canCancel && booking.isConfirmed && isUpcoming;
+    final isConfirmed = booking.isConfirmed;
+    final showActions = canCancel && isConfirmed && isUpcoming;
     final isCancelling = _cancellingIds.contains(booking.id);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Entrance(
         delay: Duration(milliseconds: 100 + (index * 25)),
-        child: Card(
-          margin: EdgeInsets.zero,
-          elevation: 0,
-          color: colorScheme.surfaceContainer,
-          shape: RoundedRectangleBorder(
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
+            border: Border.all(
               color: colorScheme.outlineVariant.withValues(alpha: 0.4),
             ),
           ),
-          child: Padding(
-            padding: kCardPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppDateUtils.formatBookingHeader(
-                    booking.startTime,
-                  ),
-                ).h4().semiBold(),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 9,
-                      backgroundColor:
-                          colorScheme.primary.withValues(alpha: 0.12),
-                      child: Text(
-                        userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.primary,
-                        ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      AppDateUtils.formatBookingHeader(
+                        booking.startTime,
+                      ),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        '$durationText · $userName',
-                        overflow: TextOverflow.ellipsis,
-                      ).small().muted(),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
                     ),
-                  ],
-                ),
-                if (showActions) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
+                    decoration: BoxDecoration(
+                      color: isConfirmed
+                          ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                          : colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isConfirmed
+                            ? const Color(0xFF10B981).withValues(alpha: 0.4)
+                            : colorScheme.error.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Text(
+                      booking.status.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isConfirmed
+                            ? const Color(0xFF10B981)
+                            : colorScheme.onErrorContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 11,
+                    backgroundColor: colorScheme.primaryContainer,
+                    child: Text(
+                      userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      userName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSurface,
+                        fontSize: 13,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.schedule_outlined,
+                          size: 13,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          durationText,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if (showActions) ...[
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FilledButton.tonalIcon(
+                      onPressed: () => _rescheduleBooking(context, booking),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      icon: const Icon(
+                        Icons.edit_calendar_outlined,
+                        size: 16,
+                      ),
+                      label: const Text('Reschedule'),
+                    ),
+                    const SizedBox(width: 8),
+                    if (isCancelling)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colorScheme.error,
+                          ),
+                        ),
+                      )
+                    else
                       OutlinedButton.icon(
-                        onPressed: () => _rescheduleBooking(context, booking),
+                        onPressed: () => _cancelBooking(context, booking.id),
                         style: OutlinedButton.styleFrom(
+                          foregroundColor: colorScheme.error,
+                          side: BorderSide(
+                            color: colorScheme.error.withValues(alpha: 0.4),
+                          ),
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
                         ),
                         icon: const Icon(
-                          Icons.edit_calendar_outlined,
+                          Icons.close_rounded,
                           size: 16,
                         ),
-                        label: const Text('Reschedule'),
+                        label: const Text('Cancel'),
                       ),
-                      const SizedBox(width: 8),
-                      if (isCancelling)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: colorScheme.error,
-                            ),
-                          ),
-                        )
-                      else
-                        OutlinedButton.icon(
-                          onPressed: () => _cancelBooking(context, booking.id),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: colorScheme.error,
-                            side: BorderSide(
-                              color: colorScheme.error.withValues(alpha: 0.5),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                          ),
-                          icon: const Icon(
-                            Icons.close_outlined,
-                            size: 16,
-                          ),
-                          label: const Text('Cancel'),
-                        ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ],
-            ),
+            ],
           ),
         ),
       ),
