@@ -145,6 +145,42 @@ void main() {
       expect(mockRepo.updatedRole, 'MODERATOR');
       expect(mockRepo.updatedExpiresAt, isNull);
     });
+
+    testWidgets('uses id when userId is empty (backend member mapping)', (tester) async {
+      final memberWithEmptyUserId = GroupMember(
+        id: 'u-target-123',
+        groupId: 'g1',
+        userId: '',
+        displayName: 'Albie',
+        role: 'MEMBER',
+        joinedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            groupsRepositoryProvider.overrideWithValue(mockRepo),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: ChangeRoleSheet(groupId: 'g1', member: memberWithEmptyUserId),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Admin'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save Role'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save Role'));
+      await tester.pump();
+
+      expect(mockRepo.updatedGroupId, 'g1');
+      expect(mockRepo.updatedUserId, 'u-target-123');
+      expect(mockRepo.updatedRole, 'ADMIN');
+    });
   });
 
   group('Moderator permissions in MembersScreen', () {

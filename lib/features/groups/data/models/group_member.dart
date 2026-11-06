@@ -52,14 +52,21 @@ class GroupMember {
 
   factory GroupMember.fromJson(Map<String, dynamic> json) {
     final userMap = json['user'] as Map<String, dynamic>?;
+    final resolvedUserId = json['user_id'] as String? ??
+        json['userId'] as String? ??
+        userMap?['id'] as String? ??
+        userMap?['user_id'] as String? ??
+        userMap?['userId'] as String? ??
+        json['id'] as String? ??
+        '';
     return GroupMember(
-      id: json['id'] as String? ?? json['user_id'] as String? ?? '',
+      id: json['id'] as String? ?? resolvedUserId,
       groupId: json['group_id'] as String? ?? json['groupId'] as String? ?? '',
-      userId: json['user_id'] as String? ?? userMap?['id'] as String? ?? '',
-      displayName:
-          json['display_name'] as String? ??
+      userId: resolvedUserId,
+      displayName: json['display_name'] as String? ??
           userMap?['display_name'] as String? ??
           json['displayName'] as String? ??
+          userMap?['displayName'] as String? ??
           'User',
       username:
           json['username'] as String? ??
@@ -72,7 +79,9 @@ class GroupMember {
               : null,
       joinedAt: json['joined_at'] != null
           ? DateTime.parse(json['joined_at'] as String)
-          : DateTime.now(),
+          : (json['joinedAt'] != null
+              ? DateTime.parse(json['joinedAt'] as String)
+              : DateTime.now()),
     );
   }
 

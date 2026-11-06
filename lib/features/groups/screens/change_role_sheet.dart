@@ -92,9 +92,13 @@ class _ChangeRoleSheetState extends ConsumerState<ChangeRoleSheet> {
         );
       }
 
+      final targetUserId = widget.member.userId.trim().isNotEmpty
+          ? widget.member.userId.trim()
+          : widget.member.id.trim();
+
       await ref.read(groupsRepositoryProvider).updateMemberRole(
         widget.groupId,
-        widget.member.userId,
+        targetUserId,
         _selectedRole,
         expiresAt: expiry,
       );

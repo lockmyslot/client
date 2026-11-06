@@ -338,11 +338,15 @@ class MembersScreen extends ConsumerWidget {
                                         isDestructive: true,
                                       );
                                       if (confirmed == true) {
+                                        final targetUserId =
+                                            member.userId.trim().isNotEmpty
+                                                ? member.userId.trim()
+                                                : member.id.trim();
                                         await ref
                                             .read(groupsRepositoryProvider)
                                             .removeMember(
                                               groupId,
-                                              member.userId,
+                                              targetUserId,
                                             );
                                         ref.invalidate(
                                           groupMembersProvider(groupId),
