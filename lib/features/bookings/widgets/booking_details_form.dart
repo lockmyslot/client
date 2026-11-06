@@ -947,6 +947,8 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
         value: durationUnits,
         label: Text(
           durationLabel,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 13,
@@ -980,7 +982,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                     _errorMessage = null;
                   });
                 },
-                showSelectedIcon: true,
+                showSelectedIcon: false,
                 style: SegmentedButton.styleFrom(
                   selectedBackgroundColor: cs.primaryContainer,
                   selectedForegroundColor: cs.onPrimaryContainer,

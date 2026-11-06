@@ -56,11 +56,14 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                 child: SizedBox(
                   width: double.infinity,
                   child: SegmentedButton<String?>(
+                    showSelectedIcon: false,
                     segments: const [
                       ButtonSegment(
                         value: null,
                         label: Text(
                           'All',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -68,6 +71,8 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                         value: 'CONFIRMED',
                         label: Text(
                           'Confirmed',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -75,6 +80,8 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                         value: 'CANCELLED',
                         label: Text(
                           'Cancelled',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),

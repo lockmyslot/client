@@ -115,14 +115,17 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: SegmentedButton<String?>(
+                        showSelectedIcon: false,
                         segments: const [
                           ButtonSegment(
                             value: null,
                             label: Text(
                               'All',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13,
+                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -130,9 +133,11 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                             value: 'CONFIRMED',
                             label: Text(
                               'Confirmed',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13,
+                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -140,9 +145,11 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                             value: 'CANCELLED',
                             label: Text(
                               'Cancelled',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13,
+                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -150,9 +157,11 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                             value: 'COMPLETED',
                             label: Text(
                               'Completed',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13,
+                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -162,6 +171,8 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                           setState(() => _selectedStatusFilter = val.first);
                         },
                         style: SegmentedButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
                           selectedBackgroundColor: colorScheme.primaryContainer,
                           selectedForegroundColor:
                               colorScheme.onPrimaryContainer,
