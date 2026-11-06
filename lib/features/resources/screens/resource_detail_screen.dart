@@ -555,41 +555,13 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                               ),
                             ),
                             if (myBookings.isEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.surfaceContainerLow,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: colorScheme.outlineVariant
-                                          .withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.event_available_outlined,
-                                        size: 16,
-                                        color: colorScheme.onSurfaceVariant
-                                            .withValues(alpha: 0.7),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          'You have no upcoming bookings for this resource.',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 24),
+                                child: EmptyState(
+                                  icon: Icons.event_available_outlined,
+                                  title: 'No Personal Bookings',
+                                  description:
+                                      'You have no upcoming bookings for this resource.',
                                 ),
                               )
                             else
@@ -644,41 +616,13 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                               ),
                             ),
                             if (othersBookings.isEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.surfaceContainerLow,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: colorScheme.outlineVariant
-                                          .withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.event_note_outlined,
-                                        size: 16,
-                                        color: colorScheme.onSurfaceVariant
-                                            .withValues(alpha: 0.7),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          'No bookings from other members.',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 24),
+                                child: EmptyState(
+                                  icon: Icons.event_note_outlined,
+                                  title: 'No Other Bookings',
+                                  description:
+                                      'No bookings from other members.',
                                 ),
                               )
                             else

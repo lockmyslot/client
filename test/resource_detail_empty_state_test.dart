@@ -149,7 +149,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No Upcoming Bookings'), findsNothing);
-    expect(find.byType(EmptyState), findsNothing);
+    expect(
+      find.ancestor(
+        of: find.byType(EmptyState),
+        matching: find.byType(SliverFillRemaining),
+      ),
+      findsNothing,
+    );
     expect(find.text('My Bookings'), findsOneWidget);
     expect(find.text('Other Bookings'), findsOneWidget);
   });
