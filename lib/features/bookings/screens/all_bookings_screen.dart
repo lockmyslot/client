@@ -5,6 +5,7 @@ import '../../groups/providers/groups_provider.dart';
 import '../data/bookings_repository.dart';
 import 'reschedule_booking_sheet.dart';
 import '../../resources/widgets/resource_avatar.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
@@ -55,7 +56,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppShapes.tag,
         border: Border.all(color: border),
       ),
       child: Text(
@@ -283,7 +284,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: colorScheme.surfaceContainerLow,
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: AppShapes.card,
                                 border: Border.all(
                                   color: colorScheme.outlineVariant
                                       .withValues(alpha: 0.4),
@@ -350,7 +351,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: colorScheme.surfaceContainerHigh,
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: AppShapes.control,
                                     ),
                                     child: Row(
                                       children: [
@@ -404,7 +405,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                             ),
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  AppShapes.control,
                                             ),
                                           ),
                                           icon: const Icon(
@@ -456,7 +457,7 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                             ),
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  AppShapes.control,
                                             ),
                                           ),
                                           icon: const Icon(

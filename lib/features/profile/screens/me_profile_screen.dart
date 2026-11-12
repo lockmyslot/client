@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../groups/providers/groups_provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/color_scheme_provider.dart';
 import '../../../core/theme/item_color_provider.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -49,7 +50,7 @@ class MeProfileScreen extends ConsumerWidget {
                     elevation: 0,
                     color: colorScheme.surfaceContainer,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: AppShapes.card,
                       side: BorderSide(
                         color: colorScheme.outlineVariant.withValues(alpha: 0.4),
                       ),
@@ -77,25 +78,6 @@ class MeProfileScreen extends ConsumerWidget {
                             const SizedBox(height: 2),
                             Text('@${user.username}').small().muted(),
                           ],
-                          const SizedBox(height: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.secondaryContainer,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              'Member',
-                              style: TextStyle(
-                                color: colorScheme.onSecondaryContainer,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
                           if (user?.createdAt != null) ...[
                             const SizedBox(height: 10),
                             Text(
@@ -123,7 +105,7 @@ class MeProfileScreen extends ConsumerWidget {
                           elevation: 0,
                           color: colorScheme.surfaceContainer,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: AppShapes.card,
                             side: BorderSide(
                               color: colorScheme.outlineVariant
                                   .withValues(alpha: 0.4),
@@ -225,7 +207,7 @@ class MeProfileScreen extends ConsumerWidget {
                                 elevation: 0,
                                 color: colorScheme.surfaceContainer,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: AppShapes.card,
                                   side: BorderSide(
                                     color: colorScheme.outlineVariant
                                         .withValues(alpha: 0.4),
@@ -473,7 +455,7 @@ class MeProfileScreen extends ConsumerWidget {
                     elevation: 0,
                     color: colorScheme.surfaceContainer,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: AppShapes.card,
                       side: BorderSide(
                         color: colorScheme.outlineVariant.withValues(alpha: 0.4),
                       ),
@@ -497,7 +479,7 @@ class MeProfileScreen extends ConsumerWidget {
                       subtitle: const Text('Name, username, password'),
                       trailing: const Icon(Icons.chevron_right, size: 20),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: AppShapes.card,
                       ),
                       onTap: () => EditProfileSheet.show(context),
                     ),
@@ -521,7 +503,7 @@ class MeProfileScreen extends ConsumerWidget {
                     elevation: 0,
                     color: colorScheme.surfaceContainer,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: AppShapes.card,
                       side: BorderSide(
                         color: colorScheme.outlineVariant.withValues(alpha: 0.4),
                       ),
@@ -571,7 +553,7 @@ class MeProfileScreen extends ConsumerWidget {
                             ],
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: AppShapes.card,
                           ),
                           onTap: () => ThemeSelectionSheet.show(context),
                         ),
@@ -636,7 +618,7 @@ class MeProfileScreen extends ConsumerWidget {
                             ],
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: AppShapes.card,
                           ),
                           onTap: () => ColorSchemeSelectionSheet.show(context),
                         ),
@@ -669,7 +651,7 @@ class MeProfileScreen extends ConsumerWidget {
                                 .setUseItemColors(val);
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: AppShapes.card,
                           ),
                         ),
                       ],
@@ -678,12 +660,23 @@ class MeProfileScreen extends ConsumerWidget {
 
                   const SizedBox(height: 16),
 
-                  // About & System
+                  // About Section
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 8),
+                    child: Text(
+                      'About',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurfaceVariant,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   Card(
                     elevation: 0,
                     color: colorScheme.surfaceContainer,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: AppShapes.card,
                       side: BorderSide(
                         color: colorScheme.outlineVariant.withValues(alpha: 0.4),
                       ),
@@ -696,7 +689,7 @@ class MeProfileScreen extends ConsumerWidget {
                       title: const Text('Lock My Slot'),
                       subtitle: const Text('Version 1.0.0'),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: AppShapes.card,
                       ),
                     ),
                   ),
@@ -724,7 +717,7 @@ class MeProfileScreen extends ConsumerWidget {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: AppShapes.control,
                       ),
                     ),
                     icon: const Icon(Icons.logout_outlined),

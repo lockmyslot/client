@@ -1,5 +1,29 @@
 import 'package:flutter/material.dart';
 
+/// Unified shape scale across the app adhering strictly to Material 3 specifications.
+class AppShapes {
+  /// Tier 1: Cards & Large Surface Containers (16dp)
+  static const double cardRadius = 16.0;
+  static final BorderRadius card = BorderRadius.circular(cardRadius);
+  static const Radius cardRadiusValue = Radius.circular(cardRadius);
+
+  /// Tier 2: Controls, Inputs & Buttons (12dp)
+  static const double controlRadius = 12.0;
+  static final BorderRadius control = BorderRadius.circular(controlRadius);
+  static const Radius controlRadiusValue = Radius.circular(controlRadius);
+
+  /// Tier 3: Compact Tags, Badges & Indicators (8dp)
+  static const double tagRadius = 8.0;
+  static final BorderRadius tag = BorderRadius.circular(tagRadius);
+  static const Radius tagRadiusValue = Radius.circular(tagRadius);
+
+  /// Tier 4: Bottom Sheets & Dialogs (28dp)
+  static const double sheetRadius = 28.0;
+  static const BorderRadius sheetTop =
+      BorderRadius.vertical(top: Radius.circular(sheetRadius));
+  static final BorderRadius dialog = BorderRadius.circular(sheetRadius);
+}
+
 class AppTheme {
   static const Color _seedColor = Color(0xFF18181B);
   static const String _fontFamily = 'GoogleSansFlexRounded';
@@ -51,7 +75,7 @@ class AppTheme {
   }
 
   static InputDecorationTheme _inputDecorationTheme(ColorScheme cs) {
-    final borderRadius = BorderRadius.circular(12);
+    final borderRadius = AppShapes.control;
     return InputDecorationTheme(
       filled: false,
       border: OutlineInputBorder(
@@ -94,7 +118,7 @@ class AppTheme {
         elevation: 0,
         color: cs.surfaceContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppShapes.card,
           side: BorderSide(
             color: cs.outlineVariant.withValues(alpha: 0.4),
           ),
@@ -103,6 +127,28 @@ class AppTheme {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: cs.surfaceContainerHigh,
         surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(borderRadius: AppShapes.sheetTop),
+      ),
+      dialogTheme: DialogThemeData(
+        shape: RoundedRectangleBorder(borderRadius: AppShapes.dialog),
+        backgroundColor: cs.surfaceContainerHigh,
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: AppShapes.control),
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: AppShapes.control),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: AppShapes.control),
+        ),
       ),
       appBarTheme: AppBarTheme(
         elevation: 0,
@@ -145,7 +191,7 @@ class AppTheme {
         elevation: 0,
         color: cs.surfaceContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppShapes.card,
           side: BorderSide(
             color: cs.outlineVariant.withValues(alpha: 0.4),
           ),
@@ -154,6 +200,28 @@ class AppTheme {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: cs.surfaceContainerHigh,
         surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(borderRadius: AppShapes.sheetTop),
+      ),
+      dialogTheme: DialogThemeData(
+        shape: RoundedRectangleBorder(borderRadius: AppShapes.dialog),
+        backgroundColor: cs.surfaceContainerHigh,
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: AppShapes.control),
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: AppShapes.control),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: AppShapes.control),
+        ),
       ),
       appBarTheme: AppBarTheme(
         elevation: 0,

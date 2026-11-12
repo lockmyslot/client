@@ -4,6 +4,7 @@ import '../providers/my_bookings_provider.dart';
 import '../data/bookings_repository.dart';
 import 'reschedule_booking_sheet.dart';
 import '../../resources/widgets/resource_avatar.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
@@ -154,7 +155,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: cs.surfaceContainerLow,
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: AppShapes.card,
                                 border: Border.all(
                                   color: cs.outlineVariant
                                       .withValues(alpha: 0.4),
@@ -195,7 +196,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                                                   .withValues(alpha: 0.15)
                                               : cs.errorContainer,
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              AppShapes.tag,
                                           border: Border.all(
                                             color: isConfirmed
                                                 ? const Color(0xFF10B981)
@@ -268,7 +269,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                                             ),
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  AppShapes.control,
                                             ),
                                           ),
                                           icon: const Icon(
@@ -319,7 +320,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                                             ),
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  AppShapes.control,
                                             ),
                                           ),
                                           icon: const Icon(

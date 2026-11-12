@@ -8,6 +8,7 @@ import '../data/bookings_repository.dart';
 import '../providers/availability_provider.dart';
 import '../providers/bookings_provider.dart';
 import '../providers/my_bookings_provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -299,20 +300,13 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: AppShapes.sheetTop,
         border: Border(
           top: BorderSide(
-            color: cs.outlineVariant.withValues(alpha: 0.3),
+            color: cs.outlineVariant.withValues(alpha: 0.4),
             width: 1,
           ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
       ),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       child: SafeArea(
@@ -347,7 +341,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                     color: isValid
                         ? const Color(0xFF10B981).withValues(alpha: 0.15)
                         : cs.errorContainer,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: AppShapes.tag,
                     border: Border.all(
                       color: isValid
                           ? const Color(0xFF10B981).withValues(alpha: 0.4)
@@ -401,7 +395,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                     : null,
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: AppShapes.control,
                   ),
                 ),
                 child: _isBooking
@@ -544,83 +538,76 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => _onDateSelected(date),
-                borderRadius: BorderRadius.circular(16),
-                child: AnimatedScale(
-                  scale: isSelected ? 1.04 : 1.0,
-                  duration: const Duration(milliseconds: 260),
-                  curve: Curves.easeOutBack,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
-                    width: 70,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
+                borderRadius: AppShapes.control,
+                child: Container(
+                  width: 70,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? cs.primaryContainer
+                        : cs.surfaceContainerLow,
+                    borderRadius: AppShapes.control,
+                    border: Border.all(
                       color: isSelected
-                          ? cs.primaryContainer
-                          : cs.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected
-                            ? cs.primary
-                            : cs.outlineVariant.withValues(alpha: 0.5),
-                        width: isSelected ? 1.5 : 1.0,
+                          ? cs.primary
+                          : cs.outlineVariant.withValues(alpha: 0.5),
+                      width: isSelected ? 1.5 : 1.0,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        AppDateUtils.formatWeekday(date).toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                          color: isSelected
+                              ? cs.onPrimaryContainer
+                              : cs.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          AppDateUtils.formatWeekday(date).toUpperCase(),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${date.day}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? cs.onPrimaryContainer
+                              : cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? cs.primary.withValues(alpha: 0.2)
+                              : (isToday
+                                  ? cs.primary.withValues(alpha: 0.12)
+                                  : Colors.transparent),
+                          borderRadius: AppShapes.tag,
+                        ),
+                        child: Text(
+                          isToday
+                              ? 'Today'
+                              : AppDateUtils.formatShortDate(date),
                           style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
+                            fontSize: 10,
+                            fontWeight:
+                                isToday ? FontWeight.bold : FontWeight.w500,
                             color: isSelected
                                 ? cs.onPrimaryContainer
-                                : cs.onSurfaceVariant,
+                                : (isToday ? cs.primary : cs.onSurfaceVariant),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${date.day}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? cs.onPrimaryContainer
-                                : cs.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? cs.primary.withValues(alpha: 0.2)
-                                : (isToday
-                                    ? cs.primary.withValues(alpha: 0.12)
-                                    : Colors.transparent),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            isToday
-                                ? 'Today'
-                                : AppDateUtils.formatShortDate(date),
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight:
-                                  isToday ? FontWeight.bold : FontWeight.w500,
-                              color: isSelected
-                                  ? cs.onPrimaryContainer
-                                  : (isToday ? cs.primary : cs.onSurfaceVariant),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -855,7 +842,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
           chipBorder = cs.outlineVariant
               .withValues(alpha: 0.3);
           borderWidth = 1;
-          icon = Icons.block_outlined;
+          icon = Icons.schedule_outlined;
           iconColor = cs.outline.withValues(alpha: 0.6);
           textColor = cs.outline;
         }
@@ -871,47 +858,40 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                     });
                   }
                 : null,
-            borderRadius: BorderRadius.circular(12),
-            child: AnimatedScale(
-              scale: isSelected ? 1.05 : 1.0,
-              duration: const Duration(milliseconds: 260),
-              curve: Curves.easeOutBack,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                decoration: BoxDecoration(
-                  color: chipBg,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: chipBorder,
-                    width: borderWidth,
-                  ),
+            borderRadius: AppShapes.control,
+            child: Container(
+              decoration: BoxDecoration(
+                color: chipBg,
+                borderRadius: AppShapes.control,
+                border: Border.all(
+                  color: chipBorder,
+                  width: borderWidth,
                 ),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        icon,
-                        size: 14,
-                        color: iconColor,
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 14,
+                      color: iconColor,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      AppDateUtils.formatTime(
+                        slot.startTime,
                       ),
-                      const SizedBox(width: 5),
-                      Text(
-                        AppDateUtils.formatTime(
-                          slot.startTime,
-                        ),
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.w500,
-                          fontSize: 13,
-                        ),
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontSize: 13,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -992,7 +972,7 @@ class _BookingDetailsFormState extends ConsumerState<BookingDetailsForm> {
                     color: cs.outlineVariant.withValues(alpha: 0.5),
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: AppShapes.control,
                   ),
                 ),
               ),

@@ -10,6 +10,7 @@ import '../../bookings/data/models/booking.dart';
 import '../../bookings/providers/bookings_provider.dart';
 import '../../bookings/screens/reschedule_booking_sheet.dart';
 import '../../groups/providers/groups_provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
@@ -367,78 +368,80 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                   ? inProgress.first
                                   : active.first;
 
-                              return Container(
+                              return Card(
+                                elevation: 0,
                                 margin: const EdgeInsets.only(top: 10, bottom: 4),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: isCurrentlyUnderMaintenance
-                                      ? Colors.orange.withValues(
-                                          alpha: isDark ? 0.15 : 0.10,
-                                        )
-                                      : colorScheme.primaryContainer.withValues(
-                                          alpha: 0.35,
-                                        ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
+                                color: isCurrentlyUnderMaintenance
+                                    ? Colors.orange.withValues(
+                                        alpha: isDark ? 0.15 : 0.10,
+                                      )
+                                    : colorScheme.surfaceContainerLow,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: AppShapes.card,
+                                  side: BorderSide(
                                     color: isCurrentlyUnderMaintenance
                                         ? (isDark
                                             ? Colors.orange.shade700
                                             : Colors.orange.shade400)
-                                        : colorScheme.primary.withValues(alpha: 0.3),
+                                        : colorScheme.outlineVariant
+                                            .withValues(alpha: 0.5),
                                   ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      isCurrentlyUnderMaintenance
-                                          ? Icons.build_circle
-                                          : Icons.info_outline,
-                                      color: isCurrentlyUnderMaintenance
-                                          ? (isDark
-                                              ? Colors.orange.shade300
-                                              : Colors.orange.shade800)
-                                          : colorScheme.primary,
-                                      size: 22,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            isCurrentlyUnderMaintenance
-                                                ? 'Currently Under Maintenance'
-                                                : 'Maintenance Scheduled',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              color: isCurrentlyUnderMaintenance
-                                                  ? (isDark
-                                                      ? Colors.orange.shade200
-                                                      : Colors.orange.shade900)
-                                                  : colorScheme.primary,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        isCurrentlyUnderMaintenance
+                                            ? Icons.build_circle
+                                            : Icons.info_outline,
+                                        color: isCurrentlyUnderMaintenance
+                                            ? (isDark
+                                                ? Colors.orange.shade300
+                                                : Colors.orange.shade800)
+                                            : colorScheme.primary,
+                                        size: 22,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              isCurrentlyUnderMaintenance
+                                                  ? 'Currently Under Maintenance'
+                                                  : 'Maintenance Scheduled',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                                color: isCurrentlyUnderMaintenance
+                                                    ? (isDark
+                                                        ? Colors.orange.shade200
+                                                        : Colors.orange.shade900)
+                                                    : colorScheme.primary,
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            '${displayTask.title} (${displayTask.isRecurring ? displayTask.recurrenceSummary : AppDateUtils.formatDate(displayTask.startTime)})',
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.bodySmall,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              '${displayTask.title} (${displayTask.isRecurring ? displayTask.recurrenceSummary : AppDateUtils.formatDate(displayTask.startTime)})',
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodySmall,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => context.push(
-                                        '/groups/$groupId/resources/$resourceId/maintenance',
+                                      TextButton(
+                                        onPressed: () => context.push(
+                                          '/groups/$groupId/resources/$resourceId/maintenance',
+                                        ),
+                                        child: const Text('View'),
                                       ),
-                                      child: const Text('View'),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               );
                             },
@@ -673,96 +676,89 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
       padding: const EdgeInsets.only(bottom: 10),
       child: Entrance(
         delay: Duration(milliseconds: 100 + (index * 25)),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
+        child: Card(
+          elevation: 0,
+          color: colorScheme.surfaceContainerLow,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppShapes.card,
+            side: BorderSide(
               color: colorScheme.outlineVariant.withValues(alpha: 0.4),
             ),
           ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      AppDateUtils.formatBookingHeader(
-                        booking.startTime,
-                      ),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        AppDateUtils.formatBookingHeader(
+                          booking.startTime,
+                        ),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isConfirmed
-                          ? const Color(0xFF10B981).withValues(alpha: 0.15)
-                          : colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
                         color: isConfirmed
-                            ? const Color(0xFF10B981).withValues(alpha: 0.4)
-                            : colorScheme.error.withValues(alpha: 0.4),
+                            ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                            : colorScheme.errorContainer,
+                        borderRadius: AppShapes.tag,
+                        border: Border.all(
+                          color: isConfirmed
+                              ? const Color(0xFF10B981).withValues(alpha: 0.4)
+                              : colorScheme.error.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Text(
+                        booking.status.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isConfirmed
+                              ? const Color(0xFF10B981)
+                              : colorScheme.onErrorContainer,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      booking.status.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: isConfirmed
-                            ? const Color(0xFF10B981)
-                            : colorScheme.onErrorContainer,
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 11,
+                      backgroundColor: colorScheme.primaryContainer,
+                      child: Text(
+                        userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 11,
-                    backgroundColor: colorScheme.primaryContainer,
-                    child: Text(
-                      userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onPrimaryContainer,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        userName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurface,
+                          fontSize: 13,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      userName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: colorScheme.onSurface,
-                        fontSize: 13,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
+                    Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
@@ -774,32 +770,31 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                         Text(
                           durationText,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              if (showActions) ...[
-                const SizedBox(height: 14),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    FilledButton.tonalIcon(
-                      onPressed: () => _rescheduleBooking(context, booking),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
+                  ],
+                ),
+                if (showActions) ...[
+                  const SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FilledButton.tonalIcon(
+                        onPressed: () => _rescheduleBooking(context, booking),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: AppShapes.control,
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
                       icon: const Icon(
                         Icons.edit_calendar_outlined,
                         size: 16,
@@ -832,7 +827,7 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                             vertical: 8,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: AppShapes.control,
                           ),
                         ),
                         icon: const Icon(
@@ -848,6 +843,7 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

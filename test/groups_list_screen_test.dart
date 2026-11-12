@@ -39,7 +39,7 @@ class FakeMyGroupsNotifier extends MyGroupsNotifier {
 void main() {
   group('GroupsListScreen Widget Tests', () {
     testWidgets(
-      'renders admin shield badge for admin, guest badge for guest, and no badge or pill for member/mod',
+      'renders role in subtitle metadata and member counts for each group',
       (WidgetTester tester) async {
         final testGroups = [
           Group(
@@ -94,32 +94,16 @@ void main() {
         expect(find.text('Gaming Lounge'), findsOneWidget);
         expect(find.text('Open Coworking'), findsOneWidget);
 
-        // No role pills are displayed
-        expect(find.text('ADMIN'), findsNothing);
-        expect(find.text('Admin'), findsNothing);
-        expect(find.text('MEMBER'), findsNothing);
-        expect(find.text('Member'), findsNothing);
-        expect(find.text('MOD'), findsNothing);
-        expect(find.text('Mod'), findsNothing);
-        expect(find.text('GUEST'), findsNothing);
-        expect(find.text('Guest'), findsNothing);
-
-        // Admin shield icon is displayed exactly once (only on Admin group)
-        expect(find.byIcon(Icons.shield), findsOneWidget);
-
-        // Guest badge icon is displayed exactly once (only on Guest group)
-        expect(find.byIcon(Icons.badge), findsOneWidget);
-
-        // Member counts are rendered
-        expect(find.text('5 members'), findsOneWidget);
-        expect(find.text('3 members'), findsOneWidget);
-        expect(find.text('8 members'), findsOneWidget);
-        expect(find.text('12 members'), findsOneWidget);
+        // Subtitle displays role and member counts
+        expect(find.text('Admin • 5 members'), findsOneWidget);
+        expect(find.text('Member • 3 members'), findsOneWidget);
+        expect(find.text('Member • 8 members'), findsOneWidget);
+        expect(find.text('Guest • 12 members'), findsOneWidget);
       },
     );
 
     testWidgets(
-      'renders pinned group at the top with PINNED header and pin icon without Pinned pill next to members count',
+      'renders pinned group at the top with Pinned header and pin icon',
       (WidgetTester tester) async {
         final testGroups = [
           Group(
@@ -157,17 +141,14 @@ void main() {
         await tester.pump(const Duration(milliseconds: 600));
 
         // Section headers
-        expect(find.text('PINNED'), findsOneWidget);
-        expect(find.text('ALL GROUPS'), findsOneWidget);
-
-        // No "Pinned" text pill next to members count
-        expect(find.text('Pinned'), findsNothing);
+        expect(find.text('Pinned'), findsOneWidget);
+        expect(find.text('All Groups'), findsOneWidget);
 
         // No persistent pin IconButton tooltip directly on the cards
         expect(find.byTooltip('Pin to top'), findsNothing);
 
         // Pin icon is rendered for the pinned group
-        expect(find.byIcon(Icons.push_pin), findsNWidgets(2)); // 1 for PINNED header, 1 for the pinned card
+        expect(find.byIcon(Icons.push_pin), findsNWidgets(2)); // 1 for Pinned header, 1 for the pinned card
 
         // Verify order: Study Room should appear above Gym Bros
         final studyRoomOffset = tester.getTopLeft(find.text('Study Room')).dy;
@@ -229,8 +210,8 @@ void main() {
         await tester.pumpAndSettle();
 
         // Group Beta is now pinned at top
-        expect(find.text('PINNED'), findsOneWidget);
-        expect(find.text('ALL GROUPS'), findsOneWidget);
+        expect(find.text('Pinned'), findsOneWidget);
+        expect(find.text('All Groups'), findsOneWidget);
 
         final betaOffset = tester.getTopLeft(find.text('Group Beta')).dy;
         final alphaOffset = tester.getTopLeft(find.text('Group Alpha')).dy;
@@ -245,7 +226,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // No more pinned header
-        expect(find.text('PINNED'), findsNothing);
+        expect(find.text('Pinned'), findsNothing);
       },
     );
 

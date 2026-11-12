@@ -6,11 +6,13 @@ import '../providers/groups_provider.dart';
 import '../widgets/group_avatar.dart';
 import 'create_group_sheet.dart';
 import 'join_group_sheet.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/deep_link_utils.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 import '../../../shared/widgets/m3_collapsing_app_bar.dart';
+import '../data/models/group.dart';
 
 class GroupsListScreen extends ConsumerWidget {
   const GroupsListScreen({super.key});
@@ -38,27 +40,37 @@ class GroupsListScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                  child: Material(
-                    color: colorScheme.primaryContainer.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(16),
+                  child: Card(
+                    elevation: 0,
+                    color: colorScheme.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppShapes.card,
+                      side: BorderSide(
+                        color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: AppShapes.card,
                       onTap: () => JoinGroupSheet.show(context),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(8),
+                              width: 36,
+                              height: 36,
                               decoration: BoxDecoration(
-                                color: colorScheme.primary,
-                                shape: BoxShape.circle,
+                                color: colorScheme.primaryContainer,
+                                borderRadius: AppShapes.control,
                               ),
                               child: Icon(
-                                Icons.mark_email_unread_outlined,
+                                Icons.mail_outline,
                                 size: 18,
-                                color: colorScheme.onPrimary,
+                                color: colorScheme.onPrimaryContainer,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -71,7 +83,7 @@ class GroupsListScreen extends ConsumerWidget {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
-                                      color: colorScheme.onPrimaryContainer,
+                                      color: colorScheme.onSurface,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -79,8 +91,7 @@ class GroupsListScreen extends ConsumerWidget {
                                     'Tap to review and join your groups',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: colorScheme.onPrimaryContainer
-                                          .withValues(alpha: 0.8),
+                                      color: colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
@@ -90,7 +101,9 @@ class GroupsListScreen extends ConsumerWidget {
                               onPressed: () => JoinGroupSheet.show(context),
                               style: FilledButton.styleFrom(
                                 visualDensity: VisualDensity.compact,
-                                backgroundColor: colorScheme.surface,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: AppShapes.control,
+                                ),
                               ),
                               child: const Text('Review'),
                             ),
@@ -130,351 +143,310 @@ class GroupsListScreen extends ConsumerWidget {
                   );
                 }
 
-                final hasPinned = groups.any((g) => g.isPinned);
+                final pinnedGroups = groups.where((g) => g.isPinned).toList();
+                final unpinnedGroups =
+                    groups.where((g) => !g.isPinned).toList();
 
                 return SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final group = groups[index];
-                        final isFirstPinned =
-                            hasPinned && group.isPinned && index == 0;
-                        final isFirstUnpinned = hasPinned &&
-                            !group.isPinned &&
-                            (index == 0 || groups[index - 1].isPinned);
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    delegate: SliverChildListDelegate([
+                      if (pinnedGroups.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: 10.0,
+                            left: 4,
+                            top: 4.0,
+                          ),
+                          child: Row(
                             children: [
-                              if (isFirstPinned)
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    bottom: 8.0,
-                                    left: 4,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.push_pin,
-                                        size: 14,
-                                        color: colorScheme.primary,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'PINNED',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.8,
-                                          color: colorScheme.primary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              if (isFirstUnpinned)
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    bottom: 8.0,
-                                    left: 4,
-                                    top: 4.0,
-                                  ),
-                                  child: Text(
-                                    'ALL GROUPS',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.8,
-                                      color: colorScheme.onSurfaceVariant,
+                              Icon(
+                                Icons.push_pin,
+                                size: 16,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Pinned',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.primary,
                                     ),
-                                  ),
-                                ),
-                              Entrance(
-                                delay: Duration(milliseconds: index * 60),
-                                child: PressableScale(
-                                  onTap: () =>
-                                      context.push('/groups/${group.id}'),
-                                  onLongPress: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      showDragHandle: true,
-                                      builder: (ctx) => SafeArea(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.stretch,
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 20.0,
-                                                vertical: 8.0,
-                                              ),
-                                              child: Text(
-                                                group.name,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .titleLarge
-                                                    ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 22,
-                                                    ),
-                                                maxLines: 2,
-                                                overflow:
-                                                    TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            const Divider(height: 1),
-                                            ListTile(
-                                              leading: Icon(
-                                                group.isPinned
-                                                    ? Icons.push_pin_outlined
-                                                    : Icons.push_pin,
-                                                color: colorScheme.primary,
-                                              ),
-                                              title: Text(
-                                                group.isPinned
-                                                    ? 'Unpin from top'
-                                                    : 'Pin to top',
-                                              ),
-                                              onTap: () {
-                                                Navigator.pop(ctx);
-                                                ref
-                                                    .read(
-                                                      myGroupsProvider.notifier,
-                                                    )
-                                                    .togglePin(group.id);
-                                              },
-                                            ),
-                                            ListTile(
-                                              leading: Icon(
-                                                Icons.person_add_outlined,
-                                                color: colorScheme.primary,
-                                              ),
-                                              title: const Text('Invite'),
-                                              onTap: () async {
-                                                Navigator.pop(ctx);
-                                                if (group.inviteCode != null &&
-                                                    group.inviteCode!.isNotEmpty) {
-                                                  DeepLinkUtils.showInviteSheet(
-                                                    context,
-                                                    groupName: group.name,
-                                                    inviteCode:
-                                                        group.inviteCode!,
-                                                    groupId: group.id,
-                                                  );
-                                                } else if (group.isAdmin) {
-                                                  try {
-                                                    final detail = await ref
-                                                        .read(
-                                                          groupsRepositoryProvider,
-                                                        )
-                                                        .getGroupDetail(
-                                                          group.id,
-                                                        );
-                                                    if (context.mounted &&
-                                                        detail.inviteCode !=
-                                                            null &&
-                                                        detail.inviteCode!
-                                                            .isNotEmpty) {
-                                                      DeepLinkUtils
-                                                          .showInviteSheet(
-                                                        context,
-                                                        groupName:
-                                                            detail.name,
-                                                        inviteCode:
-                                                            detail.inviteCode!,
-                                                        groupId: detail.id,
-                                                      );
-                                                    }
-                                                  } catch (_) {
-                                                    if (context.mounted) {
-                                                      ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        const SnackBar(
-                                                          content: Text(
-                                                            'Failed to load invite code',
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }
-                                                  }
-                                                } else {
-                                                  if (context.mounted) {
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      const SnackBar(
-                                                        content: Text(
-                                                          'Only group admins can invite members',
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-                                                }
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Card(
-                                    elevation: 0,
-                                    color: colorScheme.surfaceContainer,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      side: BorderSide(
-                                        color: group.isPinned
-                                            ? colorScheme.primary.withValues(
-                                                alpha: 0.4,
-                                              )
-                                            : colorScheme.outlineVariant
-                                                .withValues(alpha: 0.4),
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: kCardPadding,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Stack(
-                                                clipBehavior: Clip.none,
-                                                children: [
-                                                  GroupAvatar(
-                                                    name: group.name,
-                                                    iconKey: group.icon,
-                                                    colorHex: group.color,
-                                                    size: 48,
-                                                  ),
-                                                  if (group.isAdmin)
-                                                    Positioned(
-                                                      right: -2,
-                                                      bottom: -2,
-                                                      child: Container(
-                                                        padding:
-                                                            const EdgeInsets.all(
-                                                              3,
-                                                            ),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                              color: colorScheme
-                                                                  .primary,
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                              border: Border.all(
-                                                                color: colorScheme
-                                                                    .surfaceContainer,
-                                                                width: 1.5,
-                                                              ),
-                                                            ),
-                                                        child: Icon(
-                                                          Icons.shield,
-                                                          size: 10,
-                                                          color: colorScheme
-                                                              .onPrimary,
-                                                        ),
-                                                      ),
-                                                    )
-                                                  else if (group.isGuest)
-                                                    Positioned(
-                                                      right: -2,
-                                                      bottom: -2,
-                                                      child: Container(
-                                                        padding:
-                                                            const EdgeInsets.all(
-                                                              3,
-                                                            ),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                              color: colorScheme
-                                                                  .secondary,
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                              border: Border.all(
-                                                                color: colorScheme
-                                                                    .surfaceContainer,
-                                                                width: 1.5,
-                                                              ),
-                                                            ),
-                                                        child: Icon(
-                                                          Icons.badge,
-                                                          size: 10,
-                                                          color: colorScheme
-                                                              .onSecondary,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                              const SizedBox(width: 16),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(group.name).h4(),
-                                                    const SizedBox(height: 4),
-                                                    Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons.people_outline,
-                                                          size: 14,
-                                                          color: colorScheme
-                                                              .onSurfaceVariant,
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 4,
-                                                        ),
-                                                        Text(
-                                                          '${group.memberCount} members',
-                                                        ).small().muted(),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              if (group.isPinned)
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                    right: 6.0,
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.push_pin,
-                                                    size: 16,
-                                                    color: colorScheme.primary,
-                                                  ),
-                                                ),
-                                              Icon(
-                                                Icons.chevron_right_outlined,
-                                                color: colorScheme
-                                                    .onSurfaceVariant,
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
                               ),
                             ],
                           ),
-                        );
-                      },
-                      childCount: groups.length,
-                    ),
+                        ),
+                        _buildGroupSection(
+                          context,
+                          ref,
+                          pinnedGroups,
+                          colorScheme,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (unpinnedGroups.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: 10.0,
+                            left: 4,
+                            top: 4.0,
+                          ),
+                          child: Text(
+                            'All Groups',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ),
+                        _buildGroupSection(
+                          context,
+                          ref,
+                          unpinnedGroups,
+                          colorScheme,
+                        ),
+                      ],
+                    ]),
                   ),
                 );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  BorderRadius _getGroupItemRadius(int index, int totalCount) {
+    const double large = 16.0;
+    const double small = 4.0;
+
+    if (totalCount <= 1) {
+      return BorderRadius.circular(large);
+    }
+
+    if (index == 0) {
+      return const BorderRadius.only(
+        topLeft: Radius.circular(large),
+        topRight: Radius.circular(large),
+        bottomLeft: Radius.circular(small),
+        bottomRight: Radius.circular(small),
+      );
+    }
+
+    if (index == totalCount - 1) {
+      return const BorderRadius.only(
+        topLeft: Radius.circular(small),
+        topRight: Radius.circular(small),
+        bottomLeft: Radius.circular(large),
+        bottomRight: Radius.circular(large),
+      );
+    }
+
+    return const BorderRadius.all(Radius.circular(small));
+  }
+
+  Widget _buildGroupSection(
+    BuildContext context,
+    WidgetRef ref,
+    List<Group> sectionGroups,
+    ColorScheme colorScheme,
+  ) {
+    return Column(
+      children: [
+        for (int i = 0; i < sectionGroups.length; i++) ...[
+          if (i > 0) const SizedBox(height: 3),
+          _buildGroupCard(
+            context,
+            ref,
+            sectionGroups[i],
+            _getGroupItemRadius(i, sectionGroups.length),
+            colorScheme,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildGroupCard(
+    BuildContext context,
+    WidgetRef ref,
+    Group group,
+    BorderRadius borderRadius,
+    ColorScheme colorScheme,
+  ) {
+    final roleText =
+        group.isAdmin ? 'Admin' : (group.isGuest ? 'Guest' : 'Member');
+    return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: borderRadius,
+        side: BorderSide(
+          color: group.isPinned
+              ? colorScheme.primary.withValues(alpha: 0.35)
+              : colorScheme.outlineVariant.withValues(alpha: 0.2),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        borderRadius: borderRadius,
+        onTap: () => context.push('/groups/${group.id}'),
+        onLongPress: () => _showGroupOptionsSheet(context, ref, group),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+          child: Row(
+            children: [
+              GroupAvatar(
+                name: group.name,
+                iconKey: group.icon,
+                colorHex: group.color,
+                size: 48,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      group.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$roleText • ${group.memberCount} members',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              if (group.isPinned)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: Icon(
+                    Icons.push_pin,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              Icon(
+                Icons.chevron_right_outlined,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showGroupOptionsSheet(
+    BuildContext context,
+    WidgetRef ref,
+    Group group,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 8.0,
+              ),
+              child: Text(
+                group.name,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(
+                group.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+                color: colorScheme.primary,
+              ),
+              title: Text(
+                group.isPinned ? 'Unpin from top' : 'Pin to top',
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                ref.read(myGroupsProvider.notifier).togglePin(group.id);
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.person_add_outlined,
+                color: colorScheme.primary,
+              ),
+              title: const Text('Invite'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                if (group.inviteCode != null &&
+                    group.inviteCode!.isNotEmpty) {
+                  DeepLinkUtils.showInviteSheet(
+                    context,
+                    groupName: group.name,
+                    inviteCode: group.inviteCode!,
+                    groupId: group.id,
+                  );
+                } else if (group.isAdmin) {
+                  try {
+                    final detail = await ref
+                        .read(groupsRepositoryProvider)
+                        .getGroupDetail(group.id);
+                    if (context.mounted &&
+                        detail.inviteCode != null &&
+                        detail.inviteCode!.isNotEmpty) {
+                      DeepLinkUtils.showInviteSheet(
+                        context,
+                        groupName: detail.name,
+                        inviteCode: detail.inviteCode!,
+                        groupId: detail.id,
+                      );
+                    }
+                  } catch (_) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to load invite code'),
+                        ),
+                      );
+                    }
+                  }
+                } else {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Only group admins can invite members',
+                        ),
+                      ),
+                    );
+                  }
+                }
               },
             ),
           ],
