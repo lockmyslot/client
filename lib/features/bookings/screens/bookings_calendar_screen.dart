@@ -4,6 +4,7 @@ import '../providers/bookings_provider.dart';
 import '../../resources/providers/resources_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../shared/widgets/connected_list.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 import '../../../shared/widgets/m3_collapsing_app_bar.dart';
@@ -279,39 +280,31 @@ class _BookingsCalendarScreenState
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ...List.generate(bookings.length, (index) {
-                          final booking = bookings[index];
-                          final duration =
-                              booking.endTime.difference(booking.startTime);
-                          final durationText =
-                              AppDateUtils.formatDuration(duration);
-                          final userName = (booking.userDisplayName != null &&
-                                  booking.userDisplayName!.trim().isNotEmpty)
-                              ? booking.userDisplayName!
-                              : 'User';
+                        ConnectedListSection(
+                          itemCount: bookings.length,
+                          itemBuilder: (context, index, borderRadius) {
+                            final booking = bookings[index];
+                            final duration =
+                                booking.endTime.difference(booking.startTime);
+                            final durationText =
+                                AppDateUtils.formatDuration(duration);
+                            final userName = (booking.userDisplayName != null &&
+                                    booking.userDisplayName!.trim().isNotEmpty)
+                                ? booking.userDisplayName!
+                                : 'User';
 
-                          final timeDisplay =
-                              '${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}';
+                            final timeDisplay =
+                                '${AppDateUtils.formatTime(booking.startTime)} – ${AppDateUtils.formatTime(booking.endTime)}';
 
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: Entrance(
-                              delay: Duration(milliseconds: index * 60),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: cs.surfaceContainerLow,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: cs.outlineVariant
-                                        .withValues(alpha: 0.4),
-                                  ),
-                                ),
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
+                            return ConnectedCard(
+                              borderRadius: borderRadius,
+                              color: cs.surfaceContainer,
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
                                         Icon(
                                           Icons.schedule_outlined,
                                           size: 16,
@@ -405,12 +398,11 @@ class _BookingsCalendarScreenState
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
-                    );
+                              );
+                            },
+                          ),
+                        ],
+                      );
                   },
                 ),
               ),

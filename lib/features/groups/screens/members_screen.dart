@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/groups_provider.dart';
 import '../data/groups_repository.dart';
-import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../shared/widgets/connected_list.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -169,29 +169,21 @@ class MembersScreen extends ConsumerWidget {
               return SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final member = members[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Entrance(
-                          delay: Duration(milliseconds: 60 + index * 50),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerLow,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: cs.outlineVariant
-                                    .withValues(alpha: 0.4),
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(14),
-                            child: Row(
-                              children: [
-                                Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    Container(
+                  delegate: SliverChildListDelegate(
+                    buildConnectedItems(
+                      itemCount: members.length,
+                      builder: (index, borderRadius) {
+                        final member = members[index];
+                        return ConnectedCard(
+                          borderRadius: borderRadius,
+                          color: cs.surfaceContainer,
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: [
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Container(
                                       width: 44,
                                       height: 44,
                                       decoration: BoxDecoration(
@@ -222,7 +214,7 @@ class MembersScreen extends ConsumerWidget {
                                             color: cs.primary,
                                             shape: BoxShape.circle,
                                             border: Border.all(
-                                              color: cs.surfaceContainerLow,
+                                              color: cs.surfaceContainer,
                                               width: 2,
                                             ),
                                           ),
@@ -243,7 +235,7 @@ class MembersScreen extends ConsumerWidget {
                                             color: cs.secondary,
                                             shape: BoxShape.circle,
                                             border: Border.all(
-                                              color: cs.surfaceContainerLow,
+                                              color: cs.surfaceContainer,
                                               width: 2,
                                             ),
                                           ),
@@ -360,18 +352,16 @@ class MembersScreen extends ConsumerWidget {
                                 ],
                               ],
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                    childCount: members.length,
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
+                );
+              },
+            ),
+          ],
+        ),
+      );
   }
 }

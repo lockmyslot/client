@@ -13,6 +13,7 @@ import '../../groups/providers/groups_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../shared/widgets/connected_list.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -568,11 +569,13 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                 ),
                               )
                             else
-                              ...myBookings.asMap().entries.map(
-                                (e) => _buildBookingCard(
+                              ConnectedListSection(
+                                itemCount: myBookings.length,
+                                itemBuilder: (context, i, borderRadius) =>
+                                    _buildBookingCard(
                                   context,
-                                  e.value,
-                                  e.key,
+                                  myBookings[i],
+                                  borderRadius,
                                   colorScheme,
                                   canCancel: true,
                                 ),
@@ -629,11 +632,13 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
                                 ),
                               )
                             else
-                              ...othersBookings.asMap().entries.map(
-                                (e) => _buildBookingCard(
+                              ConnectedListSection(
+                                itemCount: othersBookings.length,
+                                itemBuilder: (context, i, borderRadius) =>
+                                    _buildBookingCard(
                                   context,
-                                  e.value,
-                                  e.key,
+                                  othersBookings[i],
+                                  borderRadius,
                                   colorScheme,
                                   canCancel: isAdmin,
                                 ),
@@ -655,7 +660,7 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
   Widget _buildBookingCard(
     BuildContext context,
     Booking booking,
-    int index,
+    BorderRadius borderRadius,
     ColorScheme colorScheme, {
     bool canCancel = false,
   }) {
@@ -672,24 +677,13 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
     final showActions = canCancel && isConfirmed && isUpcoming;
     final isCancelling = _cancellingIds.contains(booking.id);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Entrance(
-        delay: Duration(milliseconds: 100 + (index * 25)),
-        child: Card(
-          elevation: 0,
-          color: colorScheme.surfaceContainerLow,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppShapes.card,
-            side: BorderSide(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.4),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+    return ConnectedCard(
+      borderRadius: borderRadius,
+      color: colorScheme.surfaceContainer,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
                 Row(
                   children: [
                     Expanded(
@@ -841,9 +835,6 @@ class _ResourceDetailScreenState extends ConsumerState<ResourceDetailScreen> {
               ],
             ],
           ),
-        ),
-      ),
-    ),
-  );
-}
-}
+        );
+      }
+    }

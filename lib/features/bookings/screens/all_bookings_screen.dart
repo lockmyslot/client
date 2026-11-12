@@ -8,6 +8,7 @@ import '../../resources/widgets/resource_avatar.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../shared/widgets/connected_list.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -267,37 +268,29 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                 return SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final booking = bookings[index];
-                        final isUpcoming = booking.startTime.isAfter(
-                          DateTime.now(),
-                        );
-                        final isConfirmed = booking.isConfirmed;
-                        final groupName =
-                            groupNames[booking.groupId] ?? 'Group Booking';
+                    delegate: SliverChildListDelegate(
+                      buildConnectedItems(
+                        itemCount: bookings.length,
+                        builder: (index, borderRadius) {
+                          final booking = bookings[index];
+                          final isUpcoming = booking.startTime.isAfter(
+                            DateTime.now(),
+                          );
+                          final isConfirmed = booking.isConfirmed;
+                          final groupName =
+                              groupNames[booking.groupId] ?? 'Group Booking';
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Entrance(
-                            delay: Duration(milliseconds: index * 50),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: colorScheme.surfaceContainerLow,
-                                borderRadius: AppShapes.card,
-                                border: Border.all(
-                                  color: colorScheme.outlineVariant
-                                      .withValues(alpha: 0.4),
-                                ),
-                              ),
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
+                          return ConnectedCard(
+                            borderRadius: borderRadius,
+                            color: colorScheme.surfaceContainer,
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
                                       ResourceAvatar(
                                         iconKey: booking.resourceIcon,
                                         colorHex: booking.resourceColor,
@@ -471,19 +464,17 @@ class _AllBookingsScreenState extends ConsumerState<AllBookingsScreen> {
                                   ],
                                 ],
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: bookings.length,
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
   }
 }

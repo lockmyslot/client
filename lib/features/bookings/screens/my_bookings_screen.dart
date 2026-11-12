@@ -5,8 +5,8 @@ import '../data/bookings_repository.dart';
 import 'reschedule_booking_sheet.dart';
 import '../../resources/widgets/resource_avatar.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../shared/widgets/connected_list.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -140,33 +140,25 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                 return SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final booking = bookings[index];
-                        final isUpcoming = booking.startTime.isAfter(
-                          DateTime.now(),
-                        );
-                        final isConfirmed = booking.isConfirmed;
+                    delegate: SliverChildListDelegate(
+                      buildConnectedItems(
+                        itemCount: bookings.length,
+                        builder: (index, borderRadius) {
+                          final booking = bookings[index];
+                          final isUpcoming = booking.startTime.isAfter(
+                            DateTime.now(),
+                          );
+                          final isConfirmed = booking.isConfirmed;
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Entrance(
-                            delay: Duration(milliseconds: index * 60),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: cs.surfaceContainerLow,
-                                borderRadius: AppShapes.card,
-                                border: Border.all(
-                                  color: cs.outlineVariant
-                                      .withValues(alpha: 0.4),
-                                ),
-                              ),
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
+                          return ConnectedCard(
+                            borderRadius: borderRadius,
+                            color: cs.surfaceContainer,
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
                                       ResourceAvatar(
                                         iconKey: booking.resourceIcon,
                                         colorHex: booking.resourceColor,
@@ -334,19 +326,17 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                                   ],
                                 ],
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: bookings.length,
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
   }
 }

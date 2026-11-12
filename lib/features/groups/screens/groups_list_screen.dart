@@ -9,6 +9,7 @@ import 'join_group_sheet.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/deep_link_utils.dart';
+import '../../../shared/widgets/connected_list.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
 import '../../../shared/widgets/m3_collapsing_app_bar.dart';
@@ -223,54 +224,21 @@ class GroupsListScreen extends ConsumerWidget {
     );
   }
 
-  BorderRadius _getGroupItemRadius(int index, int totalCount) {
-    const double large = 16.0;
-    const double small = 4.0;
-
-    if (totalCount <= 1) {
-      return BorderRadius.circular(large);
-    }
-
-    if (index == 0) {
-      return const BorderRadius.only(
-        topLeft: Radius.circular(large),
-        topRight: Radius.circular(large),
-        bottomLeft: Radius.circular(small),
-        bottomRight: Radius.circular(small),
-      );
-    }
-
-    if (index == totalCount - 1) {
-      return const BorderRadius.only(
-        topLeft: Radius.circular(small),
-        topRight: Radius.circular(small),
-        bottomLeft: Radius.circular(large),
-        bottomRight: Radius.circular(large),
-      );
-    }
-
-    return const BorderRadius.all(Radius.circular(small));
-  }
-
   Widget _buildGroupSection(
     BuildContext context,
     WidgetRef ref,
     List<Group> sectionGroups,
     ColorScheme colorScheme,
   ) {
-    return Column(
-      children: [
-        for (int i = 0; i < sectionGroups.length; i++) ...[
-          if (i > 0) const SizedBox(height: 2),
-          _buildGroupCard(
-            context,
-            ref,
-            sectionGroups[i],
-            _getGroupItemRadius(i, sectionGroups.length),
-            colorScheme,
-          ),
-        ],
-      ],
+    return ConnectedListSection(
+      itemCount: sectionGroups.length,
+      itemBuilder: (context, i, borderRadius) => _buildGroupCard(
+        context,
+        ref,
+        sectionGroups[i],
+        borderRadius,
+        colorScheme,
+      ),
     );
   }
 
@@ -283,73 +251,62 @@ class GroupsListScreen extends ConsumerWidget {
   ) {
     final roleText =
         group.isAdmin ? 'Admin' : (group.isGuest ? 'Guest' : 'Member');
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: colorScheme.surfaceContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: borderRadius,
-        side: BorderSide(
-          color: group.isPinned
-              ? colorScheme.primary.withValues(alpha: 0.35)
-              : colorScheme.outlineVariant.withValues(alpha: 0.2),
-        ),
+    return ConnectedCard(
+      borderRadius: borderRadius,
+      borderSide: BorderSide(
+        color: group.isPinned
+            ? colorScheme.primary.withValues(alpha: 0.35)
+            : colorScheme.outlineVariant.withValues(alpha: 0.2),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        borderRadius: borderRadius,
-        onTap: () => context.push('/groups/${group.id}'),
-        onLongPress: () => _showGroupOptionsSheet(context, ref, group),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-          child: Row(
-            children: [
-              GroupAvatar(
-                name: group.name,
-                iconKey: group.icon,
-                colorHex: group.color,
-                size: 48,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      group.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$roleText • ${group.memberCount} members',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              if (group.isPinned)
-                Padding(
-                  padding: const EdgeInsets.only(right: 6.0),
-                  child: Icon(
-                    Icons.push_pin,
-                    size: 16,
-                    color: colorScheme.primary,
-                  ),
-                ),
-              Icon(
-                Icons.chevron_right_outlined,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ],
+      onTap: () => context.push('/groups/${group.id}'),
+      onLongPress: () => _showGroupOptionsSheet(context, ref, group),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+      child: Row(
+        children: [
+          GroupAvatar(
+            name: group.name,
+            iconKey: group.icon,
+            colorHex: group.color,
+            size: 48,
+            borderRadius: BorderRadius.circular(14),
           ),
-        ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  group.name,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$roleText • ${group.memberCount} members',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          if (group.isPinned)
+            Padding(
+              padding: const EdgeInsets.only(right: 6.0),
+              child: Icon(
+                Icons.push_pin,
+                size: 16,
+                color: colorScheme.primary,
+              ),
+            ),
+          Icon(
+            Icons.chevron_right_outlined,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ],
       ),
     );
   }

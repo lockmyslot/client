@@ -8,6 +8,7 @@ import '../../../core/theme/item_color_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../shared/widgets/connected_list.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/m3_collapsing_app_bar.dart';
 import 'color_scheme_selection_sheet.dart';
@@ -194,31 +195,23 @@ class MeProfileScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          ...invites.map((invite) {
-                            final initial = invite.groupName.isNotEmpty
-                                ? invite.groupName[0].toUpperCase()
-                                : 'G';
-                            final inviter = invite.invitedByName ??
-                                invite.invitedByUsername ??
-                                'Admin';
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Card(
-                                elevation: 0,
-                                color: colorScheme.surfaceContainer,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: AppShapes.card,
-                                  side: BorderSide(
-                                    color: colorScheme.outlineVariant
-                                        .withValues(alpha: 0.4),
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
+                          ConnectedListSection(
+                            itemCount: invites.length,
+                            itemBuilder: (context, index, borderRadius) {
+                              final invite = invites[index];
+                              final initial = invite.groupName.isNotEmpty
+                                  ? invite.groupName[0].toUpperCase()
+                                  : 'G';
+                              final inviter = invite.invitedByName ??
+                                  invite.invitedByUsername ??
+                                  'Admin';
+                              return ConnectedCard(
+                                borderRadius: borderRadius,
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
                                       Row(
                                         children: [
                                           Container(
@@ -426,12 +419,11 @@ class MeProfileScreen extends ConsumerWidget {
                                       ),
                                     ],
                                   ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ],
-                      );
+                                );
+                              },
+                            ),
+                          ],
+                        );
                     },
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),

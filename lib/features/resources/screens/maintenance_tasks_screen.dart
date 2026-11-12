@@ -7,6 +7,7 @@ import '../data/resources_repository.dart';
 import 'schedule_maintenance_sheet.dart';
 import '../../../core/ui/ui.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../shared/widgets/connected_list.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_display.dart';
@@ -175,22 +176,16 @@ class _MaintenanceTasksScreenState
                 return SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final task = tasks[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Entrance(
-                            delay: Duration(milliseconds: index * 40),
-                            child: _MaintenanceTaskCard(
-                              task: task,
-                              groupId: widget.groupId,
-                              resourceId: widget.resourceId,
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: tasks.length,
+                    delegate: SliverChildListDelegate(
+                      buildConnectedItems(
+                        itemCount: tasks.length,
+                        builder: (index, borderRadius) => _MaintenanceTaskCard(
+                          task: tasks[index],
+                          groupId: widget.groupId,
+                          resourceId: widget.resourceId,
+                          borderRadius: borderRadius,
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -207,11 +202,13 @@ class _MaintenanceTaskCard extends ConsumerWidget {
   final MaintenanceTask task;
   final String groupId;
   final String resourceId;
+  final BorderRadius borderRadius;
 
   const _MaintenanceTaskCard({
     required this.task,
     required this.groupId,
     required this.resourceId,
+    required this.borderRadius,
   });
 
   Color _statusColor(ColorScheme cs) {
@@ -227,17 +224,12 @@ class _MaintenanceTaskCard extends ConsumerWidget {
     final cs = theme.colorScheme;
     final color = _statusColor(cs);
 
-    return Card(
-      elevation: 0,
+    return ConnectedCard(
+      borderRadius: borderRadius,
       color: cs.surfaceContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.4)),
-      ),
-      child: Padding(
-        padding: kCardPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      padding: kCardPadding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
@@ -402,7 +394,6 @@ class _MaintenanceTaskCard extends ConsumerWidget {
             ],
           ],
         ),
-      ),
-    );
+      );
+    }
   }
-}
