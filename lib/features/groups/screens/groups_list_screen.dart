@@ -261,7 +261,7 @@ class GroupsListScreen extends ConsumerWidget {
     return Column(
       children: [
         for (int i = 0; i < sectionGroups.length; i++) ...[
-          if (i > 0) const SizedBox(height: 3),
+          if (i > 0) const SizedBox(height: 2),
           _buildGroupCard(
             context,
             ref,
@@ -285,6 +285,7 @@ class GroupsListScreen extends ConsumerWidget {
         group.isAdmin ? 'Admin' : (group.isGuest ? 'Guest' : 'Member');
     return Card(
       elevation: 0,
+      margin: EdgeInsets.zero,
       color: colorScheme.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: borderRadius,

@@ -116,6 +116,7 @@ class AppTheme {
       inputDecorationTheme: _inputDecorationTheme(cs),
       cardTheme: CardThemeData(
         elevation: 0,
+        margin: EdgeInsets.zero,
         color: cs.surfaceContainer,
         shape: RoundedRectangleBorder(
           borderRadius: AppShapes.card,
@@ -189,6 +190,7 @@ class AppTheme {
       inputDecorationTheme: _inputDecorationTheme(cs),
       cardTheme: CardThemeData(
         elevation: 0,
+        margin: EdgeInsets.zero,
         color: cs.surfaceContainer,
         shape: RoundedRectangleBorder(
           borderRadius: AppShapes.card,
